@@ -16,7 +16,7 @@ export const AboutPage: React.FC = () => {
   const tokenomicsCN = [
     { label: '总量', value: '10 亿个', note: '都在池子里，没藏私房钱' },
     { label: '税', value: '0%', note: 'Pump.fun 哪来的税？别问傻话' },
-    { label: '预售', value: '无', note: '我自己垫了 7 个 SOL，现在慌得一比' },
+    { label: '预售', value: '无', note: '我自己垫了 2 个 SOL，穷鬼创业' },
     { label: 'LP锁仓', value: '自动烧', note: '能不能上 Raydium 看你们给不给力' },
   ]
 
@@ -24,7 +24,7 @@ export const AboutPage: React.FC = () => {
   const tokenomicsEN = [
     { label: 'Supply', value: '1 Billion', note: 'All in bonding curve, obviously' },
     { label: 'Taxes', value: '0%', note: 'This is Pump.fun, not the IRS' },
-    { label: 'Dev Bag', value: '7 SOL', note: 'My hands are shaking. Pls no dump' },
+    { label: 'Dev Bag', value: '2 SOL', note: 'Broke dev energy. Pls no dump' },
     { label: 'LP', value: 'BURNT', note: 'Burnt to hell upon Raydium' },
   ]
 
@@ -41,13 +41,13 @@ export const AboutPage: React.FC = () => {
   ]
 
   const faqsCN = [
-    { q: 'Dev 会跑路吗？', a: '跑个屁。我的推特号都用了几年了，为了这点钱不要脸了？再说了，7 个 SOL 也是钱啊，我也心疼啊。' },
+    { q: 'Dev 会跑路吗？', a: '跑个屁。就 2 个 SOL，跑路还不够丢人的。再说了，链上透明，自己查。' },
     { q: '这币有什么赋能/应用场景？', a: '有个屁的赋能。唯一的应用场景就是让你看着钱包里的数字跳动，缓解你的多巴胺戒断症状。' },
     { q: '为什么叫"赛博积德"？', a: '因为我看你们这群赌狗平时太浮躁了，需要冷静一下。' },
   ]
 
   const faqsEN = [
-    { q: 'Is this a rug?', a: 'Bro, I spent 7 SOL to launch this. I\'m too broke to rug. Plus, the blockchain doesn\'t lie. Check the holders.' },
+    { q: 'Is this a rug?', a: 'Bro, I spent 2 SOL to launch this. Too broke to rug. Blockchain is transparent, check it yourself.' },
     { q: 'Utility?', a: 'It fixes your bad luck. (Not financial advice, purely spiritual advice).' },
     { q: 'Why "Cyber Karma"?', a: 'Because you degens need to calm down and reflect on your life choices.' },
   ]
@@ -152,7 +152,7 @@ export const AboutPage: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <span className={isDegen ? 'text-green-400' : 'text-goldman-gold'}>{isEN ? 'DEV BAG:' : '开发者持仓:'}</span>
                   <div className="text-right">
-                    <span className="redacted">7 SOL</span>
+                    <span className="redacted">2 SOL</span>
                     <span className="redacted ml-1">{isEN ? 'I\'m broke' : '穷死了'}</span>
                     <p className={`text-xs ${isDegen ? 'text-red-400' : 'text-gray-400'}`}>
                       ({isEN ? 'SHAKING. DO NOT DUMP PLS' : '手在抖，求你们别砸'})
