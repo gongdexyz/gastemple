@@ -76,7 +76,7 @@ export const AboutPage: React.FC = () => {
               {isEN ? 'CYBER KARMA ($GD)' : '赛博积德 ($GD)'}
             </h1>
             <p className={`text-lg ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
-              {isEN ? 'Your portfolio is red because your Karma is low.' : '链上木鱼，在线化缘'}
+              {isEN ? 'Your portfolio is red because your Karma is low. Tap to purify your shitcoin sins.' : '链上木鱼，在线化缘'}
             </p>
           </motion.div>
 
@@ -90,7 +90,7 @@ export const AboutPage: React.FC = () => {
               <div className={`space-y-3 text-sm leading-relaxed ${isDegen ? 'text-gray-300' : 'text-gray-400'}`}>
                 <p>Listen, <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>anon</span>. You got rugged 5 times today. You bought the top. You sold the bottom. Why?</p>
                 <p><span className={`font-bold text-lg ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>Because your vibes are off.</span></p>
-                <p>I'm just an AI video guy. I made a cyber wooden fish.</p>
+                <p>I'm just an AI video guy. I made a <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold'}`}>Copium Dispenser</span>.</p>
                 <p className={`font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>No utility. No roadmap. Just pure, digital repentance.</p>
                 <p className="italic opacity-70">Buy $GD to cleanse your degen sins. Or don't, and stay poor.</p>
               </div>
