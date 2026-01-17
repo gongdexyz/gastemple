@@ -32,17 +32,36 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, res
     return 20
   }
 
+  const memeNotesCN = [
+    "全是情绪没有价值。但情绪也是价值。等等，这不对。",
+    "别人恐惧我贪婪，别人贪婪我破产。",
+    "这不是亏损，这是学费。学费已交十万。",
+    "长期主义者 = 还没割肉。",
+    "价值投资就是套牢的借口。",
+    "流动性去哪了？我也想知道。",
+    "格局打开，钱包打空。"
+  ]
+  const memeNotesEN = [
+    "SER YOU ARE THE EXIT LIQUIDITY. HAVE FUN STAYING POOR.",
+    "DIAMOND HANDS? MORE LIKE BAG HOLDER HANDS.",
+    "THIS IS NOT A LOSS, IT'S A LEARNING EXPERIENCE. EXPENSIVE ONE.",
+    "WAGMI? MORE LIKE WAGBI (WE'RE ALL GONNA BE INSOLVENT).",
+    "DEV DID SOMETHING. THAT SOMETHING WAS BUYING A LAMBO.",
+    "NOT FINANCIAL ADVICE. ALSO NOT NOT FINANCIAL ADVICE.",
+    "TOUCH GRASS? IN THIS ECONOMY?"
+  ]
+
   const getAnalystNote = () => {
     const ponzi = getPonziLevel()
     if (ponzi > 90) {
       return isEN 
-        ? "THIS ASSET HAS 99% PONZI CONTENT. DEV HAS ALREADY BOUGHT A LAMBO. YOU ARE THE EXIT LIQUIDITY."
-        : "该资产含庞量99%。开发者已提款买兰博基尼。你就是那个接盘侠。"
+        ? memeNotesEN[Math.floor(Math.random() * memeNotesEN.length)]
+        : memeNotesCN[Math.floor(Math.random() * memeNotesCN.length)]
     }
     if (ponzi > 60) {
       return isEN
-        ? "MODERATE PONZI DETECTED. WHITEPAPER IS MOSTLY AI-GENERATED. TEAM IS ANON FOR A REASON."
-        : "中等含庞量。白皮书基本是AI写的。团队匿名是有原因的。"
+        ? "MODERATE PONZI DETECTED. WHITEPAPER IS AI-GENERATED. TEAM ANON FOR A REASON."
+        : "中等含庞量。白皮书AI写的。团队匿名是有原因的。"
     }
     if (ponzi > 30) {
       return isEN
