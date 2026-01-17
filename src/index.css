@@ -1,0 +1,684 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0a0a0a;
+  color: #e5e5e5;
+  overflow-x: hidden;
+}
+
+/* 高端模式 Goldman风格 */
+.mode-goldman {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #171717;
+  --accent: #c9a962;
+  --text-primary: #e5e5e5;
+  --text-secondary: #737373;
+  --border: #262626;
+}
+
+/* 土狗模式 Degen风格 */
+.mode-degen {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --accent: #39ff14;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --border: #0f3460;
+}
+
+/* 扫描线效果 */
+.scanlines {
+  position: relative;
+}
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* CRT 屏幕弯曲效果 */
+.crt-curve {
+  border-radius: 20px;
+  box-shadow: 
+    inset 0 0 60px rgba(0, 0, 0, 0.5),
+    inset 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* 霓虹文字效果 */
+.neon-text {
+  text-shadow: 
+    0 0 5px currentColor,
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 40px currentColor;
+}
+
+/* 闪烁动画 */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+/* 毛玻璃效果 */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 卡牌翻转效果 */
+.card-flip {
+  perspective: 1000px;
+}
+.card-flip-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.card-flip.flipped .card-flip-inner {
+  transform: rotateY(180deg);
+}
+.card-front, .card-back {
+  backface-visibility: hidden;
+}
+.card-back {
+  transform: rotateY(180deg);
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 庞氏指数进度条 */
+.ponzi-bar {
+  background: linear-gradient(90deg, 
+    #22c55e 0%, 
+    #eab308 50%, 
+    #ef4444 100%
+  );
+}
+
+/* 赌场庄家卡牌光效 */
+.casino-glow {
+  animation: casino-pulse 2s ease-in-out infinite;
+}
+@keyframes casino-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(245, 158, 11, 0.4),
+      0 0 40px rgba(245, 158, 11, 0.2),
+      0 0 60px rgba(245, 158, 11, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(245, 158, 11, 0.6),
+      0 0 80px rgba(245, 158, 11, 0.4),
+      0 0 120px rgba(245, 158, 11, 0.2);
+  }
+}
+
+/* 屏幕故障效果 */
+.glitch-effect {
+  animation: glitch-skew 1s infinite linear alternate-reverse;
+}
+@keyframes glitch-skew {
+  0% { transform: skew(0deg); }
+  20% { transform: skew(-2deg); }
+  40% { transform: skew(2deg); }
+  60% { transform: skew(-1deg); }
+  80% { transform: skew(1deg); }
+  100% { transform: skew(0deg); }
+}
+
+/* ===== GLITCH RETRO 赛博算命摊风格 ===== */
+
+/* 点阵背景 */
+.retro-bg {
+  background-color: #0f0f0f;
+  background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* 扫描线动画 */
+.scanline-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0, 255, 65, 0.04) 50%, rgba(0,0,0,0) 100%);
+  opacity: 0.15;
+  pointer-events: none;
+  animation: scanline-move 8s linear infinite;
+  z-index: 50;
+}
+@keyframes scanline-move {
+  0% { top: -100px; }
+  100% { top: 100%; }
+}
+
+/* 故障按钮 */
+.glitch-btn {
+  transition: all 0.2s ease;
+}
+.glitch-btn:hover {
+  animation: glitch-shake 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+  background-color: #ff0055 !important;
+  color: white !important;
+  border-color: #ff0055 !important;
+}
+@keyframes glitch-shake {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+/* RPG 对话框 */
+.rpg-box {
+  border: 4px solid white;
+  background-color: #0000aa;
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.5);
+}
+
+/* 终端机边框 */
+.terminal-box {
+  border: 2px solid #00ff41;
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+}
+
+/* 警告跑马灯 */
+.marquee-track {
+  animation: marquee-scroll 20s linear infinite;
+}
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* 霓虹绿文字 */
+.text-neon-green {
+  color: #00ff41;
+  text-shadow: 0 0 5px #00ff41, 0 0 10px #00ff41;
+}
+
+/* 危险红标签 */
+.danger-tag {
+  background: #ff0055;
+  transform: rotate(-2deg);
+}
+
+/* 含庞量进度条 */
+.ponzi-gradient {
+  background: linear-gradient(90deg, #eab308 0%, #f97316 50%, #ef4444 100%);
+}
+
+/* 耻辱榜边框 */
+.shame-border {
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+/* 打字机效果 */
+.typing-cursor::after {
+  content: '█';
+  animation: blink-cursor 0.7s step-end infinite;
+}
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== 热敏纸小票样式 (Thermal Receipt) ===== */
+.receipt-paper {
+  background-color: #fcfbf9;
+  color: #1a1a1a;
+  font-family: 'Share Tech Mono', monospace;
+  filter: contrast(120%) brightness(95%);
+  position: relative;
+}
+
+/* 小票底部锯齿边缘 - 三角形朝下 ▼▼▼ */
+.receipt-paper::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: 
+    linear-gradient(135deg, #fcfbf9 50%, transparent 50%),
+    linear-gradient(-135deg, #fcfbf9 50%, transparent 50%);
+  background-size: 10px 10px;
+}
+
+/* 小票顶部锯齿 - 三角形朝上 ▲▲▲ */
+.receipt-paper::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  height: 10px;
+  background: 
+    linear-gradient(45deg, transparent 50%, #fcfbf9 50%),
+    linear-gradient(-45deg, transparent 50%, #fcfbf9 50%);
+  background-size: 10px 10px;
+}
+
+/* 虚线分隔符 */
+.receipt-line {
+  border-bottom: 2px dashed #1a1a1a;
+  margin: 10px 0;
+}
+
+/* 油墨污渍 */
+.ink-stain {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 50%;
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* 条形码字体 */
+.barcode-font {
+  font-family: 'Libre Barcode 39 Text', cursive;
+  font-size: 48px;
+  line-height: 1;
+}
+
+/* ===== CRT 显示器滤镜 ===== */
+.crt-overlay {
+  background: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.03));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 9999;
+}
+
+/* 像素风宝箱 */
+.pixel-box {
+  image-rendering: pixelated;
+  box-shadow: 
+    inset -4px -4px 0 rgba(0,0,0,0.3),
+    inset 4px 4px 0 rgba(255,255,255,0.2);
+}
+
+/* RPG对话框加强 - 内阴影+扫描线 */
+.rpg-box {
+  background: linear-gradient(180deg, #000080 0%, #0000aa 100%);
+  border: 4px solid #fff;
+  box-shadow: 
+    inset 0 0 30px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(0, 0, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.rpg-box::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+}
+
+/* 全站中文使用等宽字体 */
+body {
+  font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+}
+
+/* ===== 绝密涂改效果 (Redacted Text) ===== */
+.redacted {
+  background-color: black;
+  color: black;
+  padding: 0 4px;
+  cursor: help;
+  transition: all 0.3s ease;
+  position: relative;
+  user-select: none;
+}
+
+.redacted:hover {
+  background-color: transparent;
+  color: #00ff41;
+  text-decoration: line-through;
+  user-select: auto;
+}
+
+.redacted::before {
+  content: "TOP SECRET";
+  position: absolute;
+  top: -12px;
+  left: 0;
+  font-size: 7px;
+  color: #ff0000;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.redacted:hover::before {
+  opacity: 0.8;
+}
+
+/* ===== 墓碑震动效果 (Tombstone Shake) ===== */
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.tombstone {
+  transition: all 0.3s ease;
+}
+
+.tombstone:hover {
+  animation: shake 0.5s;
+  filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.7));
+}
+
+.tombstone:hover .tombstone-inner {
+  border-color: #ff0000 !important;
+}
+
+/* ===== 3D 全息 NFT 卡片 (Holographic NFT Card) ===== */
+.nft-card-container {
+  perspective: 1000px;
+  width: 280px;
+  height: 400px;
+}
+
+.nft-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  animation: nft-float 3s ease-in-out infinite;
+  border: 2px solid #00ff41;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(0, 20, 0, 0.9), rgba(0, 50, 20, 0.8));
+  box-shadow:
+    0 0 20px rgba(0, 255, 65, 0.3),
+    0 0 40px rgba(0, 255, 65, 0.1),
+    inset 0 0 60px rgba(0, 255, 65, 0.05);
+  overflow: hidden;
+}
+
+.nft-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(0, 255, 65, 0.1) 50%,
+    transparent 70%
+  );
+  animation: holographic-shine 3s linear infinite;
+  pointer-events: none;
+}
+
+.nft-card:hover {
+  transform: rotateY(15deg) rotateX(-5deg);
+  box-shadow:
+    0 0 30px rgba(0, 255, 65, 0.5),
+    0 0 60px rgba(0, 255, 65, 0.2),
+    inset 0 0 80px rgba(0, 255, 65, 0.1);
+}
+
+/* 金色版本 (稀有 NFT) */
+.nft-card.golden {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, rgba(30, 20, 0, 0.9), rgba(50, 40, 0, 0.8));
+  box-shadow:
+    0 0 20px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.1),
+    inset 0 0 60px rgba(255, 215, 0, 0.05);
+}
+
+.nft-card.golden::before {
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 215, 0, 0.15) 50%,
+    transparent 70%
+  );
+}
+
+/* 燃烧版本 (赎罪券) */
+.nft-card.burning {
+  border-color: #ff4500;
+  animation: nft-float 3s ease-in-out infinite, burn-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes nft-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes holographic-shine {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}
+
+@keyframes burn-glow {
+  0% { box-shadow: 0 0 20px rgba(255, 69, 0, 0.5), 0 0 40px rgba(255, 69, 0, 0.2); }
+  100% { box-shadow: 0 0 40px rgba(255, 69, 0, 0.8), 0 0 80px rgba(255, 69, 0, 0.4); }
+}
+
+/* 铸造动画 */
+@keyframes mint-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.minting-shake {
+  animation: mint-shake 0.5s ease-in-out;
+}
+
+/* 功德流失效果 */
+@keyframes merit-drain {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-50px) scale(0.5); }
+}
+
+.merit-draining {
+  animation: merit-drain 0.3s ease-out forwards;
+}
+
+/* 金光闪烁 */
+@keyframes golden-flash {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.golden-flash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, transparent 70%);
+  animation: golden-flash 0.8s ease-out forwards;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ===== 献祭火盆 (Burning Ritual) ===== */
+.sacrifice-pit {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1a0a00 0%, #0d0500 100%);
+  border: 3px solid #ff4500;
+  box-shadow: 
+    0 0 30px rgba(255, 69, 0, 0.5),
+    inset 0 0 50px rgba(255, 69, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.sacrifice-pit.active {
+  border-color: #00ff41;
+  box-shadow: 
+    0 0 50px rgba(0, 255, 65, 0.8),
+    inset 0 0 80px rgba(0, 255, 65, 0.5);
+  animation: sacrifice-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes sacrifice-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* 火焰动画 */
+.sacrifice-flames {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 120%;
+  pointer-events: none;
+}
+
+.flame {
+  position: absolute;
+  bottom: 0;
+  width: 20px;
+  background: linear-gradient(to top, #ff4500, #ff8c00, #ffd700, transparent);
+  border-radius: 50% 50% 20% 20%;
+  animation: flicker 0.3s ease-in-out infinite alternate;
+  opacity: 0.8;
+}
+
+.sacrifice-pit.active .flame {
+  background: linear-gradient(to top, #00ff41, #00ffaa, #aaffaa, transparent);
+}
+
+@keyframes flicker {
+  0% { transform: scaleY(1) scaleX(1); }
+  100% { transform: scaleY(1.2) scaleX(0.9); }
+}
+
+/* 献祭成功爆炸 */
+@keyframes sacrifice-explode {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(2); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+.sacrifice-explode {
+  animation: sacrifice-explode 1s ease-out forwards;
+}
+
+/* 代币雨效果 */
+@keyframes token-rain {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.token-rain-particle {
+  position: fixed;
+  font-size: 24px;
+  animation: token-rain 2s linear forwards;
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* Proof of Rekt 验证样式 */
+.rekt-badge {
+  position: relative;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(100, 0, 0, 0.3));
+  border: 1px solid rgba(255, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.rekt-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.2), transparent);
+  animation: rekt-scan 2s linear infinite;
+}
+
+@keyframes rekt-scan {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* 拖拽高亮 */
+.drag-highlight {
+  outline: 3px dashed #00ff41;
+  outline-offset: 4px;
+  animation: drag-pulse 1s ease-in-out infinite;
+}
+
+@keyframes drag-pulse {
+  0%, 100% { outline-color: #00ff41; }
+  50% { outline-color: #00ffaa; }
+}
