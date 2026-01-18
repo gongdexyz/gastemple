@@ -12,20 +12,47 @@ interface MeritPopup {
   color: string
 }
 
-const RANDOM_TEXTS = [
-  { text: '$GONGDE +1', color: 'text-green-400' },
-  { text: '$GONGDE +1', color: 'text-green-400' },
-  { text: '$GONGDE +1', color: 'text-green-400' },
-  { text: '$GONGDE +2 🔥', color: 'text-yellow-400' },
-  { text: 'FOMO -1', color: 'text-cyan-400' },
-  { text: '智商 +1', color: 'text-cyan-400' },
-  { text: '被割概率 -0.01%', color: 'text-pink-400' },
+interface ClickTarget {
+  id: number
+  x: number
+  y: number
+  timestamp: number
+}
+
+// 正常模式文案
+const NORMAL_TEXTS = [
+  { text: '功德 +1', color: 'text-green-400' },
+  { text: '心平气和 ☯️', color: 'text-cyan-400' },
+  { text: '岁月静好 🌸', color: 'text-pink-400' },
   { text: '业障 -1', color: 'text-purple-400' },
-  { text: 'Diamond Hands +1', color: 'text-blue-400' },
-  { text: 'Paper Hands -1', color: 'text-red-400' },
-  { text: '韭菜根 +1', color: 'text-green-500' },
-  { text: '接盘力 -1', color: 'text-orange-400' },
-  { text: '$GONGDE +3 🚀', color: 'text-yellow-300' },
+  { text: '智慧 +1', color: 'text-blue-400' },
+  { text: '佛光普照 ✨', color: 'text-yellow-400' },
+]
+
+// 暴走模式文案 (combo > 5)
+const RAGE_TEXTS = [
+  { text: '暴击！💥', color: 'text-red-500' },
+  { text: '怨气 +10086', color: 'text-red-400' },
+  { text: '功德已溢出！', color: 'text-yellow-400' },
+  { text: '佛祖已离线 🏃', color: 'text-orange-400' },
+  { text: '杀气过重！', color: 'text-red-500' },
+  { text: '木鱼霸凌！🔨', color: 'text-pink-400' },
+  { text: '物理超度！', color: 'text-purple-400' },
+  { text: '赛博加特林！', color: 'text-cyan-400' },
+  { text: '心率180 💓', color: 'text-red-400' },
+  { text: '钮祜禄·施主', color: 'text-yellow-300' },
+]
+
+// Miss吐槽文案
+const MISS_TEXTS = [
+  '佛祖：这届信徒太难带了 🏃',
+  '木鱼：我是来渡你的，不是让你练APM的！',
+  '检测到杀气过重，功德 -100',
+  '菩萨还没听清愿望就被你敲晕了',
+  '别人是诚心礼佛，你是物理超度',
+  '求求了，再打我要吐舍利子了',
+  '这是积功德？这是积怨气吧！',
+  '佛只渡有缘人 🙏',
 ]
 
 export const WoodenFish: React.FC = () => {
@@ -34,54 +61,116 @@ export const WoodenFish: React.FC = () => {
   const { lang } = useLangStore()
   const [merits, setMerits] = useState<MeritPopup[]>([])
   const [totalMerits, setTotalMerits] = useState(0)
-  const [isPressed, setIsPressed] = useState(false)
   const [combo, setCombo] = useState(0)
-  const [chargeProgress, setChargeProgress] = useState(0) // 蓄力进度 0-100
-  const [isCharging, setIsCharging] = useState(false) // 是否正在蓄力
-  const [isComboMode, setIsComboMode] = useState(false) // 是否进入连击模式
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const chargeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const comboTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const idRef = useRef(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [clickTargets, setClickTargets] = useState<ClickTarget[]>([])
+  const targetIdRef = useRef(0)
+  const [missText, setMissText] = useState<string | null>(null)
+  const [isFishPressed, setIsFishPressed] = useState(false)
   const [gifKey, setGifKey] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
   const burnCost = 100
-  const CHARGE_TIME = 800 // 蓄力时间 800ms
-  const CHARGE_INTERVAL = 20 // 进度条更新间隔
 
   useEffect(() => {
     audioRef.current = new Audio('/muyu.mp3')
     audioRef.current.volume = 0.5
-    return () => { 
-      if (intervalRef.current) clearInterval(intervalRef.current)
-      if (chargeIntervalRef.current) clearInterval(chargeIntervalRef.current)
-    }
   }, [])
 
-  const addMerit = useCallback(() => {
+  // 根据combo获取表情状态
+  const getFishMood = () => {
+    if (combo >= 20) return { emoji: '😵', status: 'HP -9999' }
+    if (combo >= 10) return { emoji: '😱', status: '救命！' }
+    if (combo >= 5) return { emoji: '😳', status: '太快了！' }
+    return { emoji: '🙂', status: '' }
+  }
+
+  // 震动反馈
+  const triggerVibration = () => {
+    if ('vibrate' in navigator) {
+      const intensity = Math.min(combo * 5, 100)
+      navigator.vibrate(intensity)
+    }
+  }
+
+  const spawnNewTarget = useCallback(() => {
+    // 在面板范围内生成目标（320x320容器，圈大小64px，需要留边距）
+    const maxOffset = 110 // 最大偏移量，确保圈不会超出容器
+    const x = (Math.random() - 0.5) * maxOffset * 2
+    const y = (Math.random() - 0.5) * maxOffset * 2
+    
+    const newTarget: ClickTarget = {
+      id: targetIdRef.current++,
+      x,
+      y,
+      timestamp: Date.now()
+    }
+    
+    // 只保留一个圈，替换而不是添加
+    setClickTargets([newTarget])
+    
+    // 2秒后自动消失并显示Miss
+    setTimeout(() => {
+      setClickTargets(prev => {
+        const stillExists = prev.find(t => t.id === newTarget.id)
+        if (stillExists) {
+          // 显示Miss吐槽
+          const missText = MISS_TEXTS[Math.floor(Math.random() * MISS_TEXTS.length)]
+          setMissText(missText)
+          setTimeout(() => setMissText(null), 2500)
+          return prev.filter(t => t.id !== newTarget.id)
+        }
+        return prev
+      })
+    }, 2000)
+  }, [])
+
+  const addMerit = useCallback((shouldSpawnTarget: boolean = true) => {
     if (gdBalance < burnCost) return false
     
     spendGD(burnCost)
-    setTotalMerits(prev => prev + 1)
+    setTotalMerits(prev => {
+      const newTotal = prev + 1
+      // 第二次点击后才开始生成随机圈，且只有在点击中心木鱼时才生成
+      if (newTotal > 1 && shouldSpawnTarget) {
+        spawnNewTarget()
+      }
+      return newTotal
+    })
     setCombo(prev => prev + 1)
     
     if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
     comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
 
-    // Play sound and trigger animation
+    // Play sound with pitch variation based on combo
     if (audioRef.current) {
       audioRef.current.currentTime = 0
+      // 根据combo调整播放速度（变调效果）
+      if (combo >= 20) {
+        audioRef.current.playbackRate = 2.5 // 疯魔模式
+      } else if (combo >= 10) {
+        audioRef.current.playbackRate = 1.8 // 暴走前奏
+      } else if (combo >= 5) {
+        audioRef.current.playbackRate = 1.3 // 加速
+      } else {
+        audioRef.current.playbackRate = 1.0 // 正常
+      }
       audioRef.current.play().catch(() => {})
     }
+    
+    // 触发震动
+    triggerVibration()
     setGifKey(prev => prev + 1)
     setIsAnimating(true)
     setTimeout(() => setIsAnimating(false), 2040)
 
-    const randomItem = RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)]
+    // 根据combo选择文案：combo > 5 进入暴走模式
+    const textPool = combo > 5 ? RAGE_TEXTS : NORMAL_TEXTS
+    const randomItem = textPool[Math.floor(Math.random() * textPool.length)]
     const newMerit: MeritPopup = {
       id: idRef.current++,
       x: Math.random() * 120 - 60,
@@ -93,70 +182,27 @@ export const WoodenFish: React.FC = () => {
     setTimeout(() => setMerits(prev => prev.filter(m => m.id !== newMerit.id)), 1000)
     
     return true
-  }, [gdBalance, spendGD])
+  }, [gdBalance, spendGD, spawnNewTarget, combo])
 
-  const handleClick = () => {
-    // 只有在非蓄力/非连击状态下才响应单击
-    if (!isCharging && !isComboMode && !chargeIntervalRef.current) {
+  const handleTargetClick = useCallback((targetId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    // 移除目标
+    setClickTargets(prev => prev.filter(t => t.id !== targetId))
+    // 触发功德并生成新圈
+    addMerit(true)
+  }, [addMerit])
+
+  const handleCenterClick = () => {
+    // 只有在没有随机圈时才响应中心点击（第一次点击）
+    if (clickTargets.length === 0) {
+      setIsFishPressed(true)
+      setTimeout(() => setIsFishPressed(false), 150)
       addMerit()
     }
   }
 
-  const handleMouseDown = () => {
-    setIsPressed(true)
-    setIsCharging(true)
-    setChargeProgress(0)
-    
-    // 开始蓄力进度条（不立即触发功德）
-    let progress = 0
-    chargeIntervalRef.current = setInterval(() => {
-      progress += (100 * CHARGE_INTERVAL) / CHARGE_TIME
-      if (progress >= 100) {
-        // 蓄力完成，进入连击模式
-        setChargeProgress(100)
-        setIsCharging(false)
-        setIsComboMode(true)
-        if (chargeIntervalRef.current) {
-          clearInterval(chargeIntervalRef.current)
-          chargeIntervalRef.current = null
-        }
-        // 开始连击
-        intervalRef.current = setInterval(() => {
-          if (!addMerit()) {
-            if (intervalRef.current) clearInterval(intervalRef.current)
-          }
-        }, 80)
-      } else {
-        setChargeProgress(progress)
-      }
-    }, CHARGE_INTERVAL)
-  }
+  // 不在初始时生成目标，等第一次点击后才开始
 
-  const handleMouseUp = () => {
-    const wasCharging = isCharging
-    const wasComboMode = isComboMode
-    
-    setIsPressed(false)
-    setIsCharging(false)
-    setIsComboMode(false)
-    setChargeProgress(0)
-    
-    // 清除蓄力计时器
-    if (chargeIntervalRef.current) {
-      clearInterval(chargeIntervalRef.current)
-      chargeIntervalRef.current = null
-    }
-    // 清除连击计时器
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-    
-    // 如果是短按（没进入连击模式），触发一次单击
-    if (wasCharging && !wasComboMode) {
-      addMerit()
-    }
-  }
 
   const getTitle = () => {
     if (totalMerits >= 10000) return '赛博活佛 Cyber Buddha'
@@ -169,11 +215,7 @@ export const WoodenFish: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center py-8">
       {/* 功德计数器 */}
-      <motion.div 
-        className={`text-center mb-6 ${isDegen ? 'font-pixel' : ''}`}
-        animate={{ scale: combo > 5 ? [1, 1.05, 1] : 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      <div className={`text-center mb-6 ${isDegen ? 'font-pixel' : ''}`}>
         <div className={`text-5xl font-bold mb-2 ${isDegen ? 'text-degen-yellow neon-text' : 'text-goldman-gold'}`}>
           {totalMerits.toLocaleString()}
         </div>
@@ -183,45 +225,44 @@ export const WoodenFish: React.FC = () => {
         <div className={`text-xs mt-1 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold/70'}`}>
           {getTitle()}
         </div>
-        {combo > 3 && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className={`text-lg font-bold mt-2 ${isDegen ? 'text-degen-pink' : 'text-orange-400'}`}
-          >
-            🔥 COMBO x{combo}
-          </motion.div>
-        )}
-      </motion.div>
+        <div className={`text-lg font-bold mt-2 h-7 ${isDegen ? 'text-degen-pink' : 'text-orange-400'}`}>
+          {combo > 3 ? `🔥 COMBO x${combo}` : ''}
+        </div>
+      </div>
 
-      {/* 电子木鱼 */}
-      <div className="relative">
-        <motion.button
-          onClick={handleClick}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onTouchStart={handleMouseDown}
-          onTouchEnd={handleMouseUp}
-          disabled={gdBalance < burnCost}
-          whileTap={{ scale: 0.92 }}
-          animate={{ 
-            scale: isPressed ? 0.95 : 1,
-            boxShadow: isPressed 
-              ? isDegen ? '0 0 60px #39ff14' : '0 0 60px #c9a962'
-              : isDegen ? '0 0 30px #39ff1440' : '0 0 30px #c9a96240'
+      {/* 木鱼容器 - 包含随机圈 */}
+      <div className="relative" style={{ width: '320px', height: '320px' }}>
+        {/* 木鱼按钮 - 居中 */}
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '192px',
+            height: '192px'
           }}
-          className={`
-            relative w-48 h-48 rounded-full flex items-center justify-center
-            cursor-pointer select-none transition-all
-            ${gdBalance < burnCost ? 'opacity-50 cursor-not-allowed' : ''}
-            ${isDegen 
-              ? 'bg-gradient-to-br from-degen-green/30 to-degen-purple/30 border-4 border-degen-green' 
-              : 'bg-gradient-to-br from-goldman-gold/20 to-amber-900/30 border-4 border-goldman-gold'
-            }
-          `}
         >
-          {/* 木鱼图案 */}
+          <button
+            onClick={handleCenterClick}
+            disabled={gdBalance < burnCost}
+            style={{
+              width: '100%',
+              height: '100%',
+              boxShadow: isFishPressed
+                ? isDegen ? '0 0 60px #39ff14' : '0 0 60px #c9a962'
+                : isDegen ? '0 0 30px rgba(57,255,20,0.25)' : '0 0 30px rgba(201,169,98,0.25)'
+            }}
+            className={`
+              rounded-full flex items-center justify-center
+              cursor-pointer select-none
+              ${gdBalance < burnCost ? 'cursor-default opacity-50' : ''}
+              ${isDegen 
+                ? 'bg-gradient-to-br from-degen-green/30 to-degen-purple/30 border-4 border-degen-green' 
+                : 'bg-gradient-to-br from-goldman-gold/20 to-amber-900/30 border-4 border-goldman-gold'
+              }
+            `}
+          >
           <img 
             key={gifKey}
             src={isAnimating ? `/muyu.gif?t=${gifKey}` : '/muyu-static.gif'}
@@ -230,37 +271,95 @@ export const WoodenFish: React.FC = () => {
             draggable={false}
           />
           
-          {/* 涟漪效果 */}
-          {isPressed && (
-            <>
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0.8 }}
-                animate={{ scale: 2, opacity: 0 }}
-                transition={{ duration: 0.5, repeat: Infinity }}
-                className={`absolute inset-0 rounded-full border-2 ${isDegen ? 'border-degen-green' : 'border-goldman-gold'}`}
-              />
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0.6 }}
-                animate={{ scale: 1.8, opacity: 0 }}
-                transition={{ duration: 0.5, repeat: Infinity, delay: 0.2 }}
-                className={`absolute inset-0 rounded-full border-2 ${isDegen ? 'border-degen-cyan' : 'border-amber-400'}`}
-              />
-            </>
+        </button>
+        </div>
+        
+        {/* 表情状态气泡 - 移到按钮外面 */}
+        <AnimatePresence>
+          {combo >= 5 && (
+            <motion.div
+              key="mood"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="absolute text-4xl z-20"
+              style={{ 
+                top: '15%', 
+                right: '20%',
+                filter: combo >= 20 ? 'hue-rotate(180deg)' : 'none' 
+              }}
+            >
+              {getFishMood().emoji}
+            </motion.div>
           )}
-        </motion.button>
+        </AnimatePresence>
+        
+        {/* HP状态 - 移到按钮外面 */}
+        <AnimatePresence>
+          {combo >= 10 && (
+            <motion.div
+              key="hp"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`absolute text-sm font-bold z-20 pointer-events-none ${combo >= 20 ? 'text-red-500' : 'text-orange-400'}`}
+              style={{ bottom: '20%', left: '50%', transform: 'translateX(-50%)' }}
+            >
+              {getFishMood().status}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 随机圈 - 围绕木鱼 */}
+        <AnimatePresence>
+          {clickTargets.map((target) => (
+            <motion.button
+              key={target.id}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 0.7 }}
+              exit={{ scale: 0, opacity: 0 }}
+              onClick={(e) => handleTargetClick(target.id, e)}
+              disabled={gdBalance < burnCost}
+              style={{
+                position: 'absolute',
+                left: `calc(50% + ${target.x}px)`,
+                top: `calc(50% + ${target.y}px)`,
+                transform: 'translate(-50%, -50%)'
+              }}
+              className={`
+                w-16 h-16 rounded-full flex items-center justify-center
+                cursor-pointer select-none pointer-events-auto
+                ${gdBalance < burnCost ? 'opacity-50 cursor-not-allowed' : ''}
+                border-2 border-dashed
+                ${isDegen ? 'border-gray-400 bg-gray-800/30' : 'border-gray-500 bg-gray-700/20'}
+              `}
+            >
+              {/* 倒计时圈 */}
+              <motion.div
+                initial={{ scale: 1.5, opacity: 0.5 }}
+                animate={{ scale: 1, opacity: 0 }}
+                transition={{ duration: 2, ease: 'linear' }}
+                className={`absolute inset-0 rounded-full border-2 ${isDegen ? 'border-gray-500' : 'border-gray-400'}`}
+              />
+            </motion.button>
+          ))}
+        </AnimatePresence>
 
         {/* 功德+1 弹出 */}
         <AnimatePresence>
           {merits.map((merit) => (
             <motion.div
               key={merit.id}
-              initial={{ opacity: 1, y: 0, x: merit.x, scale: 0.5 }}
-              animate={{ opacity: 0, y: merit.y - 80, scale: 1.2 }}
+              initial={{ opacity: 1, y: 0, scale: 0.8 }}
+              animate={{ opacity: 0, y: -60, scale: 1.2 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
+              transition={{ duration: 1.5, ease: 'easeOut' }}
               className={`
                 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                pointer-events-none font-bold text-xl whitespace-nowrap
+                pointer-events-none font-bold text-xl text-center z-10
+                max-w-[280px] px-2
                 ${isDegen ? `font-pixel text-lg ${merit.color}` : 'text-goldman-gold'}
               `}
               style={{ textShadow: '0 0 10px currentColor' }}
@@ -269,44 +368,38 @@ export const WoodenFish: React.FC = () => {
             </motion.div>
           ))}
         </AnimatePresence>
+
+        {/* Miss 吐槽 */}
+        <AnimatePresence>
+          {missText && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              animate={{ opacity: 1, scale: 1.2, y: 0 }}
+              exit={{ opacity: 0, scale: 0.5, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className={`
+                absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+                pointer-events-none font-bold text-xl text-center z-20
+                max-w-[280px] px-3 py-2 rounded-lg
+                ${isDegen ? 'font-pixel text-degen-pink bg-black/50' : 'text-red-400 bg-black/40'}
+              `}
+              style={{ textShadow: '0 0 15px currentColor' }}
+            >
+              {missText}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* 蓄力进度条 */}
-      {isCharging && (
-        <div className="w-48 mt-4">
-          <div className={`h-2 rounded-full overflow-hidden ${isDegen ? 'bg-gray-800' : 'bg-gray-700'}`}>
-            <motion.div
-              className={`h-full ${isDegen ? 'bg-gradient-to-r from-degen-green to-degen-cyan' : 'bg-gradient-to-r from-goldman-gold to-amber-400'}`}
-              initial={{ width: 0 }}
-              animate={{ width: `${chargeProgress}%` }}
-              transition={{ duration: 0.02 }}
-            />
-          </div>
-          <p className={`text-xs text-center mt-1 ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
-            {isEN ? '⚡ Charging combo...' : '⚡ 蓄力中...'}
-          </p>
-        </div>
-      )}
-
-      {/* 连击模式提示 */}
-      {isComboMode && (
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className={`mt-4 px-4 py-2 rounded-lg ${isDegen ? 'bg-degen-green/20 border border-degen-green' : 'bg-goldman-gold/20 border border-goldman-gold'}`}
-        >
-          <p className={`text-sm font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>
-            🔥 {isEN ? 'COMBO MODE ACTIVE!' : '连击模式激活！'}
-          </p>
-        </motion.div>
-      )}
-
-      {/* 操作提示 */}
-      <div className={`mt-6 text-center ${isDegen ? 'font-pixel text-xs' : 'text-sm'}`}>
+      {/* 操作提示 - 紧跟木鱼下方 */}
+      <div className={`text-center ${isDegen ? 'font-pixel text-xs' : 'text-sm'}`}>
         <p className={isDegen ? 'text-degen-green' : 'text-gray-400'}>
-          {isEN ? 'HOLD 0.8s TO ACTIVATE COMBO 🔥' : '长按 0.8 秒激活连击'}
+          {clickTargets.length > 0 
+            ? (isEN ? 'CATCH THE CIRCLE! ⭕' : '快点圈圈！')
+            : (isEN ? 'CLICK THE FROG TO START 🐸' : '点击蛙蛙开始')
+          }
         </p>
-        <p className={`mt-2 ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
+        <p className={`mt-1 ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {isEN ? `Cost: ${burnCost} $GD each` : `每次消耗 ${burnCost} $GD`}
         </p>
       </div>

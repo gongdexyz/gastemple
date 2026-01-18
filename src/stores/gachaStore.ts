@@ -45,7 +45,7 @@ export const useGachaStore = create<GachaState>()(
       dailyDraws: 0,
       lastDrawDate: new Date().toDateString(),
       totalDraws: 0,
-      gdBalance: 888, // 初始功德 - 吉利数字，够抽8次
+      gdBalance: 88888, // 测试用大额度
       history: [],
       currentResult: null,
       isDrawing: false,
