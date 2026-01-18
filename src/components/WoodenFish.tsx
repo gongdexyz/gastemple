@@ -168,7 +168,7 @@ export const WoodenFish: React.FC = () => {
           <img 
             src="/muyu.gif" 
             alt="木鱼" 
-            className="w-32 h-32 object-contain select-none"
+            className="w-44 h-44 object-cover rounded-full select-none"
             draggable={false}
           />
           
