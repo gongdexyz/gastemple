@@ -39,6 +39,7 @@ export const WoodenFish: React.FC = () => {
   const idRef = useRef(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [gifKey, setGifKey] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
   
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
@@ -60,12 +61,14 @@ export const WoodenFish: React.FC = () => {
     if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
     comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
 
-    // Play sound and restart GIF
+    // Play sound and trigger animation
     if (audioRef.current) {
       audioRef.current.currentTime = 0
       audioRef.current.play().catch(() => {})
     }
     setGifKey(prev => prev + 1)
+    setIsAnimating(true)
+    setTimeout(() => setIsAnimating(false), 2040)
 
     const randomItem = RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)]
     const newMerit: MeritPopup = {
@@ -169,7 +172,7 @@ export const WoodenFish: React.FC = () => {
           {/* 木鱼图案 */}
           <img 
             key={gifKey}
-            src={`/muyu.gif?t=${gifKey}`}
+            src={isAnimating ? `/muyu.gif?t=${gifKey}` : '/muyu-static.gif'}
             alt="木鱼" 
             className="w-44 h-44 object-cover rounded-full select-none"
             draggable={false}
