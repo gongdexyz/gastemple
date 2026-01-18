@@ -44,7 +44,8 @@ export const WoodenFish: React.FC = () => {
   const burnCost = 100
 
   useEffect(() => {
-    audioRef.current = new Audio('data:audio/wav;base64,UklGRl9vT19teleW...')
+    audioRef.current = new Audio('/muyu.mp3')
+    audioRef.current.volume = 0.5
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
   }, [])
 
@@ -57,6 +58,12 @@ export const WoodenFish: React.FC = () => {
     
     if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
     comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
+
+    // Play sound
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(() => {})
+    }
 
     const randomItem = RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)]
     const newMerit: MeritPopup = {
@@ -158,9 +165,12 @@ export const WoodenFish: React.FC = () => {
           `}
         >
           {/* 木鱼图案 */}
-          <div className="text-7xl select-none">
-            {isDegen ? '🐸' : '🪷'}
-          </div>
+          <img 
+            src="/muyu.gif" 
+            alt="木鱼" 
+            className="w-32 h-32 object-contain select-none"
+            draggable={false}
+          />
           
           {/* 涟漪效果 */}
           {isPressed && (
