@@ -96,8 +96,8 @@ export const WoodenFish: React.FC = () => {
   }, [gdBalance, spendGD])
 
   const handleClick = () => {
-    // 单击只触发一次，不触发连击
-    if (!isComboMode) {
+    // 只有在非蓄力/非连击状态下才响应单击
+    if (!isCharging && !isComboMode && !chargeIntervalRef.current) {
       addMerit()
     }
   }
@@ -107,10 +107,7 @@ export const WoodenFish: React.FC = () => {
     setIsCharging(true)
     setChargeProgress(0)
     
-    // 单击先触发一次
-    addMerit()
-    
-    // 开始蓄力进度条
+    // 开始蓄力进度条（不立即触发功德）
     let progress = 0
     chargeIntervalRef.current = setInterval(() => {
       progress += (100 * CHARGE_INTERVAL) / CHARGE_TIME
@@ -136,6 +133,9 @@ export const WoodenFish: React.FC = () => {
   }
 
   const handleMouseUp = () => {
+    const wasCharging = isCharging
+    const wasComboMode = isComboMode
+    
     setIsPressed(false)
     setIsCharging(false)
     setIsComboMode(false)
@@ -150,6 +150,11 @@ export const WoodenFish: React.FC = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
+    }
+    
+    // 如果是短按（没进入连击模式），触发一次单击
+    if (wasCharging && !wasComboMode) {
+      addMerit()
     }
   }
 
