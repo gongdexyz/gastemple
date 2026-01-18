@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Shield, TrendingUp, Users, Zap, ChevronRight, Globe } from 'lucide-react'
@@ -10,6 +10,14 @@ export const LandingPage: React.FC = () => {
   const isEN = lang === 'en'
   const [isHovering, setIsHovering] = useState(false)
   const [glitchActive, setGlitchActive] = useState(false)
+
+  // 0.8秒后自动进入真正页面
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleEnter()
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleEnter = () => {
     setGlitchActive(true)
