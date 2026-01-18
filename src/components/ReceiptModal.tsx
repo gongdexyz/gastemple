@@ -184,7 +184,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, res
 
               <div className="flex justify-between items-start mb-2">
                 <div className="font-bold">KARMA EARNED</div>
-                <div className="font-bold text-green-700">+{result.gdEarned} $GD</div>
+                <div className="font-bold text-green-700">+{result.gdEarned} $GONGDE</div>
               </div>
 
               <div className="receipt-line" />
@@ -243,14 +243,25 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ isOpen, onClose, res
               className="flex items-center gap-2 bg-yellow-400 text-black px-6 py-2 font-bold hover:bg-yellow-300 transition-colors disabled:opacity-50"
             >
               <Download className="w-4 h-4" />
-              {isGenerating ? (isEN ? 'GENERATING...' : '生成中...') : (isEN ? 'DOWNLOAD' : '下载图片')}
+              {isGenerating ? (isEN ? 'GENERATING...' : '生成中...') : (isEN ? 'SAVE' : '保存')}
+            </button>
+            <button
+              onClick={() => {
+                const text = isEN 
+                  ? `Just drew my crypto fortune at Gas Temple 🪵⛩️\n\nResult: ${result?.fortune.coin?.symbol || 'UNKNOWN'}\nPonzi Level: ${getPonziLevel()}%\n\n"${result?.fortune.messageEN || result?.fortune.message}"\n\n🔮 gongde.xyz\n\n$GONGDE #GasTemple #Solana`
+                  : `刚在功德殿抽了一签 🪵⛩️\n\n结果: ${result?.fortune.coin?.symbol || 'UNKNOWN'}\n庞氏指数: ${getPonziLevel()}%\n\n"${result?.fortune.message}"\n\n🔮 gongde.xyz\n\n$GONGDE #GasTemple #Solana`
+                const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`
+                window.open(url, '_blank')
+              }}
+              className="flex items-center gap-2 bg-black text-white px-6 py-2 font-bold hover:bg-gray-800 transition-colors border border-white"
+            >
+              𝕏 {isEN ? 'SHARE' : '分享'}
             </button>
             <button
               onClick={onClose}
-              className="flex items-center gap-2 border border-white text-white px-6 py-2 hover:bg-white hover:text-black transition-colors"
+              className="flex items-center gap-2 border border-gray-500 text-gray-400 px-4 py-2 hover:bg-white hover:text-black transition-colors"
             >
               <X className="w-4 h-4" />
-              {isEN ? 'CLOSE' : '关闭'}
             </button>
           </motion.div>
         </motion.div>

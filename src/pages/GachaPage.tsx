@@ -91,6 +91,7 @@ export const GachaPage: React.FC = () => {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [drawCount, setDrawCount] = useState(0)
+  const [showFullRoastModal, setShowFullRoastModal] = useState(false)
   
   const isEN = lang === 'en'
   const QUIZ_QUESTIONS = isEN ? QUIZ_QUESTIONS_EN : QUIZ_QUESTIONS_CN
@@ -371,6 +372,13 @@ export const GachaPage: React.FC = () => {
                   <p className="text-sm leading-relaxed text-gray-300">
                     "{RESPONSES[selectedChoice] || (isEN ? currentResult.fortune.messageEN : currentResult.fortune.message)}"
                   </p>
+                  {/* 查看完整辣评按钮 */}
+                  <button
+                    onClick={() => setShowFullRoastModal(true)}
+                    className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 underline flex items-center gap-1"
+                  >
+                    🔍 {isEN ? 'View Full Roast' : '查看完整辣评'}
+                  </button>
                 </div>
 
                 {/* Ponzi Meter */}
@@ -395,9 +403,14 @@ export const GachaPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* GD Earned */}
-                <div className="text-center mb-4 text-yellow-400 font-bold">
-                  +{currentResult.gdEarned} $GD {isEN ? 'EARNED' : '功德到账'}
+                {/* GD Earned - 待领取 $GONGDE */}
+                <div className="text-center mb-4">
+                  <div className="text-yellow-400 font-bold text-lg">
+                    +{currentResult.gdEarned} <span className="text-green-400">$GONGDE</span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {isEN ? '🔒 Pending claim at TGE' : '🔒 待 TGE 时领取'}
+                  </div>
                 </div>
 
                 {/* Bad Luck Warning - Link to Temple */}
@@ -516,6 +529,156 @@ export const GachaPage: React.FC = () => {
 
       {/* Inactivity Toast - Windows 95 style */}
       {stage === 'idle' && <InactivityToast timeoutSeconds={30} />}
+
+      {/* Full Roast Modal - 完整辣评报告 */}
+      <AnimatePresence>
+        {showFullRoastModal && currentResult && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 overflow-y-auto"
+            onClick={() => setShowFullRoastModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-gray-900 border-2 border-cyan-500 rounded-lg p-5 max-w-md w-full my-4"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="text-center mb-4">
+                <div className="text-3xl mb-2">{currentResult.fortune.emoji}</div>
+                <h3 className="text-lg font-bold text-cyan-400">
+                  {currentResult.fortune.coin?.symbol?.toUpperCase() || 'UNKNOWN'} {isEN ? 'Full Analysis' : '完整辣评报告'}
+                </h3>
+                <p className="text-xs text-gray-500">{currentResult.fortune.coin?.name}</p>
+              </div>
+
+              {/* 真实数据区 */}
+              <div className="bg-black/50 rounded p-3 mb-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-gray-500 text-xs">{isEN ? 'Market Cap' : '市值'}</p>
+                  <p className="text-white font-bold">
+                    ${((currentResult.fortune.coin as any)?.market_cap / 1000000)?.toFixed(1) || '?'}M
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs">{isEN ? '24h Change' : '24h涨跌'}</p>
+                  <p className={`font-bold ${(currentResult.fortune.coin as any)?.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(currentResult.fortune.coin as any)?.price_change_percentage_24h?.toFixed(1) || '?'}%
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs">{isEN ? 'Rank' : '排名'}</p>
+                  <p className="text-white font-bold">#{(currentResult.fortune.coin as any)?.market_cap_rank || '?'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs">{isEN ? 'Ponzi Level' : '含庞量'}</p>
+                  <p className={`font-bold ${getPonziLevel() > 70 ? 'text-red-400' : getPonziLevel() > 40 ? 'text-orange-400' : 'text-yellow-400'}`}>
+                    {getPonziLevel() > 70 ? '🔴' : getPonziLevel() > 40 ? '🟠' : '🟡'} {getPonziLevel()}%
+                  </p>
+                  <p className="text-xs mt-0.5">
+                    {isEN 
+                      ? (getPonziLevel() > 70 ? 'Merit Destroyer' : getPonziLevel() > 40 ? 'Premium Ponzi' : 'Casino Chip')
+                      : (getPonziLevel() > 70 ? '功德扣除器' : getPonziLevel() > 40 ? '精装盘子' : '赌场筹码')
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* AI 辣评 - 冷酷科技感 */}
+              <div className="bg-yellow-900/20 border border-yellow-600/30 rounded p-3 mb-4">
+                <p className="text-yellow-400 text-xs font-bold mb-1">🤖 {isEN ? 'AI ANALYSIS' : 'AI 冷血分析'}</p>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  "{isEN ? currentResult.fortune.messageEN : currentResult.fortune.message}"
+                </p>
+              </div>
+
+              {/* 庞氏结构分析 - 毒舌版 */}
+              <div className="bg-gray-800/50 rounded p-3 mb-4 text-sm">
+                <p className="text-cyan-400 text-xs font-bold mb-2">📊 {isEN ? 'Ponzi Structure' : '庞氏结构分析'}</p>
+                <div className="space-y-2 text-gray-400 text-xs">
+                  <p>• {isEN 
+                    ? `Token model: ${getPonziLevel() > 70 ? 'Classic sickle model. Everyone except you is an insider.' : getPonziLevel() > 40 ? 'Musical chairs, 2 rounds left maybe' : 'Surprisingly not a total scam'}`
+                    : `代币模型: ${getPonziLevel() > 70 ? '经典镰刀模型。除了你，全是庄家的老鼠仓。' : getPonziLevel() > 40 ? '击鼓传花，还能传两轮' : '居然不是纯空气，稀奇'}`
+                  }</p>
+                  <p>• {isEN
+                    ? `Exit difficulty: ${(currentResult.fortune.coin as any)?.market_cap > 10000000 ? 'Possible if you run fast' : 'Door welded shut. Abandon all hope.'}`
+                    : `跑路难度: ${(currentResult.fortune.coin as any)?.market_cap > 10000000 ? '跑快点还有救' : '门都给你焊死了，放弃挣扎吧'}`
+                  }</p>
+                  <p>• {isEN
+                    ? `Dev location: ${Math.random() > 0.5 ? '📍 Dubai. Ordering $3000 steak with YOUR money.' : '📍 Last seen 69 days ago. Probably in Bali.'}`
+                    : `项目方定位: ${Math.random() > 0.5 ? '📍 迪拜。正在用你的钱点3000刀的牛排。' : '📍 69天前最后上线。大概率在巴厘岛。'}`
+                  }</p>
+                </div>
+              </div>
+
+              {/* 佛祖判词 - 玄学版 */}
+              <div className="bg-purple-900/20 border border-purple-600/30 rounded p-3 mb-4">
+                <p className="text-purple-400 text-xs font-bold mb-1">🪷 {isEN ? "Buddha's Verdict" : '佛祖判词'}</p>
+                <p className="text-sm text-gray-300">
+                  "{isEN 
+                    ? getPonziLevel() > 70 
+                      ? "This coin and your wallet have incompatible zodiac signs. Forcing it will cost you gas fees AND dignity."
+                      : getPonziLevel() > 40
+                        ? "I calculated your fate: You lack gold in your five elements, but this coin lacks morals. Not a match."
+                        : "Let go of attachment (stop-loss), achieve enlightenment (break even)."
+                    : getPonziLevel() > 70
+                      ? "施主，此币与你八字不合。强扭的瓜不仅不甜，还要倒贴手续费。"
+                      : getPonziLevel() > 40
+                        ? "贫僧掐指一算，你五行缺金，但这币五行缺德。不配。"
+                        : "放下执念（止损），立地成佛（回本）。"
+                  }"
+                </p>
+                <p className="text-xs text-purple-400/60 mt-2">
+                  {isEN ? '🔮 Today: Uninstall App ✓ | Buy dip ✗' : '🔮 今日宜：卸载App | 忌：抄底'}
+                </p>
+              </div>
+
+              {/* 逃跑建议 - 荒谬版 */}
+              <div className="bg-red-900/20 border border-red-600/30 rounded p-3 mb-4">
+                <p className="text-red-400 text-xs font-bold mb-1">🏃 {isEN ? 'Exit Strategy' : '逃跑建议'}</p>
+                <p className="text-xs text-gray-400">
+                  {isEN 
+                    ? getPonziLevel() > 70 
+                      ? "RUN! Leave your shoes behind! Go deliver food to hedge your losses!"
+                      : getPonziLevel() > 40
+                        ? "Screenshot your gains NOW. In 5 minutes it might just be a memory."
+                        : "Surprisingly decent. But remember: even a broken clock is right twice a day."
+                    : getPonziLevel() > 70
+                      ? "快跑！鞋都不要了！赶紧去送两单外卖对冲一下亏损！"
+                      : getPonziLevel() > 40
+                        ? "赶紧截图发朋友圈！5分钟后可能就只剩回忆了。"
+                        : "居然还行？但记住：就算是坏掉的钟，一天也能对两次。"
+                  }
+                </p>
+              </div>
+
+              {/* 分享按钮 - 挑衅化 */}
+              <button
+                onClick={() => {
+                  const text = isEN 
+                    ? `� SCAM ALERT: ${currentResult?.fortune.coin?.symbol?.toUpperCase() || 'SHITCOIN'}\n\n📊 Mcap: $${((currentResult.fortune.coin as any)?.market_cap / 1000000)?.toFixed(1)}M\n� 24h: ${(currentResult.fortune.coin as any)?.price_change_percentage_24h?.toFixed(1)}%\n🔴 Ponzi Level: ${getPonziLevel()}%\n\n"${currentResult.fortune.messageEN?.slice(0, 50)}..."\n\nGet roasted: gongde.xyz\n\n$GONGDE #GasTemple`
+                    : `� 垃圾盘子预警: $${currentResult?.fortune.coin?.symbol?.toUpperCase() || '空气币'}\n\n📊 市值: $${((currentResult.fortune.coin as any)?.market_cap / 1000000)?.toFixed(1)}M\n� 24h: ${(currentResult.fortune.coin as any)?.price_change_percentage_24h?.toFixed(1)}%\n🔴 含庞量: ${getPonziLevel()}%\n\n"${currentResult.fortune.message?.slice(0, 30)}..."\n\n来挨骂: gongde.xyz\n\n$GONGDE #GasTemple`
+                  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`
+                  window.open(url, '_blank')
+                }}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 font-bold rounded border border-red-400 transition-colors flex items-center justify-center gap-2 mb-2"
+              >
+                🚨 {isEN ? 'EXPOSE THIS SCAM' : '曝光这个垃圾盘子'}
+              </button>
+              <button
+                onClick={() => setShowFullRoastModal(false)}
+                className="w-full text-gray-500 text-xs hover:text-gray-400 py-2"
+              >
+                {isEN ? 'Close' : '关闭'}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

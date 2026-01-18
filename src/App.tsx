@@ -7,8 +7,6 @@ import TemplePage from './pages/TemplePage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import AboutPage from './pages/AboutPage'
 import GraveyardPage from './pages/GraveyardPage'
-import RegretPage from './pages/RegretPage'
-import MintPage from './pages/MintPage'
 
 function App() {
   const { mode, setMode } = useThemeStore()
@@ -43,8 +41,6 @@ function App() {
         <Route path="/temple" element={<TemplePage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/graveyard" element={<GraveyardPage />} />
-        <Route path="/regret" element={<RegretPage />} />
-        <Route path="/mint" element={<MintPage />} />
         <Route path="/about" element={<AboutPage />} />
       </Routes>
     </div>

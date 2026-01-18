@@ -53,12 +53,12 @@ export const TemplePage: React.FC = () => {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {/* 左侧：统计 */}
+            {/* 左侧：统计 - 手机端隐藏 */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className={`p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
+              className={`hidden md:block p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
             >
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className={`w-4 h-4 ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`} />
@@ -88,22 +88,22 @@ export const TemplePage: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* 中间：木鱼 */}
+            {/* 中间：木鱼 - 手机端全宽 */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className={`p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
+              className={`md:col-span-1 p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
             >
               <WoodenFish />
             </motion.div>
 
-            {/* 右侧：排行榜 */}
+            {/* 右侧：排行榜 - 手机端隐藏 */}
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className={`p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
+              className={`hidden md:block p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
             >
               <div className="flex items-center gap-2 mb-4">
                 <Users className={`w-4 h-4 ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`} />
@@ -140,6 +140,70 @@ export const TemplePage: React.FC = () => {
                       {burner.merits.toLocaleString()}
                     </span>
                   </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* 手机端：折叠的统计和排行榜 */}
+          <div className="md:hidden mt-6 space-y-4">
+            {/* 简化统计 */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className={`p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
+            >
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <p className="text-xs text-gray-500">{isEN ? 'TOTAL' : '全网'}</p>
+                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-white'}`}>1.2M</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{isEN ? 'TODAY' : '今日'}</p>
+                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-pink' : 'text-white'}`}>88K</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">{isEN ? 'USERS' : '人数'}</p>
+                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-cyan' : 'text-white'}`}>4.2K</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Top 3 排行榜 */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className={`p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
+            >
+              <h3 className={`font-bold mb-3 text-center ${isDegen ? 'text-degen-green font-pixel text-xs' : 'text-goldman-gold text-sm'}`}>
+                {isEN ? 'TOP 3 🔥' : '前三甲'}
+              </h3>
+              <div className="space-y-2">
+                {TOP_BURNERS.slice(0, 3).map((burner) => (
+                  <div
+                    key={burner.rank}
+                    className={`flex items-center justify-between p-2 rounded-lg ${isDegen ? 'bg-black/20' : 'bg-black/10'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        burner.rank === 1 ? 'bg-yellow-500 text-black' :
+                        burner.rank === 2 ? 'bg-gray-400 text-black' :
+                        'bg-amber-600 text-black'
+                      }`}>
+                        {burner.rank}
+                      </span>
+                      <div>
+                        <p className={`text-xs font-mono ${isDegen ? 'text-degen-green' : 'text-white'}`}>
+                          {burner.address}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`text-xs font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>
+                      {(burner.merits / 1000).toFixed(0)}K
+                    </span>
+                  </div>
                 ))}
               </div>
             </motion.div>

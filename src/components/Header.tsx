@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Trophy, Info, Zap, Flame, Skull, Calculator, Sparkles } from 'lucide-react'
+import { Trophy, Info, Zap, Flame, Skull } from 'lucide-react'
 import { useThemeStore } from '../stores/themeStore'
 import { useGachaStore } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
@@ -17,10 +17,8 @@ export const Header: React.FC = () => {
   const navItems = [
     { path: '/gacha', label: isEN ? 'GACHA' : '抽签', icon: Zap },
     { path: '/temple', label: isEN ? 'TEMPLE' : '功德殿', icon: Flame },
-    { path: '/mint', label: isEN ? 'RELICS' : '法器', icon: Sparkles },
     { path: '/graveyard', label: isEN ? 'RIP' : '骨灰盒', icon: Skull },
-    { path: '/regret', label: isEN ? 'IF...' : '如果', icon: Calculator },
-    { path: '/leaderboard', label: isEN ? 'LEEKS' : '韭菜榜', icon: Trophy },
+    { path: '/leaderboard', label: isEN ? 'HALL' : '韭菜堂', icon: Trophy },
     { path: '/about', label: isEN ? 'WTF' : '关于', icon: Info },
   ]
 

@@ -13,10 +13,11 @@ interface MeritPopup {
 }
 
 const RANDOM_TEXTS = [
-  { text: '功德 +1', color: 'text-yellow-400' },
-  { text: '功德 +1', color: 'text-yellow-400' },
-  { text: '功德 +1', color: 'text-yellow-400' },
-  { text: 'FOMO -1', color: 'text-green-400' },
+  { text: '$GONGDE +1', color: 'text-green-400' },
+  { text: '$GONGDE +1', color: 'text-green-400' },
+  { text: '$GONGDE +1', color: 'text-green-400' },
+  { text: '$GONGDE +2 🔥', color: 'text-yellow-400' },
+  { text: 'FOMO -1', color: 'text-cyan-400' },
   { text: '智商 +1', color: 'text-cyan-400' },
   { text: '被割概率 -0.01%', color: 'text-pink-400' },
   { text: '业障 -1', color: 'text-purple-400' },
@@ -24,6 +25,7 @@ const RANDOM_TEXTS = [
   { text: 'Paper Hands -1', color: 'text-red-400' },
   { text: '韭菜根 +1', color: 'text-green-500' },
   { text: '接盘力 -1', color: 'text-orange-400' },
+  { text: '$GONGDE +3 🚀', color: 'text-yellow-300' },
 ]
 
 export const WoodenFish: React.FC = () => {
@@ -34,7 +36,11 @@ export const WoodenFish: React.FC = () => {
   const [totalMerits, setTotalMerits] = useState(0)
   const [isPressed, setIsPressed] = useState(false)
   const [combo, setCombo] = useState(0)
+  const [chargeProgress, setChargeProgress] = useState(0) // 蓄力进度 0-100
+  const [isCharging, setIsCharging] = useState(false) // 是否正在蓄力
+  const [isComboMode, setIsComboMode] = useState(false) // 是否进入连击模式
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const chargeIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const comboTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const idRef = useRef(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -44,11 +50,16 @@ export const WoodenFish: React.FC = () => {
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
   const burnCost = 100
+  const CHARGE_TIME = 800 // 蓄力时间 800ms
+  const CHARGE_INTERVAL = 20 // 进度条更新间隔
 
   useEffect(() => {
     audioRef.current = new Audio('/muyu.mp3')
     audioRef.current.volume = 0.5
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
+    return () => { 
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (chargeIntervalRef.current) clearInterval(chargeIntervalRef.current)
+    }
   }, [])
 
   const addMerit = useCallback(() => {
@@ -85,21 +96,57 @@ export const WoodenFish: React.FC = () => {
   }, [gdBalance, spendGD])
 
   const handleClick = () => {
-    addMerit()
+    // 单击只触发一次，不触发连击
+    if (!isComboMode) {
+      addMerit()
+    }
   }
 
   const handleMouseDown = () => {
     setIsPressed(true)
+    setIsCharging(true)
+    setChargeProgress(0)
+    
+    // 单击先触发一次
     addMerit()
-    intervalRef.current = setInterval(() => {
-      if (!addMerit()) {
-        if (intervalRef.current) clearInterval(intervalRef.current)
+    
+    // 开始蓄力进度条
+    let progress = 0
+    chargeIntervalRef.current = setInterval(() => {
+      progress += (100 * CHARGE_INTERVAL) / CHARGE_TIME
+      if (progress >= 100) {
+        // 蓄力完成，进入连击模式
+        setChargeProgress(100)
+        setIsCharging(false)
+        setIsComboMode(true)
+        if (chargeIntervalRef.current) {
+          clearInterval(chargeIntervalRef.current)
+          chargeIntervalRef.current = null
+        }
+        // 开始连击
+        intervalRef.current = setInterval(() => {
+          if (!addMerit()) {
+            if (intervalRef.current) clearInterval(intervalRef.current)
+          }
+        }, 80)
+      } else {
+        setChargeProgress(progress)
       }
-    }, 80)
+    }, CHARGE_INTERVAL)
   }
 
   const handleMouseUp = () => {
     setIsPressed(false)
+    setIsCharging(false)
+    setIsComboMode(false)
+    setChargeProgress(0)
+    
+    // 清除蓄力计时器
+    if (chargeIntervalRef.current) {
+      clearInterval(chargeIntervalRef.current)
+      chargeIntervalRef.current = null
+    }
+    // 清除连击计时器
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -219,10 +266,40 @@ export const WoodenFish: React.FC = () => {
         </AnimatePresence>
       </div>
 
+      {/* 蓄力进度条 */}
+      {isCharging && (
+        <div className="w-48 mt-4">
+          <div className={`h-2 rounded-full overflow-hidden ${isDegen ? 'bg-gray-800' : 'bg-gray-700'}`}>
+            <motion.div
+              className={`h-full ${isDegen ? 'bg-gradient-to-r from-degen-green to-degen-cyan' : 'bg-gradient-to-r from-goldman-gold to-amber-400'}`}
+              initial={{ width: 0 }}
+              animate={{ width: `${chargeProgress}%` }}
+              transition={{ duration: 0.02 }}
+            />
+          </div>
+          <p className={`text-xs text-center mt-1 ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
+            {isEN ? '⚡ Charging combo...' : '⚡ 蓄力中...'}
+          </p>
+        </div>
+      )}
+
+      {/* 连击模式提示 */}
+      {isComboMode && (
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className={`mt-4 px-4 py-2 rounded-lg ${isDegen ? 'bg-degen-green/20 border border-degen-green' : 'bg-goldman-gold/20 border border-goldman-gold'}`}
+        >
+          <p className={`text-sm font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>
+            🔥 {isEN ? 'COMBO MODE ACTIVE!' : '连击模式激活！'}
+          </p>
+        </motion.div>
+      )}
+
       {/* 操作提示 */}
-      <div className={`mt-8 text-center ${isDegen ? 'font-pixel text-xs' : 'text-sm'}`}>
+      <div className={`mt-6 text-center ${isDegen ? 'font-pixel text-xs' : 'text-sm'}`}>
         <p className={isDegen ? 'text-degen-green' : 'text-gray-400'}>
-          {isEN ? 'HOLD TO BURN FASTER 🔥' : '长按连续积德'}
+          {isEN ? 'HOLD 0.8s TO ACTIVATE COMBO 🔥' : '长按 0.8 秒激活连击'}
         </p>
         <p className={`mt-2 ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {isEN ? `Cost: ${burnCost} $GD each` : `每次消耗 ${burnCost} $GD`}
