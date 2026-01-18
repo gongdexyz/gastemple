@@ -69,7 +69,7 @@ export const InactivityToast: React.FC<InactivityToastProps> = ({ timeoutSeconds
           initial={{ opacity: 0, scale: 0.8, y: 50 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: 50 }}
-          className="fixed bottom-4 right-4 z-50 max-w-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
           {/* Windows-style Error Box */}
           <div className="bg-[#c0c0c0] border-2 border-t-white border-l-white border-r-[#808080] border-b-[#808080] shadow-lg">

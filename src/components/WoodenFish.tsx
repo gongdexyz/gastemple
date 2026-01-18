@@ -288,7 +288,7 @@ export const WoodenFish: React.FC = () => {
         </button>
         </div>
         
-        {/* 表情状态气泡 - 移到按钮外面 */}
+        {/* 表情状态气泡 - 居中显示在木鱼上方 */}
         <AnimatePresence>
           {combo >= 5 && (
             <motion.div
@@ -297,10 +297,9 @@ export const WoodenFish: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="absolute text-4xl z-20"
+              className="absolute text-4xl z-20 left-1/2 -translate-x-1/2"
               style={{ 
-                top: '15%', 
-                right: '20%',
+                top: '10%',
                 filter: combo >= 20 ? 'hue-rotate(180deg)' : 'none' 
               }}
             >
@@ -309,7 +308,7 @@ export const WoodenFish: React.FC = () => {
           )}
         </AnimatePresence>
         
-        {/* HP状态 - 移到按钮外面 */}
+        {/* HP状态 - 居中显示在木鱼下方 */}
         <AnimatePresence>
           {combo >= 10 && (
             <motion.div
@@ -318,8 +317,8 @@ export const WoodenFish: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className={`absolute text-sm font-bold z-20 pointer-events-none ${combo >= 20 ? 'text-red-500' : 'text-orange-400'}`}
-              style={{ bottom: '20%', left: '50%', transform: 'translateX(-50%)' }}
+              className={`absolute text-sm font-bold z-20 pointer-events-none left-1/2 -translate-x-1/2 ${combo >= 20 ? 'text-red-500' : 'text-orange-400'}`}
+              style={{ bottom: '15%' }}
             >
               {getFishMood().status}
             </motion.div>
@@ -361,45 +360,54 @@ export const WoodenFish: React.FC = () => {
           ))}
         </AnimatePresence>
 
-        {/* 功德+1 弹出 */}
+        {/* 功德+1 弹出 - 完全居中 */}
         <AnimatePresence>
           {merits.map((merit) => (
             <motion.div
               key={merit.id}
-              initial={{ opacity: 1, y: 0, scale: 0.8 }}
+              initial={{ opacity: 1, scale: 0.8 }}
               animate={{ opacity: 0, y: -60, scale: 1.2 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: 'easeOut' }}
-              className={`
-                absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                pointer-events-none font-bold text-xl text-center z-10
-                max-w-[280px] px-2
-                ${isDegen ? `font-pixel text-lg ${merit.color}` : 'text-goldman-gold'}
-              `}
-              style={{ textShadow: '0 0 10px currentColor' }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
             >
-              {merit.text} ✨
+              <div 
+                className={`
+                  font-bold text-xl text-center
+                  w-[280px] px-2
+                  ${isDegen ? `font-pixel text-lg ${merit.color}` : 'text-goldman-gold'}
+                `}
+                style={{ textShadow: '0 0 10px currentColor' }}
+              >
+                {merit.text} ✨
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
 
-        {/* Miss 吐槽 */}
+        {/* Miss 吐槽 - 完全居中 */}
         <AnimatePresence>
           {missText && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.5, y: 20 }}
-              animate={{ opacity: 1, scale: 1.2, y: 0 }}
-              exit={{ opacity: 0, scale: 0.5, y: -20 }}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1.2 }}
+              exit={{ opacity: 0, scale: 0.5 }}
               transition={{ duration: 0.4 }}
               className={`
-                absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-                pointer-events-none font-bold text-xl text-center z-20
-                max-w-[280px] px-3 py-2 rounded-lg
-                ${isDegen ? 'font-pixel text-degen-pink bg-black/50' : 'text-red-400 bg-black/40'}
+                absolute inset-0 flex items-center justify-center
+                pointer-events-none z-20
               `}
-              style={{ textShadow: '0 0 15px currentColor' }}
             >
-              {missText}
+              <div 
+                className={`
+                  font-bold text-xl text-center
+                  w-[280px] px-3 py-2 rounded-lg
+                  ${isDegen ? 'font-pixel text-degen-pink bg-black/50' : 'text-red-400 bg-black/40'}
+                `}
+                style={{ textShadow: '0 0 15px currentColor' }}
+              >
+                {missText}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

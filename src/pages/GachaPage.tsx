@@ -231,26 +231,26 @@ export const GachaPage: React.FC = () => {
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  {/* Pixel Coin */}
+                  {/* Q版古钱币 - 圆形方孔 */}
                   <div className="w-20 h-20 relative">
-                    {/* Coin body */}
+                    {/* 钱币主体 - 保持原来的金黄色Q版风格 */}
                     <div className="absolute inset-0 rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-700 border-4 border-yellow-300 shadow-lg">
-                      {/* Inner ring */}
+                      {/* 外圈 */}
                       <div className="absolute inset-2 rounded-full border-2 border-yellow-300/50" />
-                      {/* Center symbol */}
+                      {/* 方孔 - 中间的正方形孔 */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-2xl font-bold text-yellow-900 font-pixel" style={{ textShadow: '1px 1px 0 rgba(255,255,255,0.3)' }}>$</span>
+                        <div className="w-4 h-4 bg-black/90 border-2 border-yellow-600 shadow-inner" />
                       </div>
-                      {/* Shine effect */}
+                      {/* 高光 */}
                       <div className="absolute top-1 left-2 w-3 h-3 rounded-full bg-yellow-200/60 blur-[1px]" />
                     </div>
-                    {/* Glitch effect */}
+                    {/* 故障效果 */}
                     <motion.div 
                       className="absolute inset-0 rounded-full bg-white mix-blend-overlay opacity-0"
                       animate={{ opacity: [0, 0.6, 0], x: [-2, 2, 0] }}
                       transition={{ duration: 0.1, repeat: Infinity, repeatDelay: 3 }}
                     />
-                    {/* Glow */}
+                    {/* 光晕 */}
                     <div className="absolute -inset-2 rounded-full bg-yellow-400/20 blur-lg animate-pulse" />
                   </div>
                   {/* Mystery particles */}
@@ -267,10 +267,11 @@ export const GachaPage: React.FC = () => {
                 </p>
                 <button 
                   onClick={handleStart}
-                  className="glitch-btn w-full py-4 text-lg font-bold border-2 border-[#00ff41] uppercase tracking-wider bg-transparent"
+                  className="w-full py-4 text-lg font-bold border-2 border-red-500 uppercase tracking-wider bg-gradient-to-b from-red-600 to-red-800 text-yellow-300 rounded-lg shadow-lg hover:from-red-500 hover:to-red-700 transition-all hover:scale-105 active:scale-95"
+                  style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}
                 >
-                  {isEN ? 'DRAW FORTUNE CODE' : '抽取今日财富密码'}
-                  <div className="text-xs font-normal mt-1 text-gray-500">
+                  🧧 {isEN ? 'DRAW FORTUNE CODE' : '抽取今日财富密码'} 🧧
+                  <div className="text-xs font-normal mt-1 text-yellow-200/80">
                     ({isEN ? `${freeDrawsLeft} free draw left` : `消耗 1 点信仰值`})
                   </div>
                 </button>
