@@ -79,6 +79,12 @@ export const WoodenFish: React.FC = () => {
   useEffect(() => {
     audioRef.current = new Audio('/muyu.mp3')
     audioRef.current.volume = 0.5
+    
+    // 预加载图片避免闪烁
+    const preloadGif = new Image()
+    preloadGif.src = '/muyu.gif'
+    const preloadStatic = new Image()
+    preloadStatic.src = '/muyu-static.gif'
   }, [])
 
   // 根据combo获取表情状态
@@ -263,11 +269,19 @@ export const WoodenFish: React.FC = () => {
               }
             `}
           >
+          {/* 静态图 - 始终存在 */}
+          <img 
+            src="/muyu-static.gif"
+            alt="木鱼" 
+            className={`w-44 h-44 object-cover rounded-full select-none absolute inset-0 m-auto transition-opacity duration-100 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+            draggable={false}
+          />
+          {/* 动态GIF - 始终存在，用opacity切换 */}
           <img 
             key={gifKey}
-            src={isAnimating ? `/muyu.gif?t=${gifKey}` : '/muyu-static.gif'}
-            alt="木鱼" 
-            className="w-44 h-44 object-cover rounded-full select-none"
+            src={`/muyu.gif?t=${gifKey}`}
+            alt="木鱼动画" 
+            className={`w-44 h-44 object-cover rounded-full select-none transition-opacity duration-100 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}
             draggable={false}
           />
           
