@@ -36,7 +36,7 @@ export default {
       fontFamily: {
         sans: ['Inter', 'SF Pro Display', '-apple-system', 'system-ui', 'sans-serif'],
         mono: ['Share Tech Mono', 'JetBrains Mono', 'Fira Code', 'monospace'],
-        pixel: ['"Press Start 2P"', 'cursive'],
+        pixel: ['"ZCOOL KuaiLe"', '"Press Start 2P"', 'cursive'],
         retro: ['Share Tech Mono', 'monospace'],
       },
       animation: {
