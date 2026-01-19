@@ -19,8 +19,8 @@ interface ClickTarget {
   timestamp: number
 }
 
-// 正常模式文案
-const NORMAL_TEXTS = [
+// 正常模式文案 - 中文
+const NORMAL_TEXTS_CN = [
   { text: '功德 +1', color: 'text-green-400' },
   { text: '心平气和 ☯️', color: 'text-cyan-400' },
   { text: '岁月静好 🌸', color: 'text-pink-400' },
@@ -29,8 +29,18 @@ const NORMAL_TEXTS = [
   { text: '佛光普照 ✨', color: 'text-yellow-400' },
 ]
 
-// 暴走模式文案 (combo > 5)
-const RAGE_TEXTS = [
+// 正常模式文案 - 英文
+const NORMAL_TEXTS_EN = [
+  { text: 'Merit +1', color: 'text-green-400' },
+  { text: 'Inner Peace ☯️', color: 'text-cyan-400' },
+  { text: 'Zen Mode 🌸', color: 'text-pink-400' },
+  { text: 'Karma -1', color: 'text-purple-400' },
+  { text: 'Wisdom +1', color: 'text-blue-400' },
+  { text: 'Blessed ✨', color: 'text-yellow-400' },
+]
+
+// 暴走模式文案 - 中文 (combo > 5)
+const RAGE_TEXTS_CN = [
   { text: '暴击！💥', color: 'text-red-500' },
   { text: '怨气 +10086', color: 'text-red-400' },
   { text: '功德已溢出！', color: 'text-yellow-400' },
@@ -40,11 +50,25 @@ const RAGE_TEXTS = [
   { text: '物理超度！', color: 'text-purple-400' },
   { text: '赛博加特林！', color: 'text-cyan-400' },
   { text: '心率180 💓', color: 'text-red-400' },
-  { text: '钮祜禄·施主', color: 'text-yellow-300' },
+  { text: '钮祖禄·施主', color: 'text-yellow-300' },
 ]
 
-// Miss吐槽文案
-const MISS_TEXTS = [
+// 暴走模式文案 - 英文 (combo > 5)
+const RAGE_TEXTS_EN = [
+  { text: 'CRIT HIT! 💥', color: 'text-red-500' },
+  { text: 'Rage +10086', color: 'text-red-400' },
+  { text: 'Merit Overflow!', color: 'text-yellow-400' },
+  { text: 'Buddha Left Chat 🏃', color: 'text-orange-400' },
+  { text: 'Too Much Violence!', color: 'text-red-500' },
+  { text: 'Fish Abuse! 🔨', color: 'text-pink-400' },
+  { text: 'Physical Salvation!', color: 'text-purple-400' },
+  { text: 'Cyber Gatling!', color: 'text-cyan-400' },
+  { text: 'Heart Rate 180 💓', color: 'text-red-400' },
+  { text: 'Degen Unlocked', color: 'text-yellow-300' },
+]
+
+// Miss吐槽文案 - 中文
+const MISS_TEXTS_CN = [
   '佛祖：这届信徒太难带了 🏃',
   '木鱼：我是来渡你的，不是让你练APM的！',
   '检测到杀气过重，功德 -100',
@@ -53,6 +77,18 @@ const MISS_TEXTS = [
   '求求了，再打我要吐舍利子了',
   '这是积功德？这是积怨气吧！',
   '佛只渡有缘人 🙏',
+]
+
+// Miss吐槽文案 - 英文
+const MISS_TEXTS_EN = [
+  'Buddha: This generation is hopeless 🏃',
+  "Fish: I'm here to save you, not for APM training!",
+  'Violence detected, Merit -100',
+  'Buddha fainted before hearing your wish',
+  'Others pray sincerely, you assault physically',
+  'Please stop, I\'m about to cough up relics',
+  'Is this earning merit? This is earning karma!',
+  'Buddha only saves the worthy 🙏',
 ]
 
 export const WoodenFish: React.FC = () => {
@@ -69,7 +105,7 @@ export const WoodenFish: React.FC = () => {
   const targetIdRef = useRef(0)
   const [missText, setMissText] = useState<string | null>(null)
   const [isFishPressed, setIsFishPressed] = useState(false)
-  const [gifKey, setGifKey] = useState(0)
+  // gifKey removed - no longer needed
   const [isAnimating, setIsAnimating] = useState(false)
   
   const isDegen = mode === 'degen'
@@ -90,10 +126,14 @@ export const WoodenFish: React.FC = () => {
   // 根据combo获取表情状态
   const getFishMood = () => {
     if (combo >= 20) return { emoji: '😵', status: 'HP -9999' }
-    if (combo >= 10) return { emoji: '😱', status: '救命！' }
-    if (combo >= 5) return { emoji: '😳', status: '太快了！' }
+    if (combo >= 10) return { emoji: '😱', status: isEN ? 'HELP!' : '救命！' }
+    if (combo >= 5) return { emoji: '😳', status: isEN ? 'Too fast!' : '太快了！' }
     return { emoji: '🙂', status: '' }
   }
+
+  // 根据语言获取文案
+  const NORMAL_TEXTS = isEN ? NORMAL_TEXTS_EN : NORMAL_TEXTS_CN
+  const RAGE_TEXTS = isEN ? RAGE_TEXTS_EN : RAGE_TEXTS_CN
 
   // 震动反馈
   const triggerVibration = () => {
@@ -124,16 +164,17 @@ export const WoodenFish: React.FC = () => {
       setClickTargets(prev => {
         const stillExists = prev.find(t => t.id === newTarget.id)
         if (stillExists) {
-          // 显示Miss吐槽
-          const missText = MISS_TEXTS[Math.floor(Math.random() * MISS_TEXTS.length)]
-          setMissText(missText)
+          // 显示Miss吐槽 - 根据当前语言选择
+          const missTexts = lang === 'en' ? MISS_TEXTS_EN : MISS_TEXTS_CN
+          const randomMiss = missTexts[Math.floor(Math.random() * missTexts.length)]
+          setMissText(randomMiss)
           setTimeout(() => setMissText(null), 2500)
           return prev.filter(t => t.id !== newTarget.id)
         }
         return prev
       })
     }, 2000)
-  }, [])
+  }, [lang])
 
   const addMerit = useCallback((shouldSpawnTarget: boolean = true) => {
     if (gdBalance < burnCost) return false
@@ -170,9 +211,8 @@ export const WoodenFish: React.FC = () => {
     
     // 触发震动
     triggerVibration()
-    setGifKey(prev => prev + 1)
     setIsAnimating(true)
-    setTimeout(() => setIsAnimating(false), 2040)
+    setTimeout(() => setIsAnimating(false), 150)
 
     // 根据combo选择文案：combo > 5 进入暴走模式
     const textPool = combo > 5 ? RAGE_TEXTS : NORMAL_TEXTS
@@ -269,19 +309,11 @@ export const WoodenFish: React.FC = () => {
               }
             `}
           >
-          {/* 静态图 - 始终存在 */}
+          {/* 木鱼图片 - 用CSS动画代替GIF切换避免闪烁 */}
           <img 
             src="/muyu-static.gif"
-            alt="木鱼" 
-            className={`w-44 h-44 object-cover rounded-full select-none absolute inset-0 m-auto transition-opacity duration-100 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
-            draggable={false}
-          />
-          {/* 动态GIF - 始终存在，用opacity切换 */}
-          <img 
-            key={gifKey}
-            src={`/muyu.gif?t=${gifKey}`}
-            alt="木鱼动画" 
-            className={`w-44 h-44 object-cover rounded-full select-none transition-opacity duration-100 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}
+            alt={isEN ? "Wooden Fish" : "木鱼"}
+            className={`w-44 h-44 object-cover rounded-full select-none transition-transform duration-100 ${isAnimating ? 'scale-95' : 'scale-100'}`}
             draggable={false}
           />
           
