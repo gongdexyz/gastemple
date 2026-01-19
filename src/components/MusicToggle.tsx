@@ -3,31 +3,13 @@ import { Volume2, VolumeX } from 'lucide-react'
 import { useSoundStore } from '../stores/soundStore'
 
 export const MusicToggle: React.FC = () => {
-  const { initBgm, playBgm, isMuted, toggleMute, isInitialized } = useSoundStore()
+  const { initBgm, isMuted, toggleMute, setupAutoPlay } = useSoundStore()
 
-  // 初始化背景音乐（只执行一次）
+  // 初始化背景音乐和自动播放（全局只执行一次）
   useEffect(() => {
     initBgm()
-  }, [initBgm])
-
-  // 用户首次交互后播放背景音乐
-  useEffect(() => {
-    if (!isInitialized) return
-    
-    const handleFirstInteraction = () => {
-      playBgm()
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
-    }
-    
-    document.addEventListener('click', handleFirstInteraction)
-    document.addEventListener('touchstart', handleFirstInteraction)
-    
-    return () => {
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
-    }
-  }, [playBgm, isInitialized])
+    setupAutoPlay()
+  }, [initBgm, setupAutoPlay])
 
   return (
     <button

@@ -5,18 +5,24 @@ interface SoundStore {
   isBgmPlaying: boolean
   isMuted: boolean
   isInitialized: boolean
+  hasUserInteracted: boolean
   initBgm: () => void
   playBgm: () => void
   pauseBgm: () => void
   toggleMute: () => void
   playSound: (type: 'roll' | 'text' | 'choose') => void
+  setupAutoPlay: () => void
 }
+
+// 全局标志，防止多个组件重复设置事件监听
+let autoPlaySetup = false
 
 export const useSoundStore = create<SoundStore>((set, get) => ({
   bgmAudio: null,
   isBgmPlaying: false,
   isMuted: false,
   isInitialized: false,
+  hasUserInteracted: false,
 
   initBgm: () => {
     const { isInitialized, bgmAudio } = get()
@@ -31,7 +37,9 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
   },
 
   playBgm: () => {
-    const { bgmAudio, isMuted } = get()
+    const { bgmAudio, isMuted, isBgmPlaying } = get()
+    // 防止重复播放
+    if (isBgmPlaying) return
     if (bgmAudio && !isMuted) {
       bgmAudio.play().catch(() => {})
       set({ isBgmPlaying: true })
@@ -73,5 +81,25 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
     const audio = new Audio(soundMap[type])
     audio.volume = 0.5
     audio.play().catch(() => {})
+  },
+
+  setupAutoPlay: () => {
+    // 防止多个组件重复设置事件监听
+    if (autoPlaySetup) return
+    autoPlaySetup = true
+
+    const handleFirstInteraction = () => {
+      const { hasUserInteracted } = get()
+      if (hasUserInteracted) return
+      
+      set({ hasUserInteracted: true })
+      get().playBgm()
+      
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+    }
+    
+    document.addEventListener('click', handleFirstInteraction)
+    document.addEventListener('touchstart', handleFirstInteraction)
   },
 }))
