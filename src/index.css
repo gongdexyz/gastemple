@@ -64,13 +64,11 @@ body {
     inset 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-/* 霓虹文字效果 */
+/* 霓虹文字效果 - 减小光晕 */
 .neon-text {
   text-shadow: 
-    0 0 5px currentColor,
-    0 0 10px currentColor,
-    0 0 20px currentColor,
-    0 0 40px currentColor;
+    0 0 2px currentColor,
+    0 0 5px currentColor;
 }
 
 /* 闪烁动画 */

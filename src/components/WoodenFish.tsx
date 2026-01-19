@@ -259,16 +259,16 @@ export const WoodenFish: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-2">
+    <div className="flex flex-col items-center justify-center -mt-4">
       {/* 功德计数器 */}
       <div className={`text-center mb-6 ${isDegen ? 'font-pixel' : ''}`}>
         <div className={`text-5xl font-bold mb-2 ${isDegen ? 'text-degen-yellow neon-text' : 'text-goldman-gold'}`}>
           {totalMerits.toLocaleString()}
         </div>
-        <div className={`text-base ${isDegen ? 'text-degen-green' : 'text-gray-400'}`}>
+        <div className={`text-lg ${isDegen ? 'text-degen-green' : 'text-gray-400'}`}>
           {isEN ? 'Merit' : '功德 Merit'}
         </div>
-        <div className={`text-sm mt-1 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold/70'}`}>
+        <div className={`text-base mt-1 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold/70'}`}>
           {getTitle()}
         </div>
         <div className={`text-lg font-bold mt-2 h-7 ${isDegen ? 'text-degen-pink' : 'text-orange-400'}`}>
@@ -453,14 +453,14 @@ export const WoodenFish: React.FC = () => {
       </div>
 
       {/* 操作提示 - 紧跟木鱼下方 */}
-      <div className={`text-center ${isDegen ? 'font-pixel text-sm' : 'text-base'}`}>
+      <div className={`text-center ${isDegen ? 'font-pixel text-base' : 'text-lg'}`}>
         <p className={isDegen ? 'text-degen-green' : 'text-gray-400'}>
           {clickTargets.length > 0 
             ? (isEN ? 'CATCH THE CIRCLE! ⭕' : '快点圈圈！')
             : (isEN ? 'CLICK THE FROG TO START 🐸' : '点击蛙蛙开始')
           }
         </p>
-        <p className={`mt-1 text-base ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
+        <p className={`mt-1 text-lg ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {isEN ? `Cost: ${burnCost} $GD each` : `每次消耗 ${burnCost} $GD`}
         </p>
       </div>
@@ -478,7 +478,7 @@ export const WoodenFish: React.FC = () => {
 
       {/* Slogan */}
       <motion.p 
-        className={`mt-8 text-center italic ${isDegen ? 'text-degen-cyan font-pixel text-sm' : 'text-gray-500 text-base'}`}
+        className={`mt-6 text-center italic ${isDegen ? 'text-degen-cyan font-pixel text-xl' : 'text-gray-500 text-xl'}`}
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 3, repeat: Infinity }}
       >
