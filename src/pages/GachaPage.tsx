@@ -144,11 +144,46 @@ export const GachaPage: React.FC = () => {
         setStage('result')
         playSound('text') // 结果出现时打字音效
         
-        // TTS朗读佛祖判词和逃跑建议
+        // TTS朗读 - 使用与完整报告一致的内容
         const fortune = result.fortune
-        const roast = isEN ? fortune.messageEN : fortune.message
-        const advice = isEN ? fortune.adviceEN : fortune.advice
-        const ttsText = `${roast}。${advice}`
+        const ponziLevel = (() => {
+          const level = fortune.level
+          if (level === 'N') return 95
+          if (level === 'R') return 70
+          if (level === 'SR') return 40
+          return 15
+        })()
+        
+        // AI分析
+        const aiRoast = isEN ? fortune.messageEN : fortune.message
+        
+        // 佛祖判词 - 与完整报告一致
+        const buddhaVerdict = isEN 
+          ? ponziLevel > 70 
+            ? "This coin and your wallet have incompatible zodiac signs. Forcing it will cost you gas fees AND dignity."
+            : ponziLevel > 40
+              ? "I calculated your fate: You lack gold in your five elements, but this coin lacks morals. Not a match."
+              : "Let go of attachment, achieve enlightenment."
+          : ponziLevel > 70
+            ? "施主，此币与你八字不合。强扭的瓜不仅不甜，还要倒贴手续费。"
+            : ponziLevel > 40
+              ? "贫僧掐指一算，你五行缺金，但这币五行缺德。不配。"
+              : "放下执念，立地成佛。"
+        
+        // 逃跑建议 - 与完整报告一致
+        const exitAdvice = isEN 
+          ? ponziLevel > 70 
+            ? "RUN! Leave your shoes behind! Go deliver food to hedge your losses!"
+            : ponziLevel > 40
+              ? "Screenshot your gains NOW. In 5 minutes it might just be a memory."
+              : "Surprisingly decent. But remember: even a broken clock is right twice a day."
+          : ponziLevel > 70
+            ? "快跑！鞋都不要了！赶紧去送两单外卖对冲一下亏损！"
+            : ponziLevel > 40
+              ? "赶紧截图发朋友圈！5分钟后可能就只剩回忆了。"
+              : "居然还行？但记住：就算是坏掉的钟，一天也能对两次。"
+        
+        const ttsText = `${aiRoast}。佛祖判词：${buddhaVerdict}。逃跑建议：${exitAdvice}`
         speakText(ttsText, isEN ? 'en' : 'zh')
       }, 1500)
     }

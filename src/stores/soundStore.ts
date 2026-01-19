@@ -35,11 +35,11 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
   },
 
   playBgm: () => {
-    const { isMuted, isBgmPlaying } = get()
-    // 防止重复播放
-    if (isBgmPlaying) return
+    const { isMuted } = get()
+    // 防止重复播放 - 检查audio是否真的在播放
+    if (bgmAudio && !bgmAudio.paused) return
     if (bgmAudio && !isMuted) {
-      bgmAudio.play().catch(() => {})
+      bgmAudio.play().catch((e) => console.log('BGM play error:', e))
       set({ isBgmPlaying: true })
     }
   },
