@@ -476,8 +476,8 @@ export const WoodenFish: React.FC = () => {
         transition={{ duration: 3, repeat: Infinity }}
       >
         {isDegen 
-          ? '"V ME 50, BUDDHA BLESS U"' 
-          : '"Burn $GD, Fix Karma"'
+          ? (isEN ? '"V ME 50, BUDDHA BLESS U"' : '"V我50，佛祖保佑"')
+          : (isEN ? '"Burn $GD, Fix Karma"' : '"燃烧$GD，消除业障"')
         }
       </motion.p>
     </div>
