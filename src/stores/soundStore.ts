@@ -4,6 +4,7 @@ interface SoundStore {
   bgmAudio: HTMLAudioElement | null
   isBgmPlaying: boolean
   isMuted: boolean
+  isInitialized: boolean
   initBgm: () => void
   playBgm: () => void
   pauseBgm: () => void
@@ -15,13 +16,18 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
   bgmAudio: null,
   isBgmPlaying: false,
   isMuted: false,
+  isInitialized: false,
 
   initBgm: () => {
+    const { isInitialized, bgmAudio } = get()
+    // 防止重复初始化
+    if (isInitialized && bgmAudio) return
+    
     if (typeof window === 'undefined') return
     const audio = new Audio('/sounds/background.mp3')
     audio.loop = true
     audio.volume = 0.3 // 30% 音量
-    set({ bgmAudio: audio })
+    set({ bgmAudio: audio, isInitialized: true })
   },
 
   playBgm: () => {

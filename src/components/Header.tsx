@@ -5,6 +5,7 @@ import { Trophy, Info, Zap, Flame, Skull } from 'lucide-react'
 import { useThemeStore } from '../stores/themeStore'
 import { useGachaStore } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
+import { MusicToggle } from './MusicToggle'
 
 export const Header: React.FC = () => {
   const { mode } = useThemeStore()
@@ -76,6 +77,9 @@ export const Header: React.FC = () => {
 
         {/* Right section - 手机端简化 */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          {/* 音乐开关 */}
+          <MusicToggle />
+          
           {/* 功德币余额 - 手机端缩小 */}
           <div className={`
             flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium
