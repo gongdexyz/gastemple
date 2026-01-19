@@ -183,7 +183,9 @@ export const GachaPage: React.FC = () => {
               ? "赶紧截图发朋友圈！5分钟后可能就只剩回忆了。"
               : "居然还行？但记住：就算是坏掉的钟，一天也能对两次。"
         
-        const ttsText = `${aiRoast}。佛祖判词：${buddhaVerdict}。逃跑建议：${exitAdvice}`
+        const ttsText = isEN 
+          ? `${aiRoast}. Buddha's Verdict: ${buddhaVerdict}. Exit Strategy: ${exitAdvice}`
+          : `${aiRoast}。佛祖判词：${buddhaVerdict}。逃跑建议：${exitAdvice}`
         speakText(ttsText, isEN ? 'en' : 'zh')
       }, 1500)
     }
