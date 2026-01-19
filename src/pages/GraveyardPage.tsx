@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Skull, Trophy, Lock, Calculator, TrendingUp, TrendingDown, Clock, DollarSign } from 'lucide-react'
+import { Skull, Trophy, Lock, Calculator, TrendingUp, TrendingDown, Clock, DollarSign, Wallet, Loader2, RefreshCw } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Header } from '../components/Header'
 import { GlitchTransition } from '../components/GlitchTransition'
 import { useThemeStore } from '../stores/themeStore'
 import { useLangStore } from '../stores/langStore'
 import { useGachaStore } from '../stores/gachaStore'
+import { useWalletStore } from '../stores/walletStore'
+import { connectPhantomWallet, disconnectPhantomWallet, detectRuggedCoins, RuggedCoin } from '../services/ruggedCoins'
 
 // Famous dead/rugged coins for collection
 const GRAVEYARD_COINS = [
@@ -55,13 +57,66 @@ export const GraveyardPage: React.FC = () => {
   const { mode } = useThemeStore()
   const { lang } = useLangStore()
   const { history } = useGachaStore()
+  const { solanaAddress, solanaConnected, setSolanaWallet } = useWalletStore()
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
 
   // Tab state
   const [activeTab, setActiveTab] = useState<TabType>('graveyard')
+  
+  // 钱包归零币状态
+  const [walletRuggedCoins, setWalletRuggedCoins] = useState<RuggedCoin[]>([])
+  const [isLoadingWallet, setIsLoadingWallet] = useState(false)
+  const [walletError, setWalletError] = useState<string | null>(null)
 
-  // Graveyard state
+  // 连接钱包
+  const handleConnectWallet = async () => {
+    setIsLoadingWallet(true)
+    setWalletError(null)
+    try {
+      const address = await connectPhantomWallet()
+      if (address) {
+        setSolanaWallet(address)
+        // 自动扫描归零币
+        const rugged = await detectRuggedCoins(address)
+        setWalletRuggedCoins(rugged)
+      }
+    } catch (error) {
+      setWalletError(isEN ? 'Failed to connect wallet' : '连接钱包失败')
+    } finally {
+      setIsLoadingWallet(false)
+    }
+  }
+
+  // 断开钱包
+  const handleDisconnectWallet = async () => {
+    await disconnectPhantomWallet()
+    setSolanaWallet(null)
+    setWalletRuggedCoins([])
+  }
+
+  // 刷新归零币
+  const handleRefreshRugged = async () => {
+    if (!solanaAddress) return
+    setIsLoadingWallet(true)
+    try {
+      const rugged = await detectRuggedCoins(solanaAddress)
+      setWalletRuggedCoins(rugged)
+    } catch (error) {
+      setWalletError(isEN ? 'Failed to scan tokens' : '扫描代币失败')
+    } finally {
+      setIsLoadingWallet(false)
+    }
+  }
+
+  // 钱包连接后自动扫描
+  useEffect(() => {
+    if (solanaConnected && solanaAddress && walletRuggedCoins.length === 0) {
+      handleRefreshRugged()
+    }
+  }, [solanaConnected, solanaAddress])
+
+  // Graveyard state - 合并预设币和钱包归零币
   const collectedIds = new Set(history.map(h => h.fortune.coin?.id).filter(Boolean))
   const demoCollected = new Set<string>()
   if (history.length >= 1) demoCollected.add('luna')
@@ -69,7 +124,7 @@ export const GraveyardPage: React.FC = () => {
   if (history.length >= 5) demoCollected.add('squid')
   if (history.length >= 7) demoCollected.add('bitconnect')
   const allCollected = new Set([...collectedIds, ...demoCollected])
-  const collectedCount = allCollected.size
+  const collectedCount = allCollected.size + walletRuggedCoins.length
   const earnedAchievements = ACHIEVEMENTS.filter(a => {
     if (a.special) return allCollected.has(a.special)
     return collectedCount >= (a.required || 0)
@@ -188,12 +243,172 @@ export const GraveyardPage: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
               >
+                {/* 钱包连接区域 */}
+                <div className={`mb-6 p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-purple/30' : 'bg-gray-900/50 border border-goldman-border'}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Wallet className={`w-4 h-4 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold'}`} />
+                      <h2 className={`font-bold ${isDegen ? 'text-degen-cyan font-pixel text-sm' : 'text-goldman-gold'}`}>
+                        {isEN ? 'SCAN YOUR WALLET' : '扫描你的钱包'}
+                      </h2>
+                    </div>
+                    {solanaConnected && (
+                      <button
+                        onClick={handleRefreshRugged}
+                        disabled={isLoadingWallet}
+                        className={`p-1.5 rounded ${isDegen ? 'hover:bg-degen-green/20' : 'hover:bg-gray-700'}`}
+                      >
+                        <RefreshCw className={`w-4 h-4 ${isLoadingWallet ? 'animate-spin' : ''} ${isDegen ? 'text-degen-green' : 'text-gray-400'}`} />
+                      </button>
+                    )}
+                  </div>
+                  
+                  {!solanaConnected ? (
+                    <button
+                      onClick={handleConnectWallet}
+                      disabled={isLoadingWallet}
+                      className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${
+                        isDegen 
+                          ? 'bg-gradient-to-r from-degen-purple to-degen-cyan text-black hover:opacity-90' 
+                          : 'bg-gradient-to-r from-goldman-gold to-amber-500 text-black hover:opacity-90'
+                      } ${isLoadingWallet ? 'opacity-50' : ''}`}
+                    >
+                      {isLoadingWallet ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          {isEN ? 'Connecting...' : '连接中...'}
+                        </>
+                      ) : (
+                        <>
+                          <Wallet className="w-4 h-4" />
+                          {isEN ? 'Connect Phantom Wallet' : '连接 Phantom 钱包'}
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <span className={`text-xs ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                            {solanaAddress?.slice(0, 4)}...{solanaAddress?.slice(-4)}
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleDisconnectWallet}
+                          className="text-xs text-gray-500 hover:text-red-400"
+                        >
+                          {isEN ? 'Disconnect' : '断开'}
+                        </button>
+                      </div>
+                      
+                      {isLoadingWallet && (
+                        <div className="flex items-center justify-center gap-2 py-4">
+                          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                          <span className="text-sm text-gray-400">
+                            {isEN ? 'Scanning for rugged coins...' : '正在扫描归零币...'}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {walletError && (
+                        <div className="text-center text-red-400 text-sm py-2">
+                          {walletError}
+                        </div>
+                      )}
+                      
+                      {!isLoadingWallet && walletRuggedCoins.length === 0 && (
+                        <div className="text-center py-4">
+                          <div className="text-2xl mb-2">🎉</div>
+                          <p className={`text-sm ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                            {isEN ? 'No rugged coins found! You\'re clean!' : '没有发现归零币！你很干净！'}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {walletRuggedCoins.length > 0 && (
+                        <div className="text-center py-2">
+                          <p className={`text-sm ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>
+                            {isEN 
+                              ? `Found ${walletRuggedCoins.length} rugged coin(s) in your wallet!` 
+                              : `在你的钱包中发现了 ${walletRuggedCoins.length} 个归零币！`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 钱包归零币墓碑 */}
+                {walletRuggedCoins.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className={`text-sm font-bold mb-3 flex items-center gap-2 ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>
+                      <Skull className="w-4 h-4" />
+                      {isEN ? 'YOUR RUGGED COINS' : '你的归零币'}
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {walletRuggedCoins.map((coin, i) => (
+                        <motion.div
+                          key={coin.mint}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.05 * i }}
+                          className={`relative p-4 rounded-lg text-center ${
+                            isDegen ? 'bg-red-900/30 border-2 border-red-500/50' : 'bg-red-900/20 border border-red-500/30'
+                          }`}
+                        >
+                          {/* Tombstone */}
+                          <div className="relative mx-auto w-20 h-24">
+                            <div className="absolute inset-0 rounded-t-full bg-gradient-to-b from-gray-600 to-gray-800">
+                              <div className="pt-3 text-center">
+                                <span className="text-red-400 text-xs font-bold">R.I.P.</span>
+                              </div>
+                              <div className="mt-1 text-lg font-bold text-white">
+                                {coin.symbol}
+                              </div>
+                              <div className="mt-1 text-[8px] text-gray-400">{coin.deathDate}</div>
+                            </div>
+                            <div className="absolute -bottom-1 left-0 right-0 h-3 bg-gradient-to-t from-red-900/50 to-transparent rounded" />
+                          </div>
+
+                          <div className={`mt-3 text-xs font-bold ${isDegen ? 'text-red-400' : 'text-red-300'}`}>
+                            {coin.name}
+                          </div>
+
+                          <div className="mt-2 space-y-1">
+                            <div className="flex justify-between text-[10px]">
+                              <span className="text-gray-500">{isEN ? 'Balance:' : '余额:'}</span>
+                              <span className="text-gray-300">{coin.balance.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-[10px]">
+                              <span className="text-gray-500">{isEN ? 'Value:' : '价值:'}</span>
+                              <span className="text-red-400">${coin.currentValue.toFixed(6)}</span>
+                            </div>
+                          </div>
+
+                          <div className={`mt-2 text-[10px] italic ${isDegen ? 'text-gray-400' : 'text-gray-500'}`}>
+                            "{isEN ? coin.epitaphEN : coin.epitaph}"
+                          </div>
+
+                          <motion.div
+                            className="absolute -top-2 right-2 text-lg"
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
+                            🕯️
+                          </motion.div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Achievements */}
                 <div className={`mb-6 p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-purple/30' : 'bg-gray-900/50 border border-goldman-border'}`}>
                   <div className="flex items-center gap-2 mb-3">
                     <Trophy className={`w-4 h-4 ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`} />
                     <h2 className={`font-bold ${isDegen ? 'text-degen-yellow font-pixel text-sm' : 'text-goldman-gold'}`}>
-                      {isEN ? 'ACHIEVEMENTS' : '成就'} ({collectedCount}/{GRAVEYARD_COINS.length})
+                      {isEN ? 'ACHIEVEMENTS' : '成就'} ({collectedCount}/{GRAVEYARD_COINS.length + walletRuggedCoins.length})
                     </h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
