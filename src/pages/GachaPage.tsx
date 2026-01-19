@@ -86,7 +86,7 @@ const HALL_OF_SHAME = [
 export const GachaPage: React.FC = () => {
   const { lang } = useLangStore()
   const { draw, dailyDraws, gdBalance, history } = useGachaStore()
-  const { playSound } = useSoundStore()
+  const { playSound, speakText } = useSoundStore()
   const [stage, setStage] = useState<'idle' | 'choice' | 'loading' | 'result'>('idle')
   const [selectedChoice, setSelectedChoice] = useState<string>('')
   const [currentResult, setCurrentResult] = useState<GachaResult | null>(null)
@@ -143,6 +143,13 @@ export const GachaPage: React.FC = () => {
       setTimeout(() => {
         setStage('result')
         playSound('text') // 结果出现时打字音效
+        
+        // TTS朗读佛祖判词和逃跑建议
+        const fortune = result.fortune
+        const roast = isEN ? fortune.messageEN : fortune.message
+        const advice = isEN ? fortune.adviceEN : fortune.advice
+        const ttsText = `${roast}。${advice}`
+        speakText(ttsText, isEN ? 'en' : 'zh')
       }, 1500)
     }
   }

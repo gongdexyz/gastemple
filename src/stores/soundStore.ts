@@ -1,10 +1,8 @@
 import { create } from 'zustand'
 
 interface SoundStore {
-  bgmAudio: HTMLAudioElement | null
   isBgmPlaying: boolean
   isMuted: boolean
-  isInitialized: boolean
   hasUserInteracted: boolean
   initBgm: () => void
   playBgm: () => void
@@ -12,32 +10,32 @@ interface SoundStore {
   toggleMute: () => void
   playSound: (type: 'roll' | 'text' | 'choose') => void
   setupAutoPlay: () => void
+  speakText: (text: string, lang?: 'zh' | 'en') => void
 }
 
-// 全局标志，防止多个组件重复设置事件监听
+// 全局单例 - 确保只有一个背景音乐实例
+let bgmAudio: HTMLAudioElement | null = null
+let bgmInitialized = false
 let autoPlaySetup = false
 
 export const useSoundStore = create<SoundStore>((set, get) => ({
-  bgmAudio: null,
   isBgmPlaying: false,
   isMuted: false,
-  isInitialized: false,
   hasUserInteracted: false,
 
   initBgm: () => {
-    const { isInitialized, bgmAudio } = get()
-    // 防止重复初始化
-    if (isInitialized && bgmAudio) return
+    // 使用全局单例，防止重复创建
+    if (bgmInitialized) return
+    bgmInitialized = true
     
     if (typeof window === 'undefined') return
-    const audio = new Audio('/sounds/background.mp3')
-    audio.loop = true
-    audio.volume = 0.3 // 30% 音量
-    set({ bgmAudio: audio, isInitialized: true })
+    bgmAudio = new Audio('/sounds/background.mp3')
+    bgmAudio.loop = true
+    bgmAudio.volume = 0.3 // 30% 音量
   },
 
   playBgm: () => {
-    const { bgmAudio, isMuted, isBgmPlaying } = get()
+    const { isMuted, isBgmPlaying } = get()
     // 防止重复播放
     if (isBgmPlaying) return
     if (bgmAudio && !isMuted) {
@@ -47,7 +45,6 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
   },
 
   pauseBgm: () => {
-    const { bgmAudio } = get()
     if (bgmAudio) {
       bgmAudio.pause()
       set({ isBgmPlaying: false })
@@ -55,7 +52,7 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
   },
 
   toggleMute: () => {
-    const { isMuted, bgmAudio, isBgmPlaying } = get()
+    const { isMuted, isBgmPlaying } = get()
     const newMuted = !isMuted
     set({ isMuted: newMuted })
     
@@ -101,5 +98,22 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
     
     document.addEventListener('click', handleFirstInteraction)
     document.addEventListener('touchstart', handleFirstInteraction)
+  },
+
+  speakText: (text: string, lang: 'zh' | 'en' = 'zh') => {
+    const { isMuted } = get()
+    if (isMuted) return
+    if (typeof window === 'undefined' || !window.speechSynthesis) return
+
+    // 取消之前的朗读
+    window.speechSynthesis.cancel()
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = lang === 'zh' ? 'zh-CN' : 'en-US'
+    utterance.rate = 1.0
+    utterance.pitch = 1.0
+    utterance.volume = 0.8
+
+    window.speechSynthesis.speak(utterance)
   },
 }))
