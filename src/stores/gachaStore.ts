@@ -39,6 +39,13 @@ interface GachaState {
 const MAX_FREE_DRAWS = 1
 const DRAW_COST_GD = 100
 
+// 检查是否为测试模式 - URL带 ?test=gongde 即可无限余额
+const isTestMode = () => {
+  if (typeof window === 'undefined') return false
+  const params = new URLSearchParams(window.location.search)
+  return params.get('test') === 'gongde'
+}
+
 export const useGachaStore = create<GachaState>()(
   persist(
     (set, get) => ({
@@ -65,8 +72,8 @@ export const useGachaStore = create<GachaState>()(
         const currentDailyDraws = state.lastDrawDate !== today ? 0 : state.dailyDraws
         const isFree = currentDailyDraws < MAX_FREE_DRAWS
         
-        // 如果不是免费的，检查功德币
-        if (!isFree && state.gdBalance < DRAW_COST_GD) {
+        // 如果不是免费的，检查功德币（测试模式跳过）
+        if (!isFree && state.gdBalance < DRAW_COST_GD && !isTestMode()) {
           return null // 余额不足
         }
 
@@ -97,7 +104,9 @@ export const useGachaStore = create<GachaState>()(
           currentResult: result,
           dailyDraws: state.dailyDraws + 1,
           totalDraws: state.totalDraws + 1,
-          gdBalance: (isFree ? state.gdBalance : state.gdBalance - DRAW_COST_GD) + gdEarned,
+          gdBalance: isTestMode() 
+            ? 999999 // 测试模式保持无限余额
+            : (isFree ? state.gdBalance : state.gdBalance - DRAW_COST_GD) + gdEarned,
           history: [result, ...state.history].slice(0, 50),
         }))
         
