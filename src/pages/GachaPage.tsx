@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Printer, Flame, Trophy, Info } from 'lucide-react'
+import { Printer, Flame, Trophy, Info, Volume2, VolumeX } from 'lucide-react'
 import { useGachaStore, GachaResult } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
+import { useSoundStore } from '../stores/soundStore'
 import { ReceiptModal } from '../components/ReceiptModal'
 import { InactivityToast } from '../components/InactivityToast'
 import { PaymentConfirmDialog } from '../components/PaymentConfirmDialog'
@@ -84,6 +85,7 @@ const HALL_OF_SHAME = [
 export const GachaPage: React.FC = () => {
   const { lang } = useLangStore()
   const { draw, dailyDraws, gdBalance, history } = useGachaStore()
+  const { initBgm, playBgm, isMuted, toggleMute, playSound } = useSoundStore()
   const [stage, setStage] = useState<'idle' | 'choice' | 'loading' | 'result'>('idle')
   const [selectedChoice, setSelectedChoice] = useState<string>('')
   const [currentResult, setCurrentResult] = useState<GachaResult | null>(null)
@@ -98,6 +100,21 @@ export const GachaPage: React.FC = () => {
   const RESPONSES = isEN ? RESPONSES_EN : RESPONSES_CN
   const freeDrawsLeft = Math.max(0, 1 - dailyDraws)
   const randomQuiz = QUIZ_QUESTIONS[Math.floor(Math.random() * QUIZ_QUESTIONS.length)]
+
+  // 初始化背景音乐
+  useEffect(() => {
+    initBgm()
+  }, [initBgm])
+
+  // 用户交互后播放背景音乐
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      playBgm()
+      document.removeEventListener('click', handleFirstInteraction)
+    }
+    document.addEventListener('click', handleFirstInteraction)
+    return () => document.removeEventListener('click', handleFirstInteraction)
+  }, [playBgm])
 
   const handleStart = () => {
     if (freeDrawsLeft === 0 && gdBalance < 100) {
@@ -130,12 +147,17 @@ export const GachaPage: React.FC = () => {
 
   const handleChoice = async (choice: string) => {
     setSelectedChoice(choice)
+    playSound('choose') // 选择音效
     setStage('loading')
+    playSound('roll') // 滚动音效
     
     const result = await draw()
     if (result) {
       setCurrentResult(result)
-      setTimeout(() => setStage('result'), 1500)
+      setTimeout(() => {
+        setStage('result')
+        playSound('text') // 结果出现时打字音效
+      }, 1500)
     }
   }
 
@@ -195,12 +217,21 @@ export const GachaPage: React.FC = () => {
               </Link>
             ))}
           </div>
-          <button
-            onClick={() => useLangStore.getState().toggleLang()}
-            className="px-2 py-1 text-xs border border-gray-700 rounded hover:border-yellow-400 hover:text-yellow-400 transition-colors"
-          >
-            {isEN ? '🇺🇸 EN' : '🇨🇳 中文'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={toggleMute}
+              className="px-2 py-1 text-xs border border-gray-700 rounded hover:border-[#00ff41] hover:text-[#00ff41] transition-colors"
+              title={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={() => useLangStore.getState().toggleLang()}
+              className="px-2 py-1 text-xs border border-gray-700 rounded hover:border-yellow-400 hover:text-yellow-400 transition-colors"
+            >
+              {isEN ? '🇺🇸 EN' : '🇨🇳 中文'}
+            </button>
+          </div>
         </nav>
 
         {/* LOGO */}
