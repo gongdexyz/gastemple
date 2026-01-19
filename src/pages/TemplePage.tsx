@@ -43,11 +43,11 @@ export const TemplePage: React.FC = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h1 className={`text-2xl font-bold flex items-center justify-center gap-2 ${isDegen ? 'text-degen-green font-pixel text-xl neon-text' : 'text-goldman-gold'}`}>
-              <Flame className="w-6 h-6" />
+            <h1 className={`text-3xl font-bold flex items-center justify-center gap-2 ${isDegen ? 'text-degen-green font-pixel text-2xl neon-text' : 'text-goldman-gold'}`}>
+              <Flame className="w-7 h-7" />
               {isEN ? 'BURN TEMPLE 🔥' : '功德殿'}
             </h1>
-            <p className={`text-sm mt-1 ${isDegen ? 'text-degen-cyan' : 'text-gray-500'}`}>
+            <p className={`text-base mt-1 ${isDegen ? 'text-degen-cyan' : 'text-gray-500'}`}>
               {isEN ? 'BURN $GD TO STACK KARMA' : '燃烧 $GD，积累功德'}
             </p>
           </motion.div>

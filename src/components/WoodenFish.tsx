@@ -212,7 +212,7 @@ export const WoodenFish: React.FC = () => {
     // 触发震动
     triggerVibration()
     setIsAnimating(true)
-    setTimeout(() => setIsAnimating(false), 150)
+    setTimeout(() => setIsAnimating(false), 800)
 
     // 根据combo选择文案：combo > 5 进入暴走模式
     const textPool = combo > 5 ? RAGE_TEXTS : NORMAL_TEXTS
@@ -259,16 +259,16 @@ export const WoodenFish: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-8">
+    <div className="flex flex-col items-center justify-center py-2">
       {/* 功德计数器 */}
       <div className={`text-center mb-6 ${isDegen ? 'font-pixel' : ''}`}>
         <div className={`text-5xl font-bold mb-2 ${isDegen ? 'text-degen-yellow neon-text' : 'text-goldman-gold'}`}>
           {totalMerits.toLocaleString()}
         </div>
-        <div className={`text-sm ${isDegen ? 'text-degen-green' : 'text-gray-400'}`}>
-          功德 Merit
+        <div className={`text-base ${isDegen ? 'text-degen-green' : 'text-gray-400'}`}>
+          {isEN ? 'Merit' : '功德 Merit'}
         </div>
-        <div className={`text-xs mt-1 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold/70'}`}>
+        <div className={`text-sm mt-1 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold/70'}`}>
           {getTitle()}
         </div>
         <div className={`text-lg font-bold mt-2 h-7 ${isDegen ? 'text-degen-pink' : 'text-orange-400'}`}>
@@ -309,11 +309,18 @@ export const WoodenFish: React.FC = () => {
               }
             `}
           >
-          {/* 木鱼图片 - 用CSS动画代替GIF切换避免闪烁 */}
+          {/* 静态图 - 始终存在，点击时隐藏 */}
           <img 
             src="/muyu-static.gif"
             alt={isEN ? "Wooden Fish" : "木鱼"}
-            className={`w-44 h-44 object-cover rounded-full select-none transition-transform duration-100 ${isAnimating ? 'scale-95' : 'scale-100'}`}
+            className={`w-44 h-44 object-cover rounded-full select-none absolute inset-0 m-auto transition-opacity duration-75 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
+            draggable={false}
+          />
+          {/* 动态GIF - 始终存在，点击时显示 */}
+          <img 
+            src="/muyu.gif"
+            alt={isEN ? "Wooden Fish Animation" : "木鱼动画"}
+            className={`w-44 h-44 object-cover rounded-full select-none transition-opacity duration-75 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}
             draggable={false}
           />
           
@@ -446,14 +453,14 @@ export const WoodenFish: React.FC = () => {
       </div>
 
       {/* 操作提示 - 紧跟木鱼下方 */}
-      <div className={`text-center ${isDegen ? 'font-pixel text-xs' : 'text-sm'}`}>
+      <div className={`text-center ${isDegen ? 'font-pixel text-sm' : 'text-base'}`}>
         <p className={isDegen ? 'text-degen-green' : 'text-gray-400'}>
           {clickTargets.length > 0 
             ? (isEN ? 'CATCH THE CIRCLE! ⭕' : '快点圈圈！')
             : (isEN ? 'CLICK THE FROG TO START 🐸' : '点击蛙蛙开始')
           }
         </p>
-        <p className={`mt-1 ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
+        <p className={`mt-1 text-base ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {isEN ? `Cost: ${burnCost} $GD each` : `每次消耗 ${burnCost} $GD`}
         </p>
       </div>
@@ -471,7 +478,7 @@ export const WoodenFish: React.FC = () => {
 
       {/* Slogan */}
       <motion.p 
-        className={`mt-8 text-center italic ${isDegen ? 'text-degen-cyan font-pixel text-xs' : 'text-gray-500 text-sm'}`}
+        className={`mt-8 text-center italic ${isDegen ? 'text-degen-cyan font-pixel text-sm' : 'text-gray-500 text-base'}`}
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 3, repeat: Infinity }}
       >
