@@ -208,43 +208,132 @@ export function getPonziLabel(level: number, isEN: boolean) {
   return labels.extreme
 }
 
-// 基于真实数据生成毒舌辣评
+// 佛系毒舌文案库 - 先夸后阴阳怪气+佛祖金句补刀
+const BUDDHA_ROASTS = {
+  // 小涨专用 (5%-15%) - 边夸边吐槽
+  smallPump: {
+    cn: [
+      "善哉善哉！这小币种今日小涨{change}%，像个刚学会走路的娃娃，终于迈出第一步了。庄家轻轻推了一把，它就摇摇晃晃地站起来了，可喜可贺～",
+      "阿弥陀佛！涨了{change}%，简直是佛祖今天心情好，随手撒了点功德雨。它现在像个刚学会飞的小鸟，扑腾扑腾飞起来了……但佛祖提醒：小鸟飞太高容易被风吹秃毛。",
+      "善哉！涨了{change}%，真是可喜可贺～它终于从空气里爬出来了一点点，像个努力的小学生考了60分，庄家都忍不住给它鼓掌了。继续加油哦，佛祖看好你！",
+      "善哉！今日小涨{change}%，技术面出现罕见的'小阳线'，基本面出现罕见的'有点氧气'，庄家今天心情不错，没急着跑路。恭喜施主抽到一只'活着的空气币'。",
+      "善哉！小涨{change}%，像个乖宝宝终于肯吃饭了，妈妈好感动～但佛祖提醒：乖宝宝长大后也可能叛逆哦。",
+    ],
+    en: [
+      "Blessed be! Up {change}% today, like a baby learning to walk - finally took its first step! The market maker gave it a little push, and it wobbled up. How touching~",
+      "Amitabha! Up {change}%, Buddha must be in a good mood today, sprinkling some merit rain. It's like a baby bird learning to fly... but Buddha reminds: fly too high and you might lose your feathers.",
+      "Blessed! Up {change}%, finally crawled out of the air a little bit, like a hardworking student who scored 60 points. Even the market maker applauded. Keep it up, Buddha believes in you!",
+    ]
+  },
+  // 暴涨专用 (>15%) - 先捧后警告
+  bigPump: {
+    cn: [
+      "佛祖显灵！暴涨{change}%！简直是佛祖今天心情大好，随手赏了它一口仙气。感动得贫僧都想落泪了……但记住：涨得快是佛祖在提醒你——该跑了。",
+      "阿弥陀佛！{change}%的涨幅！这是要飞升渡劫了吗？恭喜施主解锁成就「纸面富贵」。但佛祖提醒：没卖之前都是镜花水月，及时止盈才是正道。",
+      "善哉善哉！暴涨{change}%！庄家今天心情好到爆炸，给你发了个大红包。但佛祖说：涨得慢是修行，涨得快是幻觉。施主莫贪心，及时落袋为安。",
+      "佛光普照！{change}%！这小币种今天像打了鸡血一样往上冲。但佛祖温柔提醒：冲得越高，摔得越惨。建议立即截图发朋友圈炫耀，5分钟后可能就没了。",
+    ],
+    en: [
+      "Buddha's blessing! Up {change}%! Buddha must be in an amazing mood, gifting it some divine energy. So touching... but remember: pumping fast means Buddha is reminding you - time to RUN.",
+      "Amitabha! {change}% pump! Is this ascending to heaven? Congrats on unlocking 'Paper Wealth' achievement. But Buddha says: unrealized gains are just illusions. Take profits, that's the way.",
+      "Blessed! Up {change}%! Market maker is feeling generous today. But Buddha reminds: slow gains are practice, fast gains are illusions. Don't be greedy, secure those profits.",
+    ]
+  },
+  // 横盘专用 - 阴阳怪气
+  sideways: {
+    cn: [
+      "这走势比木乃伊的心电图都平。庄家是死了还是把你忘了？佛祖说：横盘是修行，但修太久会成仙（归零）。",
+      "波动率接近0。这币和你的感情生活一样，死水一潭。佛祖提醒：死水里偶尔也会冒泡，但大概率是沼气。",
+      "K线扫描完成：比心电图还平。建议持有者去医院查查自己。佛祖说：平静是福，但太平静就是临终关怀了。",
+      "横盘检测：建议改名「稳定币」。至少听起来体面点。佛祖说：稳定是好事，但稳定在谷底就是另一回事了。",
+    ],
+    en: [
+      "This chart is flatter than a mummy's heartbeat. Is the market maker dead or did they forget you? Buddha says: sideways is practice, but too long and you'll ascend (to zero).",
+      "Volatility near zero. This coin is as dead as your love life. Buddha reminds: still water sometimes bubbles, but it's probably just swamp gas.",
+      "Chart scan complete: flatter than an EKG. Holders should get themselves checked. Buddha says: peace is good, but too peaceful means hospice care.",
+    ]
+  },
+  // 小跌专用 (-5% to -10%)
+  smallDump: {
+    cn: [
+      "跌了{change}%，佛祖说：小跌是考验，大跌是劫难。施主莫慌，这只是佛祖在测试你的信仰。但如果明天还跌……那就是真的劫难了。",
+      "红色K线！跌了{change}%。佛祖说：别人恐惧我贪婪？先等等，看看是不是真的恐惧还是理性逃跑。",
+      "小跌{change}%，庄家今天心情不太好。佛祖提醒：小跌不可怕，可怕的是小跌后面跟着大跌。阿弥陀佛，保重。",
+    ],
+    en: [
+      "Down {change}%. Buddha says: small dips are tests, big dumps are disasters. Don't panic, Buddha is just testing your faith. But if it dumps again tomorrow... that's a real disaster.",
+      "Red candle! Down {change}%. Buddha says: be greedy when others are fearful? Wait and see if it's real fear or rational fleeing.",
+    ]
+  },
+  // 暴跌专用 (<-10%)
+  bigDump: {
+    cn: [
+      "暴跌{change}%！这不是回调，这是跳楼。佛祖说：跌了90%还有90%可以跌，下跌空间充足。建议留着当传家宝，传给孙子维权。",
+      "阿弥陀佛！暴跌{change}%！佛祖说：把App颜色反转一下，这样看起来像在涨。心理安慰也是一种修行。",
+      "善哉！跌了{change}%。佛祖说：「价值投资」模式已激活。翻译：套牢了不想割。施主，放下执念，及时止损才是正道。",
+      "暴跌{change}%！佛祖说：抄底成功！恭喜你精准抄在了半山腰。山脚还远着呢，继续加油。",
+    ],
+    en: [
+      "DOWN {change}%! This isn't a dip, it's a cliff dive. Buddha says: down 90% still has 90% more to go. Keep it as a family heirloom for your grandkids to sue over.",
+      "Amitabha! Down {change}%! Buddha says: invert your app colors, it'll look like it's pumping. Mental comfort is also a form of practice.",
+      "Blessed! Down {change}%. Buddha says: 'Value investing' mode activated. Translation: bagholder in denial. Let go of attachment, cut losses is the way.",
+    ]
+  },
+  // 低排名补刀
+  lowRankRoast: {
+    cn: [
+      "排名#{rank}...连山寨中的山寨都看不起这排名。狗都不买。",
+      "排名#{rank}，这种垃圾涨1000%才能上桌。",
+      "排名#{rank}，CoinGecko都准备把它删了。",
+    ],
+    en: [
+      "Rank #{rank}... even shitcoins look down on this ranking.",
+      "Rank #{rank}, needs a 1000% pump just to matter.",
+      "Rank #{rank}, CoinGecko is about to delete it.",
+    ]
+  }
+}
+
+// 基于真实数据生成毒舌辣评 - 佛系阴阳怪气风格
 function generateRoast(coin: CoinData, _level: FortuneLevel, isEN: boolean): string {
   const change = coin.price_change_percentage_24h || 0
   const mcap = coin.market_cap || 0
   const rank = coin.market_cap_rank || 9999
   
+  // 判断基本面是否垃圾（低排名或低市值）
+  const isShitcoin = rank > 500 || mcap < 10000000
   const lang = isEN ? 'en' : 'cn'
-  let pool: string[] = []
   
-  // 根据数据选择辣评池 - 涨跌优先判断
+  let pool: string[]
+  let roast: string
+  
+  // 根据涨跌选择文案池
   if (change > 15) {
-    // 暴涨优先
-    pool = ROAST_TEMPLATES.bigPump[lang]
+    pool = BUDDHA_ROASTS.bigPump[lang]
   } else if (change > 5) {
-    // 小涨
-    pool = ROAST_TEMPLATES.smallPump[lang]
+    pool = BUDDHA_ROASTS.smallPump[lang]
   } else if (change < -10) {
-    // 暴跌
-    pool = ROAST_TEMPLATES.bigDump[lang]
+    pool = BUDDHA_ROASTS.bigDump[lang]
   } else if (change < -5) {
-    // 小跌 - 用低市值或低排名的吐槽
-    if (mcap < 10000000) {
-      pool = ROAST_TEMPLATES.lowMcap[lang]
-    } else if (rank > 500) {
-      pool = ROAST_TEMPLATES.lowRank[lang]
-    } else {
-      pool = ROAST_TEMPLATES.bigDump[lang]
-    }
-  } else if (Math.abs(change) < 5) {
-    // 横盘
-    pool = ROAST_TEMPLATES.sideways[lang]
+    pool = BUDDHA_ROASTS.smallDump[lang]
   } else {
-    pool = ROAST_TEMPLATES.sideways[lang]
+    pool = BUDDHA_ROASTS.sideways[lang]
   }
   
-  // 随机选一条
-  return pool[Math.floor(Math.random() * pool.length)]
+  // 随机选一条并替换变量
+  roast = pool[Math.floor(Math.random() * pool.length)]
+  roast = roast.replace('{change}', Math.abs(change).toFixed(1))
+  roast = roast.replace('{rank}', rank.toString())
+  
+  // 如果是垃圾币且在涨，追加低排名补刀
+  if (isShitcoin && change > 0) {
+    const rankRoasts = BUDDHA_ROASTS.lowRankRoast[lang]
+    const rankRoast = rankRoasts[Math.floor(Math.random() * rankRoasts.length)]
+      .replace('{rank}', rank.toString())
+    roast += ' ' + rankRoast
+  }
+  
+  return roast
 }
 
 // Generate fortune based on multi-chain small coins
