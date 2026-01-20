@@ -399,10 +399,28 @@ const BUDDHA_ROASTS = {
       "跌了{change}%，佛祖说：小跌是考验，大跌是劫难。施主莫慌，这只是佛祖在测试你的信仰。但如果明天还跌……那就是真的劫难了。ATH已经跌了{athDrop}%，你还在等什么？",
       "红色K线！跌了{change}%。佛祖说：别人恐惧我贪婪？先等等，看看是不是真的恐惧还是理性逃跑。ATH跌了{athDrop}%，这恐惧看起来挺理性的。",
       "小跌{change}%，庄家今天心情不太好。佛祖提醒：小跌不可怕，可怕的是小跌后面跟着大跌。ATH跌了{athDrop}%，阿弥陀佛，保重。",
+      // 3.0 扩充版
+      "🤖 跌了{change}%，贫僧观此币，正在进行「战略性回调」。翻译：庄家在出货。ATH跌了{athDrop}%，你是接盘侠，不是抄底王。",
+      "🏛️ -{change}%！项目方说「这是健康回调」。佛祖说：「健康个屁，这是慢性死亡。」ATH跌了{athDrop}%，别被PUA了。",
+      "🪷 小跌{change}%，佛祖说：「温水煮青蛙，青蛙不知死。」你就是那只青蛙，水温正在上升。ATH跌了{athDrop}%。",
+      "跌了{change}%？群里有人喊「加仓抄底」。佛祖说：「他加的是空气，你加的是真金白银。」ATH跌了{athDrop}%，清醒点。",
+      "🤖 监测到「阴跌」信号！-{change}%看起来不多，但ATH已经跌了{athDrop}%。这叫「钝刀子割肉」，疼但不致命，直到你发现肉没了。",
+      "🏛️ 跌了{change}%，KOL说「逢低买入」。佛祖说：「他逢低卖出，你逢低买入。」ATH跌了{athDrop}%，谁是韭菜一目了然。",
+      "🪷 -{change}%的跌幅，佛祖说：「这是给你的警告，不是给你的机会。」ATH跌了{athDrop}%，再不跑就来不及了。",
+      "小跌{change}%？佛祖说：「小跌是大跌的预告片。」ATH跌了{athDrop}%，预告片都这么惨，正片你敢看吗？",
     ],
     en: [
       "Down {change}%. Buddha says: small dips are tests, big dumps are disasters. Don't panic, Buddha is testing your faith. But if it dumps tomorrow... that's real disaster. ATH down {athDrop}%.",
       "Red candle! Down {change}%. Buddha says: be greedy when others are fearful? Wait - is this real fear or rational fleeing? ATH down {athDrop}%, this fear looks pretty rational.",
+      // 3.0 扩充版
+      "🤖 Down {change}%, Buddha sees a 'strategic pullback'. Translation: market maker is dumping. ATH down {athDrop}%, you're the bag holder, not the bottom fisher.",
+      "🏛️ -{change}%! Team says 'healthy correction'. Buddha says: 'Healthy my ass, this is slow death.' ATH down {athDrop}%, don't get PUA'd.",
+      "🪷 Down {change}%, Buddha says: 'Boiling frog doesn't know it's dying.' You're the frog, water's heating up. ATH down {athDrop}%.",
+      "Down {change}%? Someone in the group shouting 'buy the dip'. Buddha says: 'He's buying air, you're buying with real money.' ATH down {athDrop}%, wake up.",
+      "🤖 'Slow bleed' signal detected! -{change}% looks small, but ATH down {athDrop}%. This is 'death by a thousand cuts' - doesn't kill you until you're out of flesh.",
+      "🏛️ Down {change}%, KOL says 'buy low'. Buddha says: 'He sells low, you buy low.' ATH down {athDrop}%, who's the leek is obvious.",
+      "🪷 -{change}% dip, Buddha says: 'This is a warning, not an opportunity.' ATH down {athDrop}%, run before it's too late.",
+      "Small dip {change}%? Buddha says: 'Small dips are trailers for big dumps.' ATH down {athDrop}%, trailer's this bad, dare to watch the movie?",
     ]
   },
   // 📉 功德圆满版（暴跌/归零）- 反向夸奖
@@ -410,33 +428,69 @@ const BUDDHA_ROASTS = {
     cn: [
       // 2.0 素质放下版
       "🤖 恭喜施主！贺喜施主！监测到您的资产正在进行「物理因果律消除」（-{change}%）。这一根大红柱子插下来，直接帮您消除了半辈子的业障。钱没了可以再赚，脑子没了就真没办法了。ATH跌了{athDrop}%！",
-      "🏛️ 暴跌{change}%！代币模型：环保降解型代币。从空气中来，回空气中去。跑路难度：跑什么？链上池子都干了，这就是「终点」。项目定位：📍由于经费不足，该项目定位已无法显示。",
       "🪷 我不入地狱，谁入地狱？施主以一人之肉，喂饱了庄家全家。大慈大悲，功德无量！ATH跌了{athDrop}%，施主已立地成佛！🔮 今日宜：吃斋念佛 | 忌：上天台",
       // 1.0 经典版
       "暴跌{change}%！ATH跌了{athDrop}%！佛祖说：跌了90%还有90%可以跌，下跌空间充足。没事，换个币接着亏...划掉...接着抽！建议留着当传家宝，传给孙子维权。",
       "阿弥陀佛！暴跌{change}%！ATH跌了{athDrop}%。佛祖说：把App颜色反转一下，这样看起来像在涨。心理安慰也是一种修行。",
       "善哉！跌了{change}%，距ATH跌了{athDrop}%。佛祖说：「价值投资」模式已激活。翻译：套牢了不想割。施主，放下执念吧。",
       "暴跌{change}%！历史高点跌了{athDrop}%。佛祖说：抄底成功！恭喜你精准抄在了半山腰。山脚还远着呢，继续加油。",
+      // 3.0 扩充版
+      "🤖 暴跌{change}%！贫僧观此币，已入「涅槃」状态。ATH跌了{athDrop}%，建议：点一炷香，送它最后一程。",
+      "🏛️ -{change}%！项目方推特已删，TG群已解散，官网显示404。ATH跌了{athDrop}%，这不是跌，这是「物理消失」。",
+      "🪷 暴跌{change}%！佛祖说：「钱是身外之物，失去了反而轻松。」ATH跌了{athDrop}%，恭喜你获得了「财务自由」——没钱可亏了。",
+      "跌了{change}%？项目方说「我们还在」。翻译：「我们还没跑完」。ATH跌了{athDrop}%，等他们跑完就彻底归零了。",
+      "🤖 监测到「自由落体」信号（-{change}%）！ATH跌了{athDrop}%，这不是下跌，这是「跳楼大甩卖」——卖的是你。",
+      "🏛️ 暴跌{change}%！佛祖说：「放下执念，方得解脱。」这币已经帮你放下了，你解脱了吗？ATH跌了{athDrop}%。",
+      "🪷 -{change}%！恭喜施主解锁成就「归零先锋」！ATH跌了{athDrop}%，你的投资已经完成了它的历史使命——归零。",
+      "暴跌{change}%！佛祖说：「这币和你的缘分尽了。」ATH跌了{athDrop}%，缘起缘灭，一切随缘。阿弥陀佛。",
     ],
     en: [
       "🤖 Congrats! Detected your assets undergoing 'physical causality elimination' (-{change}%). This red candle just cleared half your life's karma. Money can be re-earned, brains can't. ATH down {athDrop}%!",
-      "🏛️ Down {change}%! Token model: eco-degradable token. From air it came, to air it returns. Exit difficulty: exit what? Pool's dry, this IS the end. Location: 📍Due to budget cuts, location unavailable.",
       "🪷 If not me, who enters hell? You fed the market maker's whole family with your flesh. Great mercy, infinite merit! ATH down {athDrop}%, you've achieved Buddhahood! 🔮 Today: pray | Avoid: rooftops",
       "Down {change}%! ATH down {athDrop}%! Buddha says: down 90% still has 90% to go. It's ok, try another coin to lose... I mean... to draw!",
       "Amitabha! Down {change}%! ATH down {athDrop}%. Buddha says: invert your app colors, it'll look like it's pumping. Mental comfort is also a form of practice.",
+      // 3.0 扩充版
+      "🤖 Down {change}%! This coin has entered 'Nirvana'. ATH down {athDrop}%, suggestion: light some incense, send it off properly.",
+      "🏛️ -{change}%! Team Twitter deleted, TG disbanded, website 404. ATH down {athDrop}%, this isn't dumping, this is 'physical disappearance'.",
+      "🪷 Down {change}%! Buddha says: 'Money is external, losing it sets you free.' ATH down {athDrop}%, congrats on 'financial freedom' - nothing left to lose.",
+      "Down {change}%? Team says 'we're still here'. Translation: 'we haven't finished running yet.' ATH down {athDrop}%, when they're done running, it's zero.",
+      "🤖 'Free fall' signal detected (-{change}%)! ATH down {athDrop}%, this isn't dumping, this is 'clearance sale' - and you're the product.",
+      "🏛️ Down {change}%! Buddha says: 'Let go of attachment, find liberation.' This coin let go for you. Are you liberated? ATH down {athDrop}%.",
+      "🪷 -{change}%! Congrats on unlocking 'Zero Pioneer' achievement! ATH down {athDrop}%, your investment has completed its mission - going to zero.",
+      "Down {change}%! Buddha says: 'Your fate with this coin has ended.' ATH down {athDrop}%, karma comes and goes. Amitabha.",
     ]
   },
   // 低排名补刀
   lowRankRoast: {
     cn: [
       "排名#{rank}...群主正在闲鱼卖二手电瓶车筹集拉盘资金。",
-      "排名#{rank}，项目定位：📍缅北电诈园区VIP中转站。风景很好，进来就别想出去了。",
       "排名#{rank}，CoinGecko都准备把它删了。连山寨中的山寨都看不起这排名。",
+      // 3.0 扩充版
+      "排名#{rank}...项目方正在研究如何把「跑路」包装成「战略转型」。",
+      "排名#{rank}，市值约等于项目方上个月的外卖开销。",
+      "排名#{rank}...连CoinGecko的实习生都懒得更新这个币的信息了。",
+      "排名#{rank}...这排名比你的信用评分还低。",
+      "排名#{rank}，流动性约等于你奶奶的养老金。卖出请三思，可能砸穿地板。",
+      "排名#{rank}...项目方TG群人数比排名还少。",
+      "排名#{rank}，佛祖说：「这排名，连我都救不了。」",
+      "排名#{rank}...搜索这个币需要翻到CoinGecko第99页。",
+      "排名#{rank}，项目方正在考虑改名换姓重新发币。",
+      "排名#{rank}...持有这个币的人比项目方的亲戚还少。",
     ],
     en: [
       "Rank #{rank}... dev is selling used scooters on eBay to fund the next pump.",
-      "Rank #{rank}, location: 📍Myanmar scam compound VIP lounge. Nice view, no exit.",
       "Rank #{rank}, CoinGecko about to delete it. Even shitcoins look down on this.",
+      // 3.0 扩充版
+      "Rank #{rank}... team is researching how to rebrand 'rug pull' as 'strategic pivot'.",
+      "Rank #{rank}, market cap equals team's last month's food delivery expenses.",
+      "Rank #{rank}... even CoinGecko interns are too lazy to update this coin's info.",
+      "Rank #{rank}... this rank is lower than your credit score.",
+      "Rank #{rank}, liquidity equals your grandma's pension. Selling might crash through the floor.",
+      "Rank #{rank}... project TG group has fewer members than the rank number.",
+      "Rank #{rank}, Buddha says: 'This rank, even I can't save.'",
+      "Rank #{rank}... finding this coin requires scrolling to page 99 on CoinGecko.",
+      "Rank #{rank}, team is considering rebranding and launching a new token.",
+      "Rank #{rank}... fewer people hold this coin than the team's relatives.",
     ]
   }
 }
