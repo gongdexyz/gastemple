@@ -558,7 +558,7 @@ export const GachaPage: React.FC = () => {
                     [ {isEN ? 'AI ROAST' : 'AI 毒舌点评'} ]
                   </h3>
                   <p className="text-sm leading-relaxed text-gray-300">
-                    "{RESPONSES[selectedChoice] || (isEN ? currentResult.fortune.messageEN : currentResult.fortune.message)}"
+                    "{isEN ? currentResult.fortune.messageEN : currentResult.fortune.message}"
                   </p>
                   {/* 查看完整辣评按钮 */}
                   <button
