@@ -83,6 +83,155 @@ const HALL_OF_SHAME = [
   { address: 'Degen_420x', draws: 69, title: '赛博乞丐', titleEN: 'CYBER BEGGAR' },
 ]
 
+// 🪷 佛祖判词文案库
+const BUDDHA_VERDICTS = {
+  // 高风险 (ponziLevel > 70)
+  high: {
+    cn: [
+      "施主，此币与你八字不合。强扭的瓜不仅不甜，还要倒贴手续费。",
+      "贫僧观你印堂发黑，此币乃破财之相。速速远离，否则钱包归零。",
+      "此币业障深重，持有者皆入轮回。施主若执意，贫僧只能为你超度钱包。",
+      "佛祖曰：色即是空，币即是零。施主悟了吗？",
+      "贫僧掐指一算，此币命犯天煞。买入者轻则套牢，重则归零。善哉善哉。",
+      "施主，你与此币有三世孽缘。上辈子你欠它的，这辈子它来收债了。",
+      "此币气场与你相冲，买入必遭反噬。贫僧劝你回头是岸。",
+      "佛祖托梦告诉贫僧：这币的白皮书是用ChatGPT写的，团队照片是AI生成的。",
+    ],
+    en: [
+      "This coin and your wallet have incompatible zodiac signs. Forcing it will cost you gas fees AND dignity.",
+      "I see darkness in your aura. This coin is a wealth-destroyer. Run before your wallet hits zero.",
+      "This coin carries heavy karma. All holders enter the cycle of suffering. Buy it and I'll prepare your wallet's funeral.",
+      "Buddha says: Form is emptiness, coin is zero. Do you understand now?",
+      "I calculated your fate: this coin is cursed. Buyers face either bags or bankruptcy. Amitabha.",
+      "You and this coin have karmic debt from three lifetimes. You owed it before, now it's collecting.",
+      "This coin's energy clashes with yours. Buying will bring retribution. Turn back while you can.",
+      "Buddha told me in a dream: the whitepaper was written by ChatGPT, team photos are AI-generated.",
+    ]
+  },
+  // 中风险 (ponziLevel > 40)
+  medium: {
+    cn: [
+      "贫僧掐指一算，你五行缺金，但这币五行缺德。不配。",
+      "此币尚有一线生机，但施主你的运势...贫僧不敢说。",
+      "佛祖说：这币不是不能买，但买了你就是在给庄家积功德。",
+      "贫僧观此币，有涨有跌，但跌的概率...阿弥陀佛，贫僧不能妄语。",
+      "施主，此币如同渣男。偶尔给你甜头，但最终会让你血本无归。",
+      "贫僧算过了，这币的命格是「先甜后苦」。甜的时候你舍不得卖，苦的时候你卖不掉。",
+      "佛祖曰：贪嗔痴三毒，此币占了俩。施主自己品。",
+      "此币有佛缘，但不是好的那种。是让你看破红尘、四大皆空的那种。",
+    ],
+    en: [
+      "I calculated your fate: You lack gold in your five elements, but this coin lacks morals. Not a match.",
+      "This coin has a slim chance, but your luck... I dare not speak.",
+      "Buddha says: you CAN buy this, but you'd be donating merit to the market makers.",
+      "I see ups and downs for this coin, but the probability of downs... Amitabha, I cannot lie.",
+      "This coin is like a toxic ex. Gives you hope sometimes, but will drain you eventually.",
+      "I calculated: this coin's fate is 'sweet then bitter'. Sweet when you won't sell, bitter when you can't.",
+      "Buddha says: greed, anger, ignorance - this coin has two of three. Figure out which.",
+      "This coin has Buddha's blessing, but not the good kind. The 'see through worldly attachments' kind.",
+    ]
+  },
+  // 低风险 (ponziLevel <= 40)
+  low: {
+    cn: [
+      "放下执念，立地成佛。",
+      "此币尚可，但贫僧提醒：见好就收，莫要贪心。",
+      "佛祖说：这币还行，但你的手...贫僧担心你拿不住。",
+      "难得一见的正经币。但施主，你确定你配得上它吗？",
+      "此币气场尚可，但贫僧观你面相，怕是会在最高点加仓。",
+      "佛祖点头了。但他老人家也说了：涨了别贪，跌了别慌。你能做到吗？",
+      "贫僧破例说句好话：这币不错。但你的操作水平...阿弥陀佛。",
+      "此币有佛光护体，但施主你自带霉运光环，能不能抵消贫僧也不知道。",
+    ],
+    en: [
+      "Let go of attachment, achieve enlightenment.",
+      "This coin is decent, but remember: take profits, don't be greedy.",
+      "Buddha says: coin's fine, but your hands... I worry you can't hold.",
+      "A rare legitimate coin. But are you worthy of it?",
+      "This coin's energy is okay, but looking at your face, you'll probably buy the top.",
+      "Buddha approves. But he also said: don't be greedy when up, don't panic when down. Can you do that?",
+      "I'll say something nice for once: good coin. But your trading skills... Amitabha.",
+      "This coin has Buddha's protection, but you have a bad luck aura. Whether they cancel out, I don't know.",
+    ]
+  }
+}
+
+// 🚨 逃跑建议文案库
+const EXIT_ADVICES = {
+  // 高风险 (ponziLevel > 70)
+  high: {
+    cn: [
+      "快跑！鞋都不要了！赶紧去送两单外卖对冲一下亏损！",
+      "建议立刻清仓，然后删除所有交易App，假装这一切没发生过。",
+      "逃跑路线：先卖币→再卸载App→最后换个手机号重新做人。",
+      "现在跑还来得及。等庄家砸盘的时候，你连哭的机会都没有。",
+      "贫僧给你指条明路：止损→提现→去庙里上柱香谢罪。",
+      "跑！往没有WiFi的地方跑！只要看不到行情，就不算亏！",
+      "建议操作：全部卖出，然后对着镜子说三遍「我再也不冲土狗了」。",
+      "逃生指南：1.卖掉 2.删App 3.告诉自己这是学费 4.下次还敢",
+    ],
+    en: [
+      "RUN! Leave your shoes behind! Go deliver food to hedge your losses!",
+      "Sell everything NOW, delete all trading apps, pretend this never happened.",
+      "Escape route: Sell → Uninstall app → Get a new phone number and start over.",
+      "Run while you can. When the dump comes, you won't even have time to cry.",
+      "Buddha's advice: Stop loss → Withdraw → Light incense at the temple to repent.",
+      "Run to somewhere with no WiFi! If you can't see the charts, you're not losing!",
+      "Recommended action: Sell all, then say 'I'll never ape into shitcoins again' three times in the mirror.",
+      "Escape guide: 1.Sell 2.Delete app 3.Call it tuition 4.Do it again next week",
+    ]
+  },
+  // 中风险 (ponziLevel > 40)
+  medium: {
+    cn: [
+      "赶紧截图发朋友圈！5分钟后可能就只剩回忆了。",
+      "建议设好止盈止损，然后去敲木鱼冷静一下。",
+      "现在是逃跑的好时机。当然，你也可以等跌了再后悔。",
+      "贫僧建议：先卖一半落袋为安，剩下的...随缘吧。",
+      "趁现在还有利润，赶紧跑。等你想跑的时候，可能已经是负的了。",
+      "逃跑窗口期：现在。错过这个村，就没这个店了。",
+      "建议操作：获利了结，然后假装自己是投资大师发个朋友圈。",
+      "贫僧掐指一算，你还有3分钟的逃跑时间。抓紧。",
+    ],
+    en: [
+      "Screenshot your gains NOW. In 5 minutes it might just be a memory.",
+      "Set your stop-loss, then go tap the wooden fish to calm down.",
+      "Good time to exit. Or you can wait and regret later, your choice.",
+      "Buddha suggests: sell half to secure profits, the rest... leave it to fate.",
+      "Run while you're still green. By the time you want to run, you might be deep red.",
+      "Exit window: NOW. Miss this chance and there won't be another.",
+      "Recommended: Take profits, then post on social media pretending you're a trading genius.",
+      "I calculated: you have 3 minutes left to escape. Hurry.",
+    ]
+  },
+  // 低风险 (ponziLevel <= 40)
+  low: {
+    cn: [
+      "居然还行？但记住：就算是坏掉的钟，一天也能对两次。",
+      "可以拿着，但别贪。涨了记得跑，跌了...贫僧帮你念经。",
+      "难得遇到个正经的。但贫僧提醒：你的手可能会毁掉一切。",
+      "暂时不用跑，但随时准备好跑路的姿势。",
+      "佛祖说可以持有。但他也说了，你大概率会在最高点加仓然后套牢。",
+      "不急着跑，但也别太放松。这个圈子，今天的蓝筹明天可能就是空气。",
+      "贫僧破例不催你跑。但设个止盈，别到时候坐过山车。",
+      "可以观望，但记住：币圈一天，人间一年。随时准备撤退。",
+    ],
+    en: [
+      "Surprisingly decent. But remember: even a broken clock is right twice a day.",
+      "Hold if you want, but don't be greedy. Take profits when up, I'll pray for you when down.",
+      "Rare to see a legit one. But your hands might ruin everything.",
+      "No need to run yet, but stay ready to sprint.",
+      "Buddha says hold. But he also says you'll probably buy more at the top and get rekt.",
+      "Don't rush to exit, but don't relax either. Today's blue chip could be tomorrow's rugpull.",
+      "I won't tell you to run this time. But set a take-profit, don't ride the rollercoaster.",
+      "Watch and wait, but remember: one day in crypto is one year in real life. Stay ready to retreat.",
+    ]
+  }
+}
+
+// 随机选择文案的辅助函数
+const pickRandom = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
+
 export const GachaPage: React.FC = () => {
   const { lang } = useLangStore()
   const { draw, dailyDraws, gdBalance, history } = useGachaStore()
@@ -157,31 +306,14 @@ export const GachaPage: React.FC = () => {
         // AI分析
         const aiRoast = isEN ? fortune.messageEN : fortune.message
         
-        // 佛祖判词 - 与完整报告一致
-        const buddhaVerdict = isEN 
-          ? ponziLevel > 70 
-            ? "This coin and your wallet have incompatible zodiac signs. Forcing it will cost you gas fees AND dignity."
-            : ponziLevel > 40
-              ? "I calculated your fate: You lack gold in your five elements, but this coin lacks morals. Not a match."
-              : "Let go of attachment, achieve enlightenment."
-          : ponziLevel > 70
-            ? "施主，此币与你八字不合。强扭的瓜不仅不甜，还要倒贴手续费。"
-            : ponziLevel > 40
-              ? "贫僧掐指一算，你五行缺金，但这币五行缺德。不配。"
-              : "放下执念，立地成佛。"
+        // 佛祖判词 - 从文案库随机选择
+        const verdictLevel = ponziLevel > 70 ? 'high' : ponziLevel > 40 ? 'medium' : 'low'
+        const verdictPool = BUDDHA_VERDICTS[verdictLevel][isEN ? 'en' : 'cn']
+        const buddhaVerdict = pickRandom(verdictPool)
         
-        // 逃跑建议 - 与完整报告一致
-        const exitAdvice = isEN 
-          ? ponziLevel > 70 
-            ? "RUN! Leave your shoes behind! Go deliver food to hedge your losses!"
-            : ponziLevel > 40
-              ? "Screenshot your gains NOW. In 5 minutes it might just be a memory."
-              : "Surprisingly decent. But remember: even a broken clock is right twice a day."
-          : ponziLevel > 70
-            ? "快跑！鞋都不要了！赶紧去送两单外卖对冲一下亏损！"
-            : ponziLevel > 40
-              ? "赶紧截图发朋友圈！5分钟后可能就只剩回忆了。"
-              : "居然还行？但记住：就算是坏掉的钟，一天也能对两次。"
+        // 逃跑建议 - 从文案库随机选择
+        const advicePool = EXIT_ADVICES[verdictLevel][isEN ? 'en' : 'cn']
+        const exitAdvice = pickRandom(advicePool)
         
         const ttsText = isEN 
           ? `${aiRoast}. Buddha's Verdict: ${buddhaVerdict}. Exit Strategy: ${exitAdvice}`
