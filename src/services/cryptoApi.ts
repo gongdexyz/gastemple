@@ -232,6 +232,15 @@ const BUDDHA_ROASTS = {
       "哟，涨了{change}%？这叫「巴甫洛夫的狗」效应。之前跌了{athDrop}%打你一顿，今天给个甜枣你就摇尾巴了？斯德哥尔摩综合症晚期患者建议立刻就医。",
       "善哉！这只垃圾桶里最靓的仔居然发光了（+{change}%）。虽然距离历史高点还跌了{athDrop}%，但不得不承认，它今天是一块「可回收垃圾」。建议趁热回收，晚了就馊了。",
       "涨了{change}%？历史高点跌了{athDrop}%你怎么不说？这叫「死刑犯的断头饭」——吃得再好，结局也不会变。上天给你这涨幅是让你逃生的，不是让你加仓的。",
+      // 3.0 新增扩充版
+      "🤖 涨了{change}%？贫僧掐指一算，这是庄家在「钓鱼执法」。鱼饵很香，但钩子更锋利。ATH跌了{athDrop}%，你是鱼，不是渔夫。",
+      "🏛️ +{change}%的涨幅！项目方正在群里发红包庆祝——庆祝又有韭菜上钩了。ATH跌了{athDrop}%，这红包是用你的血染红的。",
+      "🪷 善哉！这{change}%是「PUA渣男」式的甜头。他偶尔对你好，是为了让你更舍不得离开。ATH跌了{athDrop}%，清醒一点，他不爱你。",
+      "涨了{change}%？这叫「温水煮青蛙」的升级版——先给你点甜头，让你放松警惕。ATH跌了{athDrop}%，水已经开了，你还在享受温泉？",
+      "🤖 监测到「诱多信号」！涨了{change}%，但ATH跌了{athDrop}%。这就像渣男说「我变了」——信他你就输了。",
+      "🏛️ +{change}%！代币模型：经典的「割韭菜前的施肥」。肥料撒得越多，韭菜长得越壮，割起来越爽。ATH跌了{athDrop}%，你就是那颗最壮的韭菜。",
+      "🪷 这{change}%的涨幅是「回光返照」，是「落日余晖」。太阳落山前总是最美的，但天黑之后呢？ATH跌了{athDrop}%，天快黑了。",
+      "涨了{change}%？佛祖说：「庄家今天心情好，决定让韭菜们开心一下再收割。」ATH跌了{athDrop}%，开心完了该上路了。",
     ],
     en: [
       "🤖 Blessed! Detected a 'medical miracle' - after being brain-dead for months, the finger twitched (+{change}%). Don't get excited, this is called 'corpse spasm', not recovery. Market maker just raised the scythe higher. ATH down {athDrop}% btw.",
@@ -239,6 +248,14 @@ const BUDDHA_ROASTS = {
       "🪷 This {change}% pump is 'inner demon', your 'last meal before execution'. Eat up, then hit the road. ATH down {athDrop}%. Greed leads to eternal damnation. 🔮 Today: cut losses | Avoid: hopium",
       "Oh, up {change}%? Classic Pavlov's dog. They beat you down {athDrop}% from ATH, now a little treat and you're wagging your tail? Stockholm syndrome patient detected.",
       "Blessed! The shiniest turd is glowing (+{change}%). Still down {athDrop}% from ATH though. Today it's 'recyclable trash'. Sell it while it's warm, before it rots.",
+      // 3.0 新增扩充版
+      "🤖 Up {change}%? Buddha calculated: this is 'fishing enforcement'. Bait smells good, but the hook is sharper. ATH down {athDrop}%, you're the fish, not the fisherman.",
+      "🏛️ +{change}% pump! Team is celebrating in the group chat - celebrating another leek took the bait. ATH down {athDrop}%, that red packet is dyed with your blood.",
+      "🪷 This {change}% is 'toxic boyfriend' style sweetness. He's nice sometimes so you won't leave. ATH down {athDrop}%, wake up, he doesn't love you.",
+      "Up {change}%? This is 'boiling frog' upgraded - give you sweets first, lower your guard. ATH down {athDrop}%, water's boiling, still enjoying the hot spring?",
+      "🤖 'Bull trap signal' detected! Up {change}%, but ATH down {athDrop}%. Like when your ex says 'I've changed' - believe him and you lose.",
+      "🏛️ +{change}%! Token model: classic 'fertilizing before harvest'. More fertilizer = fatter leeks = better harvest. ATH down {athDrop}%, you're the fattest leek.",
+      "🪷 This {change}% pump is 'dying glow', 'sunset glory'. Sunsets are beautiful, but what about after dark? ATH down {athDrop}%, it's getting dark.",
     ]
   },
   // 🟢 小涨版（涨 5%-15% 正常币）
@@ -252,12 +269,26 @@ const BUDDHA_ROASTS = {
       "善哉善哉！这小币种今日小涨{change}%，像个刚学会走路的娃娃，终于迈出第一步了。庄家轻轻推了一把，它就摇摇晃晃地站起来了，可喜可贺～",
       "阿弥陀佛！涨了{change}%，简直是佛祖今天心情好，随手撒了点功德雨。但佛祖提醒：小鸟飞太高容易被风吹秃毛。",
       "善哉！涨了{change}%，技术面出现罕见的'小阳线'，基本面出现罕见的'有点氧气'。恭喜施主抽到一只'还在喘气的空气币'。",
+      // 3.0 新增扩充版
+      "涨了{change}%！佛祖说：这是「小确幸」，不是「大机会」。见好就收，别把小确幸变成大确丧。",
+      "🤖 +{change}%的涨幅！贫僧观此币，有点东西但不多。建议：吃完这口饭就走，别等上甜点。",
+      "🏛️ 涨了{change}%，项目还算正经。但正经项目也会跌，只是跌得比较体面。建议设好止盈，别贪。",
+      "🪷 善哉！{change}%的涨幅，佛祖点头了。但他老人家也说了：涨了别贪，跌了别慌。你能做到吗？",
+      "涨了{change}%？恭喜！但佛祖提醒：这可能是「诱多」，也可能是「真涨」。问题是——你分得清吗？",
+      "🤖 监测到正向波动（+{change}%）。项目基本面尚可，但你的操作水平...贫僧不敢恭维。建议：让利润奔跑，但别跑太远。",
     ],
     en: [
       "🤖 Blessed! Detected a 'medical miracle' - finger twitched (+{change}%). Don't get excited, this is 'corpse spasm'. Market maker just raised the scythe higher.",
       "Up {change}%? Token model: air with stimulant. Door cracked open - is it for you to escape, or to crush your head? 🔮 Today: take profits | Avoid: diamond hands",
       "🪷 This {change}% is your 'last meal'. Eat up, then hit the road. Greed leads to damnation. Take this pump and RUN!",
       "Blessed be! Up {change}% today, like a baby learning to walk. The market maker gave it a little push, and it wobbled up. How touching~",
+      // 3.0 新增扩充版
+      "Up {change}%! Buddha says: this is 'small happiness', not 'big opportunity'. Take it and leave, don't turn joy into sorrow.",
+      "🤖 +{change}% pump! This coin has something, but not much. Suggestion: finish this meal and leave, don't wait for dessert.",
+      "🏛️ Up {change}%, project seems legit. But legit projects dump too, just more gracefully. Set your take-profit, don't be greedy.",
+      "🪷 Blessed! {change}% gain, Buddha nods. But he also said: don't be greedy when up, don't panic when down. Can you do it?",
+      "Up {change}%? Congrats! But Buddha reminds: could be 'bull trap', could be 'real pump'. Question is - can you tell the difference?",
+      "🤖 Positive movement detected (+{change}%). Fundamentals are okay, but your trading skills... Buddha has concerns. Let profits run, but not too far.",
     ]
   },
   // 🚀 狗屎运爆发版（暴涨 >15% 垃圾币）- 疯狂嘲讽
@@ -271,12 +302,26 @@ const BUDDHA_ROASTS = {
       "佛祖显灵！暴涨{change}%！但ATH跌了{athDrop}%你知道吗？这根绿柱子不过是给你立的墓碑罢了。庄家把镰刀举高了，是为了砍得更深。别贪了！这已经是你这辈子运气的巅峰了！",
       "阿弥陀佛！{change}%的涨幅！但历史高点跌了{athDrop}%。项目方正在游艇上开香槟，你是业绩，不是股东。",
       "暴涨{change}%！但距ATH还跌{athDrop}%呢。经典的「杀猪盘」诱饵结构，目前的上涨只是为了让猪肉更紧实一点。趁现在门缝开了一点点，赶紧挤出去。",
+      // 3.0 新增扩充版
+      "🤖 暴涨{change}%！贫僧掐指一算：这是「最后的晚餐」。庄家请你吃饱，是为了让你死得瞑目。ATH跌了{athDrop}%，你是主菜，不是客人。",
+      "🏛️ +{change}%！项目方群里在发「恭喜发财」红包。但你要知道，这红包是用你的本金包的。ATH跌了{athDrop}%，清醒点。",
+      "🪷 暴涨{change}%！佛祖说：「天上掉馅饼，地上有陷阱。」ATH跌了{athDrop}%，这馅饼是用你的血肉做的。",
+      "涨了{change}%？庄家在群里喊「钻石手」，自己却在偷偷出货。ATH跌了{athDrop}%，你是钻石，他是钻石商。",
+      "🤖 监测到「韭菜收割前的施肥」信号！+{change}%的涨幅，ATH跌了{athDrop}%。肥料撒完了，镰刀也磨好了。",
+      "🏛️ 暴涨{change}%！这叫「回光返照」，不叫「起死回生」。ATH跌了{athDrop}%，ICU里偶尔也会有奇迹，但大概率是拔管前的最后一搏。",
     ],
     en: [
       "🤖 Amitabha! System error? A noob like you hit the 'drunk market maker random pump' event (+{change}%)? Seeing this green candle, feeling like Buffett reborn? Wake up, that's 'survivorship bias'. Still down {athDrop}% from ATH btw!",
       "🏛️ Up {change}%! Token model: classic 'hot potato' game, drums beating loud. Exit difficulty: if not now, when? Wait for it to explode in your hands? Project: 📍Dubai scam gang celebration. You're a dish on the table, but you can jump off.",
       "🪷 Wealth beyond your worth brings disaster. God gave you this {change}% because he's taking 100% next. ATH down {athDrop}%. 'Secure the bag' to save your pathetic merit. 🔮 Today: withdraw & delete app | Avoid: diamond hands",
       "Buddha's blessing! Up {change}%! But down {athDrop}% from ATH. This green candle is just your tombstone. Market maker raised the scythe to cut deeper.",
+      // 3.0 新增扩充版
+      "🤖 Up {change}%! Buddha calculated: this is 'The Last Supper'. Market maker feeds you well so you die satisfied. ATH down {athDrop}%, you're the main course, not a guest.",
+      "🏛️ +{change}%! Team is sending 'congrats' red packets in the group. But that red packet is wrapped with YOUR money. ATH down {athDrop}%, wake up.",
+      "🪷 Up {change}%! Buddha says: 'Pie from the sky, trap on the ground.' ATH down {athDrop}%, this pie is made of your flesh and blood.",
+      "Up {change}%? Market maker shouting 'diamond hands' in the group while secretly dumping. ATH down {athDrop}%, you're the diamond, he's the diamond dealer.",
+      "🤖 'Pre-harvest fertilizing' signal detected! +{change}% pump, ATH down {athDrop}%. Fertilizer spread, scythe sharpened.",
+      "🏛️ Up {change}%! This is 'dying glow', not 'resurrection'. ATH down {athDrop}%, ICU sometimes has miracles, but usually it's the last struggle before pulling the plug.",
     ]
   },
   // 🚀 暴涨版（>15% 正常币）
@@ -290,6 +335,13 @@ const BUDDHA_ROASTS = {
       "佛祖显灵！暴涨{change}%！简直是佛祖今天心情大好，随手赏了它一口仙气。但记住：涨得快是佛祖在提醒你——该跑了。",
       "阿弥陀佛！{change}%的涨幅！恭喜施主解锁成就「纸面富贵」。但佛祖提醒：没卖之前都是镜花水月，及时止盈才是正道。",
       "暴涨{change}%！别贪了！这已经是你这辈子运气的巅峰了！建议立即截图发朋友圈炫耀，5分钟后可能就没了。就算是坏掉的钟，一天也能准两次。恭喜你撞上了。",
+      // 3.0 新增扩充版
+      "🤖 暴涨{change}%！佛祖说：「会买的是徒弟，会卖的是师父。」你现在是徒弟还是师父，就看你接下来的操作了。",
+      "🏛️ +{change}%的涨幅！项目基本面还行，但涨太快容易闪了腰。建议：分批止盈，别一把梭哈。",
+      "🪷 暴涨{change}%！佛祖提醒：「涨得越高，摔得越惨。」不是说一定会摔，但你得做好准备。",
+      "涨了{change}%？恭喜！但佛祖说：「牛市多暴跌」。这涨幅很香，但别忘了设止损。",
+      "🤖 监测到强势上涨（+{change}%）！贫僧建议：至少卖掉一半，让利润奔跑的同时也要落袋为安。",
+      "🏛️ 暴涨{change}%！这是「天时地利人和」还是「庄家拉盘出货」？佛祖也看不清，但他建议你：见好就收。",
     ],
     en: [
       "🤖 Amitabha! System error? You hit the 'drunk market maker pump' event (+{change}%)? Feeling like Buffett reborn? Wake up, that's 'survivorship bias'.",
@@ -297,6 +349,13 @@ const BUDDHA_ROASTS = {
       "🪷 Wealth beyond worth brings disaster. God gave you this {change}% to take 100% next. 'Secure the bag'. 🔮 Today: withdraw & delete app | Avoid: diamond hands",
       "Buddha's blessing! Up {change}%! Buddha is in an amazing mood today. But remember: pumping fast means Buddha is reminding you - time to RUN.",
       "Amitabha! {change}% pump! Congrats on unlocking 'Paper Wealth' achievement. But Buddha says: unrealized gains are just illusions. Take profits.",
+      // 3.0 新增扩充版
+      "🤖 Up {change}%! Buddha says: 'Buying is apprentice level, selling is master level.' Are you apprentice or master? Your next move decides.",
+      "🏛️ +{change}% pump! Fundamentals are okay, but pumping too fast can hurt your back. Suggestion: take profits in batches, don't go all-in.",
+      "🪷 Up {change}%! Buddha reminds: 'The higher you climb, the harder you fall.' Not saying you will fall, but be prepared.",
+      "Up {change}%? Congrats! But Buddha says: 'Bull markets have flash crashes.' This pump is sweet, but don't forget to set stop-loss.",
+      "🤖 Strong uptrend detected (+{change}%)! Buddha suggests: sell at least half, let profits run while securing some gains.",
+      "🏛️ Up {change}%! Is this 'perfect timing' or 'market maker dumping'? Even Buddha can't tell, but he suggests: take what you can get.",
     ]
   },
   // 🦀 坟头长草版（横盘 ±5%）- 电子僵尸
@@ -311,12 +370,26 @@ const BUDDHA_ROASTS = {
       "波动率接近0。这币和你的感情生活一样，死水一潭。死水里偶尔也会冒泡，但大概率是沼气。戳一下庄家，看他死了没？",
       "K线扫描完成：比心电图还平。建议持有者去医院查查自己。佛祖说：平静是福，但太平静就是临终关怀了。",
       "横盘检测：建议改名「稳定币」。至少听起来体面点。佛祖说：稳定是好事，但稳定在谷底就是另一回事了。",
+      // 3.0 新增扩充版
+      "🤖 监测到「植物人」状态。这币既不涨也不跌，像极了你的人生——毫无波澜，一眼望到头。",
+      "🏛️ 横盘中...项目方可能在：A.跑路途中 B.蹲局子 C.换了个马甲重新割韭菜。你猜是哪个？",
+      "🪷 佛祖说：「横盘是最高级的折磨。」它不让你死心，也不给你希望。这是一种精神PUA。",
+      "这走势像极了我前任——不主动、不拒绝、不负责。你问它涨不涨？它说「再看看」。",
+      "🤖 波动率检测：0.01%。这币比你的社交生活还死寂。建议：要么割肉，要么忘了它。",
+      "🏛️ 横盘第N天...项目方TG群最后一条消息是三个月前的「soon」。很快，很快就归零了。",
     ],
     en: [
       "🤖 Blessed. This chart is flatter than grandma's EKG. Is the market maker on vacation or in prison? This 'digital zombie' state - won't let you give up, won't let you be happy. Pure lifespan drain.",
       "🏛️ Sideways... Token model: pure 'time furnace'. Input: money. Output: wasted youth. Exit difficulty: nobody's running because nobody remembers this project. Location: 📍Cyber mass grave. Quiet here, good for becoming a monk.",
       "🪷 Stillness is meditation. Holding this coin is also 'practice'. As long as you don't sell, you haven't lost - of course, it's not money either. 🔮 Today: tap wood fish | Avoid: staring at charts",
       "This chart is flatter than a mummy's heartbeat. Is the market maker dead or did they forget you? Buddha says: sideways is practice, but too long and you'll ascend (to zero).",
+      // 3.0 新增扩充版
+      "🤖 'Vegetative state' detected. This coin neither pumps nor dumps, just like your life - no waves, no hope.",
+      "🏛️ Sideways... Team is probably: A. Running away B. In jail C. Rebranded to rug again. Which one?",
+      "🪷 Buddha says: 'Sideways is the ultimate torture.' No despair, no hope. This is spiritual PUA.",
+      "This chart is like my ex - won't commit, won't leave, won't take responsibility. Ask if it'll pump? 'We'll see.'",
+      "🤖 Volatility: 0.01%. This coin is deader than your social life. Suggestion: cut losses or forget it exists.",
+      "🏛️ Day N of sideways... Last message in project TG was 'soon' three months ago. Soon to zero, that is.",
     ]
   },
   // 📉 小跌版（-5% to -15%）
