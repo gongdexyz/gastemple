@@ -10,6 +10,7 @@ import { InactivityToast } from '../components/InactivityToast'
 import { PaymentConfirmDialog } from '../components/PaymentConfirmDialog'
 import { InviteFriendsModal } from '../components/InviteFriendsModal'
 import { MusicToggle } from '../components/MusicToggle'
+import { getRandomPonziAnalysis } from '../data/poisonousQuotes'
 
 const QUIZ_QUESTIONS_CN = [
   {
@@ -246,6 +247,7 @@ export const GachaPage: React.FC = () => {
   const [showFullRoastModal, setShowFullRoastModal] = useState(false)
   const [currentVerdict, setCurrentVerdict] = useState('')
   const [currentExitAdvice, setCurrentExitAdvice] = useState('')
+  const [currentPonziAnalysis, setCurrentPonziAnalysis] = useState<{tokenModel: string, exitDifficulty: string, projectPosition: string} | null>(null)
   
   const isEN = lang === 'en'
   const QUIZ_QUESTIONS = isEN ? QUIZ_QUESTIONS_EN : QUIZ_QUESTIONS_CN
@@ -318,6 +320,10 @@ export const GachaPage: React.FC = () => {
         const advicePool = EXIT_ADVICES[verdictLevel][isEN ? 'en' : 'cn']
         const exitAdvice = pickRandom(advicePool)
         setCurrentExitAdvice(exitAdvice)
+        
+        // 庞氏结构分析 - 从文案库随机选择并保存
+        const ponziAnalysis = getRandomPonziAnalysis(ponziLevel, isEN)
+        setCurrentPonziAnalysis(ponziAnalysis)
         
         const ttsText = isEN 
           ? `${aiRoast}. Buddha's Verdict: ${buddhaVerdict}. Exit Strategy: ${exitAdvice}`
@@ -788,22 +794,13 @@ export const GachaPage: React.FC = () => {
                 </p>
               </div>
 
-              {/* 庞氏结构分析 - 毒舌版 */}
+              {/* 庞氏结构分析 - 从文案库随机选择 */}
               <div className="bg-gray-800/50 rounded p-3 mb-4 text-sm">
                 <p className="text-cyan-400 text-xs font-bold mb-2">📊 {isEN ? 'Ponzi Structure' : '庞氏结构分析'}</p>
                 <div className="space-y-2 text-gray-400 text-xs">
-                  <p>• {isEN 
-                    ? `Token model: ${getPonziLevel() > 70 ? 'Classic sickle model. Everyone except you is an insider.' : getPonziLevel() > 40 ? 'Musical chairs, 2 rounds left maybe' : 'Surprisingly not a total scam'}`
-                    : `代币模型: ${getPonziLevel() > 70 ? '经典镰刀模型。除了你，全是庄家的老鼠仓。' : getPonziLevel() > 40 ? '击鼓传花，还能传两轮' : '居然不是纯空气，稀奇'}`
-                  }</p>
-                  <p>• {isEN
-                    ? `Exit difficulty: ${(currentResult.fortune.coin as any)?.market_cap > 10000000 ? 'Possible if you run fast' : 'Door welded shut. Abandon all hope.'}`
-                    : `跑路难度: ${(currentResult.fortune.coin as any)?.market_cap > 10000000 ? '跑快点还有救' : '门都给你焊死了，放弃挣扎吧'}`
-                  }</p>
-                  <p>• {isEN
-                    ? `Dev location: ${Math.random() > 0.5 ? '📍 Dubai. Ordering $3000 steak with YOUR money.' : '📍 Last seen 69 days ago. Probably in Bali.'}`
-                    : `项目方定位: ${Math.random() > 0.5 ? '📍 迪拜。正在用你的钱点3000刀的牛排。' : '📍 69天前最后上线。大概率在巴厘岛。'}`
-                  }</p>
+                  <p>• {isEN ? 'Token model' : '代币模型'}: {currentPonziAnalysis?.tokenModel || '-'}</p>
+                  <p>• {isEN ? 'Exit difficulty' : '跑路难度'}: {currentPonziAnalysis?.exitDifficulty || '-'}</p>
+                  <p>• {isEN ? 'Dev location' : '项目方定位'}: {currentPonziAnalysis?.projectPosition || '-'}</p>
                 </div>
               </div>
 
