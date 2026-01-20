@@ -130,15 +130,30 @@ const ROAST_TEMPLATES = {
   bigPump: {
     cn: [
       "拉盘检测！这就拿不住了？注定是送外卖的命。接着奏乐接着舞！",
-      "警告：庄家正在给你希望。别傻了，你就是出货对象。",
-      "建议立即截图发朋友圈！5分钟后可能就没机会了。",
       "恭喜解锁成就：「纸面富贵」。记得及时落袋为安。",
-      "异常拉升！翻译：有人要出货了，猜猜谁是接盘侠？",
+      "涨疯了！建议立即截图发朋友圈炫耀！",
+      "起飞了！但记住：没卖之前都是纸面富贵。",
+      "暴涨警报！你是天选之人还是最后的接盘侠？只有时间知道。",
     ],
     en: [
-      "PUMP DETECTED. Screenshot now. You know what comes next.",
-      "Warning: Dev is giving you hope. You ARE the exit liquidity.",
-      "WAGMI? More like WAGMI-for-5-minutes-then-NGMI.",
+      "PUMP DETECTED. Screenshot now before it disappears!",
+      "Moon mission activated! But remember: profit isn't real until you sell.",
+      "WAGMI energy! Take some profits, don't be greedy.",
+    ]
+  },
+  // 小涨专用 (变化 5% - 15%)
+  smallPump: {
+    cn: [
+      "小涨不错！佛祖保佑，继续拿稳。",
+      "涨了一点，别急着卖，也别急着加仓。稳住。",
+      "绿色K线！虽然不多，但至少没亏。阿弥陀佛。",
+      "微涨检测。恭喜，你今天不是最惨的那个。",
+      "还行，至少比存银行强。继续观望。",
+    ],
+    en: [
+      "Small gains! Buddha blesses your bags.",
+      "Green candle detected. Not much, but hey, you're not losing.",
+      "Modest pump. At least you're not the biggest loser today.",
     ]
   },
   // 低市值专用 (< $10M)
@@ -202,17 +217,28 @@ function generateRoast(coin: CoinData, _level: FortuneLevel, isEN: boolean): str
   const lang = isEN ? 'en' : 'cn'
   let pool: string[] = []
   
-  // 根据数据选择辣评池
-  if (Math.abs(change) < 5) {
-    pool = ROAST_TEMPLATES.sideways[lang]
-  } else if (change < -10) {
-    pool = ROAST_TEMPLATES.bigDump[lang]
-  } else if (change > 15) {
+  // 根据数据选择辣评池 - 涨跌优先判断
+  if (change > 15) {
+    // 暴涨优先
     pool = ROAST_TEMPLATES.bigPump[lang]
-  } else if (mcap < 10000000) {
-    pool = ROAST_TEMPLATES.lowMcap[lang]
-  } else if (rank > 500) {
-    pool = ROAST_TEMPLATES.lowRank[lang]
+  } else if (change > 5) {
+    // 小涨
+    pool = ROAST_TEMPLATES.smallPump[lang]
+  } else if (change < -10) {
+    // 暴跌
+    pool = ROAST_TEMPLATES.bigDump[lang]
+  } else if (change < -5) {
+    // 小跌 - 用低市值或低排名的吐槽
+    if (mcap < 10000000) {
+      pool = ROAST_TEMPLATES.lowMcap[lang]
+    } else if (rank > 500) {
+      pool = ROAST_TEMPLATES.lowRank[lang]
+    } else {
+      pool = ROAST_TEMPLATES.bigDump[lang]
+    }
+  } else if (Math.abs(change) < 5) {
+    // 横盘
+    pool = ROAST_TEMPLATES.sideways[lang]
   } else {
     pool = ROAST_TEMPLATES.sideways[lang]
   }
