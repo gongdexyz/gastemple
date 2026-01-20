@@ -217,84 +217,112 @@ export function getPonziLabel(level: number, isEN: boolean) {
   return labels.extreme
 }
 
-// 【全员恶人·木鱼蛙辣评 2.0】- 素质彻底放下版
+// 【全员恶人·木鱼蛙辣评】- 1.0经典版 + 2.0素质放下版 混合
 // 看第一眼想笑，看第二眼想哭，看第三眼觉得"虽然骂得难听但好有道理"
 const BUDDHA_ROASTS = {
   // 🟢 诈尸诱多版（涨 5%-15% 且垃圾币）- 断头饭风格
   shitcoinPump: {
     cn: [
+      // 2.0 素质放下版
       "🤖 善哉！监测到该币种出现了「医学奇迹」——在长期植物人状态下，手指头突然动了一下（+{change}%）。别激动，这通常不叫苏醒，叫「尸僵反应」。庄家只是想把镰刀举高一点，好砍得更顺手。ATH跌了{athDrop}%你装看不见？",
       "🏛️ 涨了{change}%？代币模型：空气中掺杂了少量兴奋剂。跑路难度：「关门打狗」的前兆。门缝还留了一丝，你猜是给你逃跑用的，还是为了夹你的头？项目定位：📍屠宰场VIP候场区。给猪听音乐，是为了肉质更鲜美。",
       "🪷 这{change}%的涨幅是「心魔」，是给你的一碗「断头饭」。吃饱了就该上路了。ATH跌了{athDrop}%，贪念一起，万劫不复。🔮 今日宜：割肉逃生 | 忌：幻想反转",
-      "善哉！监测到心脏复苏信号（+{change}%）。但ATH跌了{athDrop}%，这走势怎么看都像是「回光返照」。你是信它起死回生，还是信庄家在拔氧气管前最后骗一次保费？趁庄家没醒，拿着这点涨幅赶紧滚！",
+      // 1.0 经典版
+      "善哉！监测到心脏复苏信号（+{change}%）。但ATH跌了{athDrop}%，这走势怎么看都像是「回光返照」。你是信它起死回生，还是信庄家在拔氧气管前最后骗一次保费？",
       "哟，涨了{change}%？这叫「巴甫洛夫的狗」效应。之前跌了{athDrop}%打你一顿，今天给个甜枣你就摇尾巴了？斯德哥尔摩综合症晚期患者建议立刻就医。",
+      "善哉！这只垃圾桶里最靓的仔居然发光了（+{change}%）。虽然距离历史高点还跌了{athDrop}%，但不得不承认，它今天是一块「可回收垃圾」。建议趁热回收，晚了就馊了。",
+      "涨了{change}%？历史高点跌了{athDrop}%你怎么不说？这叫「死刑犯的断头饭」——吃得再好，结局也不会变。上天给你这涨幅是让你逃生的，不是让你加仓的。",
     ],
     en: [
       "🤖 Blessed! Detected a 'medical miracle' - after being brain-dead for months, the finger twitched (+{change}%). Don't get excited, this is called 'corpse spasm', not recovery. Market maker just raised the scythe higher. ATH down {athDrop}% btw.",
       "🏛️ Up {change}%? Token model: air with a hint of stimulant. Exit difficulty: 'trap door closing'. Project location: 📍Slaughterhouse VIP waiting room. They play music for pigs to make the meat more tender.",
       "🪷 This {change}% pump is 'inner demon', your 'last meal before execution'. Eat up, then hit the road. ATH down {athDrop}%. Greed leads to eternal damnation. 🔮 Today: cut losses | Avoid: hopium",
       "Oh, up {change}%? Classic Pavlov's dog. They beat you down {athDrop}% from ATH, now a little treat and you're wagging your tail? Stockholm syndrome patient detected.",
+      "Blessed! The shiniest turd is glowing (+{change}%). Still down {athDrop}% from ATH though. Today it's 'recyclable trash'. Sell it while it's warm, before it rots.",
     ]
   },
   // 🟢 小涨版（涨 5%-15% 正常币）
   smallPump: {
     cn: [
+      // 2.0 素质放下版
       "🤖 善哉！监测到该币种出现了「医学奇迹」——手指头动了一下（+{change}%）。别激动，这通常不叫苏醒，叫「尸僵反应」。庄家只是想把镰刀举高一点。",
       "涨了{change}%？代币模型：空气中掺杂了少量兴奋剂。门缝还留了一丝，你猜是给你逃跑用的，还是为了夹你的头？🔮 今日宜：见好就收 | 忌：格局打开",
       "🪷 这{change}%是「心魔」，是给你的一碗「断头饭」。吃饱了就该上路了。贪念一起，万劫不复。趁庄家没醒，拿着这点涨幅赶紧滚！",
+      // 1.0 经典版
+      "善哉善哉！这小币种今日小涨{change}%，像个刚学会走路的娃娃，终于迈出第一步了。庄家轻轻推了一把，它就摇摇晃晃地站起来了，可喜可贺～",
+      "阿弥陀佛！涨了{change}%，简直是佛祖今天心情好，随手撒了点功德雨。但佛祖提醒：小鸟飞太高容易被风吹秃毛。",
       "善哉！涨了{change}%，技术面出现罕见的'小阳线'，基本面出现罕见的'有点氧气'。恭喜施主抽到一只'还在喘气的空气币'。",
     ],
     en: [
       "🤖 Blessed! Detected a 'medical miracle' - finger twitched (+{change}%). Don't get excited, this is 'corpse spasm'. Market maker just raised the scythe higher.",
       "Up {change}%? Token model: air with stimulant. Door cracked open - is it for you to escape, or to crush your head? 🔮 Today: take profits | Avoid: diamond hands",
       "🪷 This {change}% is your 'last meal'. Eat up, then hit the road. Greed leads to damnation. Take this pump and RUN!",
+      "Blessed be! Up {change}% today, like a baby learning to walk. The market maker gave it a little push, and it wobbled up. How touching~",
     ]
   },
   // 🚀 狗屎运爆发版（暴涨 >15% 垃圾币）- 疯狂嘲讽
   shitcoinBigPump: {
     cn: [
+      // 2.0 素质放下版
       "🤖 阿弥陀佛！系统报错了吗？居然让你这种韭菜撞上了「庄家喝高了乱拉盘」的小概率事件（+{change}%）。看着这根大阳线，你现在是不是心跳加速、觉得自己是巴菲特转世？醒醒，那是你的「幸存者偏差」。ATH还跌着{athDrop}%呢！",
       "🏛️ 暴涨{change}%！代币模型：经典的「击鼓传花」游戏，目前鼓声震天响。跑路难度：此时不跑，更待何时？难道等花在你手里炸开吗？项目定位：📍迪拜诈骗团伙庆功宴。你现在是桌上的一道菜，但你可以选择跳下桌子。",
       "🪷 财不配位，必有灾殃。老天爷给你这{change}%，是因为接下来要拿走你100%。ATH跌了{athDrop}%你忘了？「落袋为安」，方能保住这点可怜的功德。🔮 今日宜：提现删App | 忌：格局打开",
-      "暴涨{change}%！但ATH跌了{athDrop}%你知道吗？这根绿柱子不过是给你立的墓碑罢了。别贪了！这已经是你这辈子运气的巅峰了！",
+      // 1.0 经典版
+      "佛祖显灵！暴涨{change}%！但ATH跌了{athDrop}%你知道吗？这根绿柱子不过是给你立的墓碑罢了。庄家把镰刀举高了，是为了砍得更深。别贪了！这已经是你这辈子运气的巅峰了！",
+      "阿弥陀佛！{change}%的涨幅！但历史高点跌了{athDrop}%。项目方正在游艇上开香槟，你是业绩，不是股东。",
+      "暴涨{change}%！但距ATH还跌{athDrop}%呢。经典的「杀猪盘」诱饵结构，目前的上涨只是为了让猪肉更紧实一点。趁现在门缝开了一点点，赶紧挤出去。",
     ],
     en: [
       "🤖 Amitabha! System error? A noob like you hit the 'drunk market maker random pump' event (+{change}%)? Seeing this green candle, feeling like Buffett reborn? Wake up, that's 'survivorship bias'. Still down {athDrop}% from ATH btw!",
       "🏛️ Up {change}%! Token model: classic 'hot potato' game, drums beating loud. Exit difficulty: if not now, when? Wait for it to explode in your hands? Project: 📍Dubai scam gang celebration. You're a dish on the table, but you can jump off.",
       "🪷 Wealth beyond your worth brings disaster. God gave you this {change}% because he's taking 100% next. ATH down {athDrop}%. 'Secure the bag' to save your pathetic merit. 🔮 Today: withdraw & delete app | Avoid: diamond hands",
+      "Buddha's blessing! Up {change}%! But down {athDrop}% from ATH. This green candle is just your tombstone. Market maker raised the scythe to cut deeper.",
     ]
   },
   // 🚀 暴涨版（>15% 正常币）
   bigPump: {
     cn: [
+      // 2.0 素质放下版
       "🤖 阿弥陀佛！系统报错了吗？居然让你撞上了「庄家喝高了乱拉盘」的小概率事件（+{change}%）。看着这根大阳线，你是不是觉得自己是巴菲特转世？醒醒，那是「幸存者偏差」。",
       "🏛️ 暴涨{change}%！代币模型：经典的「击鼓传花」，目前鼓声震天响。此时不跑，更待何时？难道等花在你手里炸开吗？项目定位：📍庆功宴。你是桌上的一道菜，但你可以选择跳下桌子。",
       "🪷 财不配位，必有灾殃。老天爷给你这{change}%，是因为接下来要拿走你100%。「落袋为安」，方能保住这点可怜的功德。🔮 今日宜：提现删App | 忌：格局打开",
-      "暴涨{change}%！别贪了！这已经是你这辈子运气的巅峰了！建议立即截图发朋友圈炫耀，5分钟后可能就没了。",
+      // 1.0 经典版
+      "佛祖显灵！暴涨{change}%！简直是佛祖今天心情大好，随手赏了它一口仙气。但记住：涨得快是佛祖在提醒你——该跑了。",
+      "阿弥陀佛！{change}%的涨幅！恭喜施主解锁成就「纸面富贵」。但佛祖提醒：没卖之前都是镜花水月，及时止盈才是正道。",
+      "暴涨{change}%！别贪了！这已经是你这辈子运气的巅峰了！建议立即截图发朋友圈炫耀，5分钟后可能就没了。就算是坏掉的钟，一天也能准两次。恭喜你撞上了。",
     ],
     en: [
       "🤖 Amitabha! System error? You hit the 'drunk market maker pump' event (+{change}%)? Feeling like Buffett reborn? Wake up, that's 'survivorship bias'.",
       "🏛️ Up {change}%! Token model: classic 'hot potato', drums beating loud. If not now, when? Wait for it to explode in your hands? You're a dish on the table, but you can jump off.",
       "🪷 Wealth beyond worth brings disaster. God gave you this {change}% to take 100% next. 'Secure the bag'. 🔮 Today: withdraw & delete app | Avoid: diamond hands",
+      "Buddha's blessing! Up {change}%! Buddha is in an amazing mood today. But remember: pumping fast means Buddha is reminding you - time to RUN.",
+      "Amitabha! {change}% pump! Congrats on unlocking 'Paper Wealth' achievement. But Buddha says: unrealized gains are just illusions. Take profits.",
     ]
   },
   // 🦀 坟头长草版（横盘 ±5%）- 电子僵尸
   sideways: {
     cn: [
+      // 2.0 素质放下版
       "🤖 善哉。这走势比我奶奶的心电图都平。庄家是去度假了，还是已经进局子了？这种「电子僵尸」状态，既不让你死心，也不让你开心，纯纯是在消耗你的「阳寿」。",
       "🏛️ 横盘中...代币模型：纯度极高的「时间熔炉」。投入的是钱，烧掉的是青春。跑路难度：没人跑路，因为没人记得这个项目了。项目定位：📍赛博乱葬岗。这里很安静，适合出家。",
       "🪷 不动不摇，是为坐禅。施主拿着这个币，也是一种「修行」。只要你不卖，就不算亏——当然，也不算钱。🔮 今日宜：敲木鱼 | 忌：盯着K线看",
+      // 1.0 经典版
+      "这走势比木乃伊的心电图都平。庄家是死了还是把你忘了？佛祖说：横盘是修行，但修太久会成仙（归零）。",
       "波动率接近0。这币和你的感情生活一样，死水一潭。死水里偶尔也会冒泡，但大概率是沼气。戳一下庄家，看他死了没？",
+      "K线扫描完成：比心电图还平。建议持有者去医院查查自己。佛祖说：平静是福，但太平静就是临终关怀了。",
+      "横盘检测：建议改名「稳定币」。至少听起来体面点。佛祖说：稳定是好事，但稳定在谷底就是另一回事了。",
     ],
     en: [
       "🤖 Blessed. This chart is flatter than grandma's EKG. Is the market maker on vacation or in prison? This 'digital zombie' state - won't let you give up, won't let you be happy. Pure lifespan drain.",
       "🏛️ Sideways... Token model: pure 'time furnace'. Input: money. Output: wasted youth. Exit difficulty: nobody's running because nobody remembers this project. Location: 📍Cyber mass grave. Quiet here, good for becoming a monk.",
       "🪷 Stillness is meditation. Holding this coin is also 'practice'. As long as you don't sell, you haven't lost - of course, it's not money either. 🔮 Today: tap wood fish | Avoid: staring at charts",
+      "This chart is flatter than a mummy's heartbeat. Is the market maker dead or did they forget you? Buddha says: sideways is practice, but too long and you'll ascend (to zero).",
     ]
   },
   // 📉 小跌版（-5% to -15%）
   smallDump: {
     cn: [
+      // 混合版
       "跌了{change}%，佛祖说：小跌是考验，大跌是劫难。施主莫慌，这只是佛祖在测试你的信仰。但如果明天还跌……那就是真的劫难了。ATH已经跌了{athDrop}%，你还在等什么？",
       "红色K线！跌了{change}%。佛祖说：别人恐惧我贪婪？先等等，看看是不是真的恐惧还是理性逃跑。ATH跌了{athDrop}%，这恐惧看起来挺理性的。",
       "小跌{change}%，庄家今天心情不太好。佛祖提醒：小跌不可怕，可怕的是小跌后面跟着大跌。ATH跌了{athDrop}%，阿弥陀佛，保重。",
@@ -307,17 +335,22 @@ const BUDDHA_ROASTS = {
   // 📉 功德圆满版（暴跌/归零）- 反向夸奖
   bigDump: {
     cn: [
+      // 2.0 素质放下版
       "🤖 恭喜施主！贺喜施主！监测到您的资产正在进行「物理因果律消除」（-{change}%）。这一根大红柱子插下来，直接帮您消除了半辈子的业障。钱没了可以再赚，脑子没了就真没办法了。ATH跌了{athDrop}%！",
       "🏛️ 暴跌{change}%！代币模型：环保降解型代币。从空气中来，回空气中去。跑路难度：跑什么？链上池子都干了，这就是「终点」。项目定位：📍由于经费不足，该项目定位已无法显示。",
       "🪷 我不入地狱，谁入地狱？施主以一人之肉，喂饱了庄家全家。大慈大悲，功德无量！ATH跌了{athDrop}%，施主已立地成佛！🔮 今日宜：吃斋念佛 | 忌：上天台",
-      "暴跌{change}%！ATH跌了{athDrop}%！佛祖说：跌了90%还有90%可以跌，下跌空间充足。没事，换个币接着亏...划掉...接着抽！",
+      // 1.0 经典版
+      "暴跌{change}%！ATH跌了{athDrop}%！佛祖说：跌了90%还有90%可以跌，下跌空间充足。没事，换个币接着亏...划掉...接着抽！建议留着当传家宝，传给孙子维权。",
+      "阿弥陀佛！暴跌{change}%！ATH跌了{athDrop}%。佛祖说：把App颜色反转一下，这样看起来像在涨。心理安慰也是一种修行。",
       "善哉！跌了{change}%，距ATH跌了{athDrop}%。佛祖说：「价值投资」模式已激活。翻译：套牢了不想割。施主，放下执念吧。",
+      "暴跌{change}%！历史高点跌了{athDrop}%。佛祖说：抄底成功！恭喜你精准抄在了半山腰。山脚还远着呢，继续加油。",
     ],
     en: [
       "🤖 Congrats! Detected your assets undergoing 'physical causality elimination' (-{change}%). This red candle just cleared half your life's karma. Money can be re-earned, brains can't. ATH down {athDrop}%!",
       "🏛️ Down {change}%! Token model: eco-degradable token. From air it came, to air it returns. Exit difficulty: exit what? Pool's dry, this IS the end. Location: 📍Due to budget cuts, location unavailable.",
       "🪷 If not me, who enters hell? You fed the market maker's whole family with your flesh. Great mercy, infinite merit! ATH down {athDrop}%, you've achieved Buddhahood! 🔮 Today: pray | Avoid: rooftops",
       "Down {change}%! ATH down {athDrop}%! Buddha says: down 90% still has 90% to go. It's ok, try another coin to lose... I mean... to draw!",
+      "Amitabha! Down {change}%! ATH down {athDrop}%. Buddha says: invert your app colors, it'll look like it's pumping. Mental comfort is also a form of practice.",
     ]
   },
   // 低排名补刀
