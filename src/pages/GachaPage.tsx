@@ -244,6 +244,8 @@ export const GachaPage: React.FC = () => {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [drawCount, setDrawCount] = useState(0)
   const [showFullRoastModal, setShowFullRoastModal] = useState(false)
+  const [currentVerdict, setCurrentVerdict] = useState('')
+  const [currentExitAdvice, setCurrentExitAdvice] = useState('')
   
   const isEN = lang === 'en'
   const QUIZ_QUESTIONS = isEN ? QUIZ_QUESTIONS_EN : QUIZ_QUESTIONS_CN
@@ -306,14 +308,16 @@ export const GachaPage: React.FC = () => {
         // AI分析
         const aiRoast = isEN ? fortune.messageEN : fortune.message
         
-        // 佛祖判词 - 从文案库随机选择
+        // 佛祖判词 - 从文案库随机选择并保存
         const verdictLevel = ponziLevel > 70 ? 'high' : ponziLevel > 40 ? 'medium' : 'low'
         const verdictPool = BUDDHA_VERDICTS[verdictLevel][isEN ? 'en' : 'cn']
         const buddhaVerdict = pickRandom(verdictPool)
+        setCurrentVerdict(buddhaVerdict)
         
-        // 逃跑建议 - 从文案库随机选择
+        // 逃跑建议 - 从文案库随机选择并保存
         const advicePool = EXIT_ADVICES[verdictLevel][isEN ? 'en' : 'cn']
         const exitAdvice = pickRandom(advicePool)
+        setCurrentExitAdvice(exitAdvice)
         
         const ttsText = isEN 
           ? `${aiRoast}. Buddha's Verdict: ${buddhaVerdict}. Exit Strategy: ${exitAdvice}`
@@ -803,44 +807,22 @@ export const GachaPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* 佛祖判词 - 玄学版 */}
+              {/* 佛祖判词 - 从文案库随机选择 */}
               <div className="bg-purple-900/20 border border-purple-600/30 rounded p-3 mb-4">
                 <p className="text-purple-400 text-xs font-bold mb-1">🪷 {isEN ? "Buddha's Verdict" : '佛祖判词'}</p>
                 <p className="text-sm text-gray-300">
-                  "{isEN 
-                    ? getPonziLevel() > 70 
-                      ? "This coin and your wallet have incompatible zodiac signs. Forcing it will cost you gas fees AND dignity."
-                      : getPonziLevel() > 40
-                        ? "I calculated your fate: You lack gold in your five elements, but this coin lacks morals. Not a match."
-                        : "Let go of attachment (stop-loss), achieve enlightenment (break even)."
-                    : getPonziLevel() > 70
-                      ? "施主，此币与你八字不合。强扭的瓜不仅不甜，还要倒贴手续费。"
-                      : getPonziLevel() > 40
-                        ? "贫僧掐指一算，你五行缺金，但这币五行缺德。不配。"
-                        : "放下执念（止损），立地成佛（回本）。"
-                  }"
+                  "{currentVerdict}"
                 </p>
                 <p className="text-xs text-purple-400/60 mt-2">
                   {isEN ? '🔮 Today: Uninstall App ✓ | Buy dip ✗' : '🔮 今日宜：卸载App | 忌：抄底'}
                 </p>
               </div>
 
-              {/* 逃跑建议 - 荒谬版 */}
+              {/* 逃跑建议 - 从文案库随机选择 */}
               <div className="bg-red-900/20 border border-red-600/30 rounded p-3 mb-4">
                 <p className="text-red-400 text-xs font-bold mb-1">🏃 {isEN ? 'Exit Strategy' : '逃跑建议'}</p>
                 <p className="text-xs text-gray-400">
-                  {isEN 
-                    ? getPonziLevel() > 70 
-                      ? "RUN! Leave your shoes behind! Go deliver food to hedge your losses!"
-                      : getPonziLevel() > 40
-                        ? "Screenshot your gains NOW. In 5 minutes it might just be a memory."
-                        : "Surprisingly decent. But remember: even a broken clock is right twice a day."
-                    : getPonziLevel() > 70
-                      ? "快跑！鞋都不要了！赶紧去送两单外卖对冲一下亏损！"
-                      : getPonziLevel() > 40
-                        ? "赶紧截图发朋友圈！5分钟后可能就只剩回忆了。"
-                        : "居然还行？但记住：就算是坏掉的钟，一天也能对两次。"
-                  }
+                  {currentExitAdvice}
                 </p>
               </div>
 
