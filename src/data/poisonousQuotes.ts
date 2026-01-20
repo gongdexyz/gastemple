@@ -155,6 +155,197 @@ export const PONZI_LEVELS = {
   },
 }
 
+// 🏛️ 庞氏结构分析文案库 - 更丰富的毒舌解读
+export const PONZI_ANALYSIS = {
+  // 代币模型分析
+  tokenModel: {
+    high: {
+      cn: [
+        "代币模型：纯度极高的空气币。从空气中来，回空气中去。",
+        "代币模型：经典的「击鼓传花」结构，目前鼓声震天响。",
+        "代币模型：空气中掺杂了少量兴奋剂，让你产生「这次不一样」的幻觉。",
+        "代币模型：100%情绪价值，0%实际价值。但情绪价值也是价值嘛...吗？",
+        "代币模型：白皮书写了50页，核心逻辑一句话——「你买我就涨」。",
+        "代币模型：环保降解型代币，半衰期约3个月。",
+        "代币模型：经典的「庞氏套娃」结构，一层套一层，层层都是坑。",
+        "代币模型：项目方持币90%，你持有的是「流动性出口」。",
+      ],
+      en: [
+        "Token model: Pure air coin. From air it came, to air it returns.",
+        "Token model: Classic 'hot potato' structure, drums beating loud.",
+        "Token model: Air with stimulants, making you think 'this time is different'.",
+        "Token model: 100% emotional value, 0% real value. But emotional value counts... right?",
+        "Token model: 50-page whitepaper, one core logic - 'you buy, I pump'.",
+        "Token model: Eco-degradable token, half-life about 3 months.",
+        "Token model: Classic 'Ponzi nesting doll', layer after layer of traps.",
+        "Token model: Team holds 90%, you hold the 'liquidity exit'.",
+      ]
+    },
+    medium: {
+      cn: [
+        "代币模型：有点东西，但不多。主要靠信仰充值。",
+        "代币模型：叙事驱动型，故事讲完就得换新的。",
+        "代币模型：半空气半实体，像薛定谔的猫，不打开钱包不知道死活。",
+        "代币模型：有产品有用户，但用户主要是来挖矿的。",
+        "代币模型：技术不错，可惜没人用。代币价值全靠「未来可期」。",
+        "代币模型：介于「正经项目」和「高级骗局」之间的灰色地带。",
+      ],
+      en: [
+        "Token model: Has something, but not much. Mainly faith-powered.",
+        "Token model: Narrative-driven, needs new stories constantly.",
+        "Token model: Half air half substance, like Schrödinger's cat.",
+        "Token model: Has product and users, but users are mainly farming.",
+        "Token model: Good tech, shame no one uses it. Value based on 'future potential'.",
+        "Token model: Gray area between 'legit project' and 'sophisticated scam'.",
+      ]
+    },
+    low: {
+      cn: [
+        "代币模型：居然有点靠谱？贫僧揉揉眼睛再看一遍。",
+        "代币模型：有实际收入支撑，在币圈算是稀有物种了。",
+        "代币模型：结构相对健康，但别忘了这是币圈，健康是相对的。",
+        "代币模型：难得一见的正经项目。但你的手可能会毁掉一切。",
+      ],
+      en: [
+        "Token model: Actually decent? Let me rub my eyes and check again.",
+        "Token model: Has real revenue, a rare species in crypto.",
+        "Token model: Relatively healthy, but remember this is crypto, 'healthy' is relative.",
+        "Token model: Rare legit project. But your hands might ruin everything.",
+      ]
+    }
+  },
+  // 跑路难度分析
+  exitDifficulty: {
+    high: {
+      cn: [
+        "跑路难度：「关门打狗」的前兆。门缝还留了一丝，你猜是给你逃跑用的，还是为了夹你的头？",
+        "跑路难度：池子浅得能看见底，你一卖就砸穿地板。",
+        "跑路难度：跑什么？链上池子都干了，这就是「终点」。",
+        "跑路难度：理论上可以跑，实际上滑点50%起步。",
+        "跑路难度：项目方已经在机场了，你还在研究K线。",
+        "跑路难度：门已经焊死了，窗户也钉上了。你现在是「长期投资者」了。",
+        "跑路难度：此时不跑，更待何时？难道等花在你手里炸开吗？",
+        "跑路难度：DEX流动性约等于你奶奶的养老金，卖出请三思。",
+      ],
+      en: [
+        "Exit difficulty: 'Trap door closing'. Is that crack for you to escape, or to crush your head?",
+        "Exit difficulty: Pool so shallow you can see the bottom. One sell and you break the floor.",
+        "Exit difficulty: Exit what? Pool's dry, this IS the end.",
+        "Exit difficulty: Theoretically possible, practically 50% slippage minimum.",
+        "Exit difficulty: Team's at the airport, you're still studying charts.",
+        "Exit difficulty: Door welded shut, windows nailed. You're a 'long-term investor' now.",
+        "Exit difficulty: If not now, when? Wait for it to explode in your hands?",
+        "Exit difficulty: DEX liquidity equals your grandma's pension. Think twice before selling.",
+      ]
+    },
+    medium: {
+      cn: [
+        "跑路难度：能跑，但得排队。前面还有100个人等着出货。",
+        "跑路难度：中等难度，建议分批出货，别一把梭。",
+        "跑路难度：流动性还行，但大单会砸出坑。",
+        "跑路难度：CEX有深度，DEX是摆设。想跑去中心化交易所。",
+        "跑路难度：现在跑还来得及，再等等可能就来不及了。",
+        "跑路难度：门开着，但门口有保安。跑的时候别太张扬。",
+      ],
+      en: [
+        "Exit difficulty: Can run, but queue up. 100 people ahead waiting to dump.",
+        "Exit difficulty: Medium difficulty, suggest selling in batches.",
+        "Exit difficulty: Liquidity okay, but big orders will crater the price.",
+        "Exit difficulty: CEX has depth, DEX is decoration. Run to centralized exchange.",
+        "Exit difficulty: Can still escape now, wait longer and maybe not.",
+        "Exit difficulty: Door's open, but there's security. Don't be too obvious when running.",
+      ]
+    },
+    low: {
+      cn: [
+        "跑路难度：流动性充足，想跑随时能跑。问题是你舍得跑吗？",
+        "跑路难度：大门敞开，但你可能会因为贪心而错过最佳逃跑时机。",
+        "跑路难度：低。但贫僧担心的不是你能不能跑，是你愿不愿意跑。",
+        "跑路难度：没人拦你，但你的心魔会。",
+      ],
+      en: [
+        "Exit difficulty: Plenty of liquidity, can run anytime. Question is, will you?",
+        "Exit difficulty: Door wide open, but greed might make you miss the exit.",
+        "Exit difficulty: Low. But I worry not about if you CAN run, but if you WILL.",
+        "Exit difficulty: No one's stopping you, but your inner demons will.",
+      ]
+    }
+  },
+  // 项目定位分析
+  projectPosition: {
+    high: {
+      cn: [
+        "项目定位：📍屠宰场VIP候场区。给猪听音乐，是为了肉质更鲜美。",
+        "项目定位：📍迪拜诈骗团伙庆功宴。你是桌上的一道菜。",
+        "项目定位：📍缅北电诈园区VIP中转站。风景很好，进来就别想出去了。",
+        "项目定位：📍赛博乱葬岗。这里很安静，适合出家。",
+        "项目定位：📍由于经费不足，该项目定位已无法显示。",
+        "项目定位：📍韭菜收割机4.0版本测试场地。",
+        "项目定位：📍Web3版「杀猪盘」实验基地。",
+        "项目定位：📍庄家的提款机，散户的碎钞机。",
+      ],
+      en: [
+        "Project location: 📍Slaughterhouse VIP waiting room. Music for pigs makes meat tender.",
+        "Project location: 📍Dubai scam gang celebration. You're a dish on the table.",
+        "Project location: 📍Myanmar scam compound VIP lounge. Nice view, no exit.",
+        "Project location: 📍Cyber mass grave. Quiet here, good for becoming a monk.",
+        "Project location: 📍Due to budget cuts, location unavailable.",
+        "Project location: 📍Leek harvester 4.0 testing ground.",
+        "Project location: 📍Web3 'pig butchering' experiment base.",
+        "Project location: 📍Whale's ATM, retail's shredder.",
+      ]
+    },
+    medium: {
+      cn: [
+        "项目定位：📍币圈「灰色地带」。不算骗局，但也别太认真。",
+        "项目定位：📍叙事工厂流水线。故事讲完换下一个。",
+        "项目定位：📍信仰充值站。充多少看你的虔诚程度。",
+        "项目定位：📍击鼓传花游戏厅。目前鼓声还在响。",
+        "项目定位：📍薛定谔的项目。不打开钱包不知道死活。",
+        "项目定位：📍「下一个以太坊」候选名单第9527位。",
+      ],
+      en: [
+        "Project location: 📍Crypto 'gray area'. Not a scam, but don't take it too seriously.",
+        "Project location: 📍Narrative factory assembly line. Story done, next one please.",
+        "Project location: 📍Faith recharge station. Amount depends on your devotion.",
+        "Project location: 📍Hot potato arcade. Drums still beating.",
+        "Project location: 📍Schrödinger's project. Don't know if dead until you check wallet.",
+        "Project location: 📍'Next Ethereum' candidate list #9527.",
+      ]
+    },
+    low: {
+      cn: [
+        "项目定位：📍难得一见的正经项目。但在币圈，正经也是相对的。",
+        "项目定位：📍有实际产品的稀有物种。请珍惜，可能是最后一个了。",
+        "项目定位：📍相对靠谱区。但别忘了，这是币圈。",
+        "项目定位：📍佛祖点头区。但他老人家也说了，别梭哈。",
+      ],
+      en: [
+        "Project location: 📍Rare legit project. But in crypto, 'legit' is relative.",
+        "Project location: 📍Rare species with actual product. Cherish it, might be the last.",
+        "Project location: 📍Relatively safe zone. But remember, this is crypto.",
+        "Project location: 📍Buddha-approved zone. But he also said, don't go all-in.",
+      ]
+    }
+  }
+}
+
+// 随机获取庞氏分析文案
+export const getRandomPonziAnalysis = (score: number, isEN: boolean) => {
+  const level = score > 70 ? 'high' : score > 40 ? 'medium' : 'low'
+  const lang = isEN ? 'en' : 'cn'
+  
+  const tokenModels = PONZI_ANALYSIS.tokenModel[level][lang]
+  const exitDifficulties = PONZI_ANALYSIS.exitDifficulty[level][lang]
+  const projectPositions = PONZI_ANALYSIS.projectPosition[level][lang]
+  
+  return {
+    tokenModel: tokenModels[Math.floor(Math.random() * tokenModels.length)],
+    exitDifficulty: exitDifficulties[Math.floor(Math.random() * exitDifficulties.length)],
+    projectPosition: projectPositions[Math.floor(Math.random() * projectPositions.length)],
+  }
+}
+
 export const getRandomQuote = (isEN: boolean) => {
   const quotes = isEN ? BUDDHA_QUOTES_EN : BUDDHA_QUOTES_CN
   return quotes[Math.floor(Math.random() * quotes.length)]
