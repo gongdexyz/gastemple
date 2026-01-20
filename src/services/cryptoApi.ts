@@ -12,6 +12,15 @@ export interface CoinData {
   price_change_percentage_24h: number
   market_cap: number
   market_cap_rank: number
+  // ATH相关数据
+  ath?: number                      // 历史最高价
+  ath_change_percentage?: number    // 距ATH跌幅（负数）
+  ath_date?: string                 // ATH日期
+  atl?: number                      // 历史最低价
+  atl_change_percentage?: number    // 距ATL涨幅
+  total_volume?: number             // 24h交易量
+  circulating_supply?: number       // 流通量
+  total_supply?: number             // 总量
 }
 
 export interface TrendingCoin {
@@ -213,17 +222,17 @@ const BUDDHA_ROASTS = {
   // 垃圾币小涨专用 (5%-15% 但排名很差) - 诱多陷阱/回光返照风格
   shitcoinPump: {
     cn: [
-      "奇迹！监测到心脏复苏信号（+{change}%）。但这走势怎么看都像是「回光返照」。你是信它起死回生，还是信庄家在拔氧气管前最后骗一次保费？",
-      "哟，涨了{change}%？这叫「巴甫洛夫的狗」效应。之前跌了90%打你一顿，今天给个甜枣你就摇尾巴了？斯德哥尔摩综合症晚期患者建议立刻就医。",
-      "善哉！这只垃圾桶里最靓的仔居然发光了（+{change}%）。虽然本质还是废品，但不得不承认，它今天是一块「可回收垃圾」。建议趁热回收，晚了就馊了。",
-      "监测到尸体...哦不，代币生命体征恢复了{change}%。这种走势在医学上叫「回光返照」，在金融学上叫「骗炮」。庄家花点小钱画个门，你就以为牛回速归了？",
-      "涨了{change}%？这叫「死刑犯的断头饭」——吃得再好，结局也不会变。上天给你这{change}%是让你逃生的，不是让你加仓的。",
+      "奇迹！监测到心脏复苏信号（+{change}%）。但距离ATH还跌了{athDrop}%，这走势怎么看都像是「回光返照」。你是信它起死回生，还是信庄家在拔氧气管前最后骗一次保费？",
+      "哟，涨了{change}%？但ATH跌了{athDrop}%你知道吗？这叫「巴甫洛夫的狗」效应。之前跌了90%打你一顿，今天给个甜枣你就摇尾巴了？",
+      "善哉！这只垃圾桶里最靓的仔居然发光了（+{change}%）。虽然距离历史高点还跌了{athDrop}%，但不得不承认，它今天是一块「可回收垃圾」。",
+      "监测到尸体...哦不，代币生命体征恢复了{change}%。但ATH是${ath}，现在跌了{athDrop}%。这种走势在医学上叫「回光返照」，在金融学上叫「骗炮」。",
+      "涨了{change}%？历史高点跌了{athDrop}%你怎么不说？这叫「死刑犯的断头饭」——吃得再好，结局也不会变。",
     ],
     en: [
-      "Miracle! Heartbeat detected (+{change}%). But this looks like a 'dead cat bounce'. Are you believing in resurrection, or is the market maker pulling the plug after one last scam?",
-      "Oh, up {change}%? Classic Pavlov's dog. They beat you down 90%, now a little treat and you're wagging your tail? Stockholm syndrome patient detected.",
-      "Blessed! The shiniest turd in the garbage bin is glowing (+{change}%). Still trash, but today it's 'recyclable trash'. Sell it while it's warm, before it rots.",
-      "Corpse detected... oh wait, vital signs recovered {change}%. Medically this is called 'rally before death'. Financially it's called 'bull trap'. Don't fall for it.",
+      "Miracle! Heartbeat detected (+{change}%). But still down {athDrop}% from ATH. This looks like a 'dead cat bounce'. Are you believing in resurrection?",
+      "Oh, up {change}%? But down {athDrop}% from ATH. Classic Pavlov's dog. They beat you down, now a little treat and you're wagging your tail?",
+      "Blessed! The shiniest turd is glowing (+{change}%). Still down {athDrop}% from ATH though. Today it's 'recyclable trash'. Sell it while it's warm.",
+      "Corpse detected... vital signs recovered {change}%. ATH was ${ath}, now down {athDrop}%. Medically this is 'rally before death'. Financially it's 'bull trap'.",
     ]
   },
   // 正常币小涨专用 (5%-15%) - 温和阴阳
@@ -243,15 +252,15 @@ const BUDDHA_ROASTS = {
   // 垃圾币暴涨专用 (>15% 但排名很差) - 更狠的警告
   shitcoinBigPump: {
     cn: [
-      "佛祖显灵！暴涨{change}%！但别嗨，这根绿柱子不过是给你立的墓碑罢了。庄家把镰刀举高了{change}%，是为了砍得更深，不是为了放你走。",
-      "阿弥陀佛！{change}%的涨幅！项目方正在游艇上开香槟，这{change}%是他们买香槟剩下的零钱。你是业绩，不是股东。",
-      "暴涨{change}%！经典的「杀猪盘」诱饵结构。目前的上涨只是为了让猪肉更紧实一点。趁现在门缝开了一点点，赶紧挤出去。",
-      "涨了{change}%？色即是空，涨即是跌。这{change}%是心魔，是庄家施舍的诱饵。你若贪恋这口饵，便是吞下了整个鱼钩。",
+      "佛祖显灵！暴涨{change}%！但ATH跌了{athDrop}%你知道吗？这根绿柱子不过是给你立的墓碑罢了。庄家把镰刀举高了，是为了砍得更深。",
+      "阿弥陀佛！{change}%的涨幅！但历史高点${ath}，现在跌了{athDrop}%。项目方正在游艇上开香槟，你是业绩，不是股东。",
+      "暴涨{change}%！但距ATH还跌{athDrop}%呢。经典的「杀猪盘」诱饵结构，目前的上涨只是为了让猪肉更紧实一点。",
+      "涨了{change}%？ATH跌了{athDrop}%你怎么不说？色即是空，涨即是跌。这是心魔，是庄家施舍的诱饵。",
     ],
     en: [
-      "Buddha's blessing! Up {change}%! But don't celebrate - this green candle is just your tombstone. Market maker raised the scythe {change}% higher to cut deeper, not to let you go.",
-      "Amitabha! {change}% pump! The dev team is popping champagne on their yacht. This {change}% is their spare change. You're the product, not the shareholder.",
-      "Up {change}%! Classic 'pig butchering' bait structure. This pump is just to fatten you up before slaughter. The door is cracked open - squeeze out NOW.",
+      "Buddha's blessing! Up {change}%! But down {athDrop}% from ATH. This green candle is just your tombstone. Market maker raised the scythe to cut deeper.",
+      "Amitabha! {change}% pump! ATH was ${ath}, now down {athDrop}%. Dev team is popping champagne. You're the product, not the shareholder.",
+      "Up {change}%! But still {athDrop}% below ATH. Classic 'pig butchering' bait. This pump is just to fatten you up before slaughter.",
     ]
   },
   // 正常币暴涨专用 (>15%) - 先捧后警告
@@ -297,17 +306,17 @@ const BUDDHA_ROASTS = {
   // 暴跌专用 (<-10%)
   bigDump: {
     cn: [
-      "暴跌{change}%！这不是回调，这是跳楼。佛祖说：跌了90%还有90%可以跌，下跌空间充足。建议留着当传家宝，传给孙子维权。",
-      "阿弥陀佛！暴跌{change}%！佛祖说：把App颜色反转一下，这样看起来像在涨。心理安慰也是一种修行。",
-      "善哉！跌了{change}%。佛祖说：「价值投资」模式已激活。翻译：套牢了不想割。施主，放下执念，及时止损才是正道。",
-      "暴跌{change}%！佛祖说：抄底成功！恭喜你精准抄在了半山腰。山脚还远着呢，继续加油。",
-      "跌了{change}%！我不入地狱谁入地狱？施主大义！功德+1000（以此慰藉受伤的心灵）。",
+      "暴跌{change}%！距ATH已跌{athDrop}%，这不是回调，这是跳楼。佛祖说：跌了90%还有90%可以跌，下跌空间充足。建议留着当传家宝。",
+      "阿弥陀佛！暴跌{change}%！ATH是${ath}，现在跌了{athDrop}%。佛祖说：把App颜色反转一下，这样看起来像在涨。",
+      "善哉！跌了{change}%，距ATH跌了{athDrop}%。佛祖说：「价值投资」模式已激活。翻译：套牢了不想割。",
+      "暴跌{change}%！历史高点跌了{athDrop}%。佛祖说：抄底成功！恭喜你精准抄在了半山腰。山脚还远着呢。",
+      "跌了{change}%，ATH跌了{athDrop}%！我不入地狱谁入地狱？施主大义！功德+1000。",
     ],
     en: [
-      "DOWN {change}%! This isn't a dip, it's a cliff dive. Buddha says: down 90% still has 90% more to go. Keep it as a family heirloom for your grandkids to sue over.",
-      "Amitabha! Down {change}%! Buddha says: invert your app colors, it'll look like it's pumping. Mental comfort is also a form of practice.",
-      "Blessed! Down {change}%. Buddha says: 'Value investing' mode activated. Translation: bagholder in denial. Let go of attachment, cut losses is the way.",
-      "Down {change}%! If not me, who enters hell? Noble sacrifice! Merit +1000 (to comfort your wounded soul).",
+      "DOWN {change}%! Down {athDrop}% from ATH. This isn't a dip, it's a cliff dive. Buddha says: down 90% still has 90% more to go.",
+      "Amitabha! Down {change}%! ATH was ${ath}, now down {athDrop}%. Buddha says: invert your app colors, it'll look like it's pumping.",
+      "Blessed! Down {change}%, {athDrop}% from ATH. Buddha says: 'Value investing' mode activated. Translation: bagholder in denial.",
+      "Down {change}%! {athDrop}% from ATH! If not me, who enters hell? Noble sacrifice! Merit +1000.",
     ]
   },
   // 低排名补刀
@@ -330,6 +339,8 @@ function generateRoast(coin: CoinData, _level: FortuneLevel, isEN: boolean): str
   const change = coin.price_change_percentage_24h || 0
   const mcap = coin.market_cap || 0
   const rank = coin.market_cap_rank || 9999
+  const athDrop = coin.ath_change_percentage || 0  // 负数，如 -95.5
+  const ath = coin.ath || 0
   
   // 判断基本面是否垃圾（低排名或低市值）- 诱多陷阱/回光返照场景
   const isShitcoin = rank > 500 || mcap < 10000000
@@ -356,13 +367,15 @@ function generateRoast(coin: CoinData, _level: FortuneLevel, isEN: boolean): str
     pool = BUDDHA_ROASTS.sideways[lang]
   }
   
-  // 随机选一条并替换变量
+  // 随机选一条并替换变量（包括ATH数据）
   roast = pool[Math.floor(Math.random() * pool.length)]
   roast = roast.replace(/{change}/g, Math.abs(change).toFixed(1))
   roast = roast.replace(/{rank}/g, rank.toString())
+  roast = roast.replace(/{athDrop}/g, Math.abs(athDrop).toFixed(1))
+  roast = roast.replace(/{ath}/g, ath > 1 ? ath.toFixed(2) : ath.toFixed(6))
   
-  // 如果是垃圾币且在涨，追加低排名补刀（概率50%，避免太长）
-  if (isShitcoin && change > 0 && Math.random() > 0.5) {
+  // 低排名补刀：垃圾币且在涨（概率30%）
+  if (isShitcoin && change > 0 && Math.random() < 0.3) {
     const rankRoasts = BUDDHA_ROASTS.lowRankRoast[lang]
     const rankRoast = rankRoasts[Math.floor(Math.random() * rankRoasts.length)]
       .replace(/{rank}/g, rank.toString())
