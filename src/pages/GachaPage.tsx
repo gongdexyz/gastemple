@@ -798,9 +798,9 @@ export const GachaPage: React.FC = () => {
               <div className="bg-gray-800/50 rounded p-3 mb-4 text-sm">
                 <p className="text-cyan-400 text-xs font-bold mb-2">📊 {isEN ? 'Ponzi Structure' : '庞氏结构分析'}</p>
                 <div className="space-y-2 text-gray-400 text-xs">
-                  <p>• {isEN ? 'Token model' : '代币模型'}: {currentPonziAnalysis?.tokenModel || '-'}</p>
-                  <p>• {isEN ? 'Exit difficulty' : '跑路难度'}: {currentPonziAnalysis?.exitDifficulty || '-'}</p>
-                  <p>• {isEN ? 'Dev location' : '项目方定位'}: {currentPonziAnalysis?.projectPosition || '-'}</p>
+                  <p>• {currentPonziAnalysis?.tokenModel || '-'}</p>
+                  <p>• {currentPonziAnalysis?.exitDifficulty || '-'}</p>
+                  <p>• {currentPonziAnalysis?.projectPosition || '-'}</p>
                 </div>
               </div>
 
