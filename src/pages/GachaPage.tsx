@@ -648,7 +648,7 @@ export const GachaPage: React.FC = () => {
                     onClick={handleReset}
                     className="w-full border border-gray-600 text-gray-400 py-2 text-sm hover:text-white transition-colors"
                   >
-                    {isEN ? `Draw Again (${freeDrawsLeft} free)` : `再抽一次 (剩余信仰: ${freeDrawsLeft})`}
+                    {isEN ? `Draw Again (Faith: ${gdBalance.toLocaleString()})` : `再抽一次 (剩余信仰: ${gdBalance.toLocaleString()})`}
                   </button>
                 </div>
               </motion.div>
@@ -779,8 +779,8 @@ export const GachaPage: React.FC = () => {
                   </p>
                   <p className="text-xs mt-0.5">
                     {isEN 
-                      ? (getPonziLevel() > 70 ? 'Merit Destroyer' : getPonziLevel() > 40 ? 'Premium Ponzi' : 'Casino Chip')
-                      : (getPonziLevel() > 70 ? '功德扣除器' : getPonziLevel() > 40 ? '精装盘子' : '赌场筹码')
+                      ? (getPonziLevel() > 70 ? 'Merit Destroyer' : getPonziLevel() > 40 ? 'Premium Ponzi' : 'High-Risk Chip')
+                      : (getPonziLevel() > 70 ? '功德扣除器' : getPonziLevel() > 40 ? '精装盘子' : '高风险筹码')
                     }
                   </p>
                 </div>
