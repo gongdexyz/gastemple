@@ -256,13 +256,13 @@ export const AboutPage: React.FC = () => {
           {/* 社交链接 */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
             className="flex justify-center gap-4">
-            <a href="#" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
+            <a href="https://x.com/gongdexyz" target="_blank" rel="noopener noreferrer" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
               <Twitter className="w-5 h-5" />
             </a>
-            <a href="#" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
+            <a href="https://t.me/mugongde" target="_blank" rel="noopener noreferrer" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
               <MessageCircle className="w-5 h-5" />
             </a>
-            <a href="#" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
+            <a href="https://github.com/gongdexyz/gastemple" target="_blank" rel="noopener noreferrer" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
               <Github className="w-5 h-5" />
             </a>
           </motion.div>
