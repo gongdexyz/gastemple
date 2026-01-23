@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Coins, AlertTriangle, Twitter, MessageCircle, Github } from 'lucide-react'
+import { Coins, AlertTriangle, Twitter, MessageCircle } from 'lucide-react'
 import { Header } from '../components/Header'
 import { GlitchTransition } from '../components/GlitchTransition'
 import { useThemeStore } from '../stores/themeStore'
@@ -13,21 +13,6 @@ export const AboutPage: React.FC = () => {
   const isEN = lang === 'en'
 
   // CN version (Goldman mode - homepage)
-  const tokenomicsCN = [
-    { label: '总量', value: '10 亿个', note: '都在池子里，没藏私房钱' },
-    { label: '税', value: '0%', note: 'Pump.fun 哪来的税？别问傻话' },
-    { label: '预售', value: '无', note: '我自己垫了 2 个 SOL，穷鬼创业' },
-    { label: 'LP锁仓', value: '自动烧', note: '能不能上 Raydium 看你们给不给力' },
-  ]
-
-  // EN version (Degen mode - inner pages)
-  const tokenomicsEN = [
-    { label: 'Supply', value: '1 Billion', note: 'All in bonding curve, obviously' },
-    { label: 'Taxes', value: '0%', note: 'This is Pump.fun, not the IRS' },
-    { label: 'Dev Bag', value: '2 SOL', note: 'Broke dev energy. Pls no dump' },
-    { label: 'LP', value: 'BURNT', note: 'Burnt to hell upon Raydium' },
-  ]
-
   const roadmapCN = [
     { phase: '阶段一：活着', items: ['我把币发出来，你们把币买进去', '只要今晚没归零，这阶段就算成功'] },
     { phase: '阶段二：做梦', items: ['市值到 100K，我再跑几个 AI 视频', '能上交易所，我直播敲真正的木鱼'] },
@@ -52,7 +37,6 @@ export const AboutPage: React.FC = () => {
     { q: 'Why "Cyber Karma"?', a: 'Because you degens need to calm down and reflect on your life choices.' },
   ]
 
-  const tokenomics = isEN ? tokenomicsEN : tokenomicsCN
   const roadmap = isEN ? roadmapEN : roadmapCN
   const faqs = isEN ? faqsEN : faqsCN
 
@@ -261,9 +245,6 @@ export const AboutPage: React.FC = () => {
             </a>
             <a href="https://t.me/mugongde" target="_blank" rel="noopener noreferrer" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
               <MessageCircle className="w-5 h-5" />
-            </a>
-            <a href="https://github.com/gongdexyz/gastemple" target="_blank" rel="noopener noreferrer" className={`p-3 rounded-full transition-all ${isDegen ? 'bg-degen-green/20 hover:bg-degen-green/30 text-degen-green' : 'bg-goldman-gold/20 hover:bg-goldman-gold/30 text-goldman-gold'}`}>
-              <Github className="w-5 h-5" />
             </a>
           </motion.div>
         </div>
