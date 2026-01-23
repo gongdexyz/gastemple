@@ -93,7 +93,7 @@ const MISS_TEXTS_EN = [
 
 export const WoodenFish: React.FC = () => {
   const { mode } = useThemeStore()
-  const { gdBalance, spendGD } = useGachaStore()
+  const { gdBalance, spendGD, addGD } = useGachaStore()
   const { lang } = useLangStore()
   const [merits, setMerits] = useState<MeritPopup[]>([])
   const [totalMerits, setTotalMerits] = useState(0)
@@ -107,6 +107,9 @@ export const WoodenFish: React.FC = () => {
   const [isFishPressed, setIsFishPressed] = useState(false)
   // gifKey removed - no longer needed
   const [isAnimating, setIsAnimating] = useState(false)
+  const [gameMode, setGameMode] = useState<'meditation' | 'merit'>('meditation') // 默认冥想模式
+  const [criticalReward, setCriticalReward] = useState<{ amount: number; text: string } | null>(null) // 暴击奖励显示
+  const rewardAudioRef = useRef<HTMLAudioElement | null>(null) // 奖励音效
   
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
@@ -115,6 +118,10 @@ export const WoodenFish: React.FC = () => {
   useEffect(() => {
     audioRef.current = new Audio('/muyu.mp3')
     audioRef.current.volume = 0.5
+    
+    // 奖励音效 - 使用roll.mp3作为金币滚动音效
+    rewardAudioRef.current = new Audio('/sounds/roll.mp3')
+    rewardAudioRef.current.volume = 0.7
     
     // 预加载图片避免闪烁
     const preloadGif = new Image()
@@ -177,58 +184,251 @@ export const WoodenFish: React.FC = () => {
   }, [lang])
 
   const addMerit = useCallback((shouldSpawnTarget: boolean = true) => {
-    if (gdBalance < burnCost) return false
-    
-    spendGD(burnCost)
-    setTotalMerits(prev => {
-      const newTotal = prev + 1
-      // 第二次点击后才开始生成随机圈，且只有在点击中心木鱼时才生成
-      if (newTotal > 1 && shouldSpawnTarget) {
-        spawnNewTarget()
-      }
-      return newTotal
-    })
-    setCombo(prev => prev + 1)
-    
-    if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
-    comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
+    // 冥想模式：免费游玩，不消耗代币，有小几率获得GD奖励
+    if (gameMode === 'meditation') {
+      setTotalMerits(prev => {
+        const newTotal = prev + 1
+        // 第二次点击后才开始生成随机圈，且只有在点击中心木鱼时才生成
+        if (newTotal > 1 && shouldSpawnTarget) {
+          spawnNewTarget()
+        }
+        return newTotal
+      })
+      setCombo(prev => prev + 1)
+      
+      if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
+      comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
 
-    // Play sound with pitch variation based on combo
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0
-      // 根据combo调整播放速度（变调效果）
-      if (combo >= 20) {
-        audioRef.current.playbackRate = 2.5 // 疯魔模式
-      } else if (combo >= 10) {
-        audioRef.current.playbackRate = 1.8 // 暴走前奏
-      } else if (combo >= 5) {
-        audioRef.current.playbackRate = 1.3 // 加速
-      } else {
-        audioRef.current.playbackRate = 1.0 // 正常
+      // Play sound with pitch variation based on combo
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0
+        // 根据combo调整播放速度（变调效果）
+        if (combo >= 20) {
+          audioRef.current.playbackRate = 2.5 // 疯魔模式
+        } else if (combo >= 10) {
+          audioRef.current.playbackRate = 1.8 // 暴走前奏
+        } else if (combo >= 5) {
+          audioRef.current.playbackRate = 1.3 // 加速
+        } else {
+          audioRef.current.playbackRate = 1.0 // 正常
+        }
+        audioRef.current.play().catch(() => {})
       }
-      audioRef.current.play().catch(() => {})
+      
+      // 触发震动
+      triggerVibration()
+      setIsAnimating(true)
+      setTimeout(() => setIsAnimating(false), 800)
+
+      // 冥想模式：10%几率获得小额GD奖励（1-10 GD）
+      let gdReward = 0
+      let gdRewardText = ''
+      const randomValue = Math.random()
+      
+      if (randomValue < 0.1) {
+        gdReward = Math.floor(Math.random() * 10) + 1 // 1-10 GD
+        addGD(gdReward)
+        gdRewardText = isEN ? `💰 +${gdReward} $GD!` : `💰 +${gdReward} $GD！`
+      }
+      
+      const isGDReward = gdReward > 0
+      
+      // 根据combo选择文案：combo > 5 进入暴走模式
+      const textPool = combo > 5 ? RAGE_TEXTS : NORMAL_TEXTS
+      const randomItem = textPool[Math.floor(Math.random() * textPool.length)]
+      
+      // 决定显示哪个文案（优先级：GD奖励 > 普通）
+      let displayText = randomItem.text
+      let displayColor = randomItem.color
+      
+      if (isGDReward) {
+        displayText = gdRewardText
+        displayColor = 'text-green-400'
+      }
+      
+      const newMerit: MeritPopup = {
+        id: idRef.current++,
+        x: Math.random() * 120 - 60,
+        y: Math.random() * 40 - 60,
+        text: displayText,
+        color: displayColor,
+      }
+      setMerits(prev => [...prev.slice(-15), newMerit])
+      setTimeout(() => setMerits(prev => prev.filter(m => m.id !== newMerit.id)), 1000)
+      
+      return true
+    }
+    // 功德模式：消耗代币，有概率暴击和获得GD
+    else if (gameMode === 'merit') {
+      if (gdBalance < burnCost) return false
+      
+      spendGD(burnCost)
+      
+      // 20%概率触发暴击（佛祖显灵）- 增加暴击几率
+      const isCriticalHit = Math.random() < 0.2
+      let meritBonus = 1
+      let criticalText = ''
+      
+      if (isCriticalHit) {
+        meritBonus = 10 // 暴击获得10倍功德
+        criticalText = isEN ? '✨ BUDDHA BLESS! 10x MERIT! ✨' : '✨ 佛祖显灵！功德x10！ ✨'
+      }
+      
+      // GD奖励逻辑 - 增加100 GD以上暴击几率
+      let gdReward = 0
+      let gdRewardText = ''
+      const randomValue = Math.random()
+      
+      // 微小概率：10000 GD (0.5%) - 增加
+      if (randomValue < 0.005) {
+        gdReward = 10000
+        addGD(gdReward)
+        gdRewardText = isEN ? `💰💰💰 MEGA JACKPOT! +${gdReward} $GD! 💰💰💰` : `💰💰💰 功德无量！+${gdReward} $GD！ 💰💰💰`
+        
+        // 触发暴击奖励特别放大显示
+        setCriticalReward({
+          amount: gdReward,
+          text: gdRewardText
+        })
+        
+        // 播放奖励音效
+        if (rewardAudioRef.current) {
+          rewardAudioRef.current.currentTime = 0
+          rewardAudioRef.current.playbackRate = 1.0
+          rewardAudioRef.current.play().catch(() => {})
+        }
+        
+        setTimeout(() => setCriticalReward(null), 3000) // 3秒后消失
+      }
+      // 微小概率：5000 GD (1%) - 增加
+      else if (randomValue < 0.015) {
+        gdReward = 5000
+        addGD(gdReward)
+        gdRewardText = isEN ? `💰💰💰 SUPER JACKPOT! +${gdReward} $GD! 💰💰💰` : `💰💰💰 功德圆满！+${gdReward} $GD！ 💰💰💰`
+        
+        // 触发暴击奖励特别放大显示
+        setCriticalReward({
+          amount: gdReward,
+          text: gdRewardText
+        })
+        
+        // 播放奖励音效
+        if (rewardAudioRef.current) {
+          rewardAudioRef.current.currentTime = 0
+          rewardAudioRef.current.playbackRate = 1.0
+          rewardAudioRef.current.play().catch(() => {})
+        }
+        
+        setTimeout(() => setCriticalReward(null), 3000) // 3秒后消失
+      }
+      // 概率：1000 GD (3%) - 增加
+      else if (randomValue < 0.045) {
+        gdReward = 1000
+        addGD(gdReward)
+        gdRewardText = isEN ? `💰💰💰 JACKPOT! +${gdReward} $GD! 💰💰💰` : `💰💰💰 功德暴击！+${gdReward} $GD！ 💰💰💰`
+        
+        // 触发暴击奖励特别放大显示
+        setCriticalReward({
+          amount: gdReward,
+          text: gdRewardText
+        })
+        
+        // 播放奖励音效
+        if (rewardAudioRef.current) {
+          rewardAudioRef.current.currentTime = 0
+          rewardAudioRef.current.playbackRate = 1.0
+          rewardAudioRef.current.play().catch(() => {})
+        }
+        
+        setTimeout(() => setCriticalReward(null), 3000) // 3秒后消失
+      }
+      // 概率：200 GD (10%) - 新增中等奖励
+      else if (randomValue < 0.145) {
+        gdReward = 200
+        addGD(gdReward)
+        gdRewardText = isEN ? `💰💰 NICE! +${gdReward} $GD! 💰💰` : `💰💰 不错！+${gdReward} $GD！ 💰💰`
+      }
+      // 最大概率：50 GD (50%)
+      else if (randomValue < 0.645) {
+        gdReward = 50 // 固定50 GD
+        addGD(gdReward)
+        gdRewardText = isEN ? `💰 +${gdReward} $GD!` : `💰 +${gdReward} $GD！`
+      }
+      // 小概率不给：35.5% (randomValue >= 0.645)
+      
+      const isGDReward = gdReward > 0
+      
+      setTotalMerits(prev => {
+        const newTotal = prev + meritBonus
+        // 第二次点击后才开始生成随机圈，且只有在点击中心木鱼时才生成
+        if (newTotal > 1 && shouldSpawnTarget) {
+          spawnNewTarget()
+        }
+        return newTotal
+      })
+      setCombo(prev => prev + 1)
+      
+      if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current)
+      comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
+
+      // Play sound with pitch variation based on combo
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0
+        // 暴击时使用特殊音效
+        if (isCriticalHit) {
+          audioRef.current.playbackRate = 1.5 // 暴击音效更高亢
+        } else if (combo >= 20) {
+          audioRef.current.playbackRate = 2.5 // 疯魔模式
+        } else if (combo >= 10) {
+          audioRef.current.playbackRate = 1.8 // 暴走前奏
+        } else if (combo >= 5) {
+          audioRef.current.playbackRate = 1.3 // 加速
+        } else {
+          audioRef.current.playbackRate = 1.0 // 正常
+        }
+        audioRef.current.play().catch(() => {})
+      }
+      
+      // 触发震动 - 暴击时震动更强
+      if ('vibrate' in navigator) {
+        const intensity = isCriticalHit ? 200 : Math.min(combo * 5, 100)
+        navigator.vibrate(intensity)
+      }
+      
+      setIsAnimating(true)
+      setTimeout(() => setIsAnimating(false), isCriticalHit ? 1200 : 800)
+
+      // 根据combo选择文案：combo > 5 进入暴走模式
+      const textPool = combo > 5 ? RAGE_TEXTS : NORMAL_TEXTS
+      const randomItem = textPool[Math.floor(Math.random() * textPool.length)]
+      
+      // 决定显示哪个文案（优先级：GD奖励 > 暴击 > 普通）
+      let displayText = randomItem.text
+      let displayColor = randomItem.color
+      
+      if (isGDReward) {
+        displayText = gdRewardText
+        displayColor = 'text-green-400'
+      } else if (isCriticalHit) {
+        displayText = criticalText
+        displayColor = 'text-yellow-400'
+      }
+      
+      const newMerit: MeritPopup = {
+        id: idRef.current++,
+        x: Math.random() * 120 - 60,
+        y: Math.random() * 40 - 60,
+        text: displayText,
+        color: displayColor,
+      }
+      setMerits(prev => [...prev.slice(-15), newMerit])
+      setTimeout(() => setMerits(prev => prev.filter(m => m.id !== newMerit.id)), isCriticalHit ? 2000 : 1000)
+      
+      return true
     }
     
-    // 触发震动
-    triggerVibration()
-    setIsAnimating(true)
-    setTimeout(() => setIsAnimating(false), 800)
-
-    // 根据combo选择文案：combo > 5 进入暴走模式
-    const textPool = combo > 5 ? RAGE_TEXTS : NORMAL_TEXTS
-    const randomItem = textPool[Math.floor(Math.random() * textPool.length)]
-    const newMerit: MeritPopup = {
-      id: idRef.current++,
-      x: Math.random() * 120 - 60,
-      y: Math.random() * 40 - 60,
-      text: randomItem.text,
-      color: randomItem.color,
-    }
-    setMerits(prev => [...prev.slice(-15), newMerit])
-    setTimeout(() => setMerits(prev => prev.filter(m => m.id !== newMerit.id)), 1000)
-    
-    return true
-  }, [gdBalance, spendGD, spawnNewTarget, combo])
+    return false
+  }, [gdBalance, spendGD, addGD, spawnNewTarget, combo, gameMode, isEN])
 
   const handleTargetClick = useCallback((targetId: number, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -260,6 +460,47 @@ export const WoodenFish: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center -mt-4">
+      {/* 模式切换开关 */}
+      <div className={`mb-6 flex flex-col items-center ${isDegen ? 'font-pixel' : ''}`}>
+        <div className={`text-lg font-bold mb-2 ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
+          {isEN ? 'Game Mode' : '游戏模式'}
+        </div>
+        <div className="flex items-center space-x-4">
+          <span className={`text-sm ${gameMode === 'meditation' ? (isDegen ? 'text-degen-green font-bold' : 'text-green-500 font-bold') : 'text-gray-500'}`}>
+            {isEN ? '🧘 Meditation' : '🧘 冥想模式'}
+          </span>
+          <button
+            onClick={() => setGameMode(gameMode === 'meditation' ? 'merit' : 'meditation')}
+            className={`
+              relative inline-flex h-8 w-16 items-center rounded-full
+              transition-colors duration-300 focus:outline-none
+              ${gameMode === 'merit'
+                ? (isDegen ? 'bg-degen-purple' : 'bg-goldman-gold')
+                : (isDegen ? 'bg-degen-green' : 'bg-gray-600')
+              }
+            `}
+          >
+            <span
+              className={`
+                inline-block h-6 w-6 transform rounded-full bg-white
+                transition-transform duration-300
+                ${gameMode === 'merit' ? 'translate-x-9' : 'translate-x-1'}
+                ${gameMode === 'merit' ? (isDegen ? 'shadow-degen-glow' : 'shadow-gold-glow') : ''}
+              `}
+            />
+          </button>
+          <span className={`text-sm ${gameMode === 'merit' ? (isDegen ? 'text-degen-yellow font-bold' : 'text-yellow-500 font-bold') : 'text-gray-500'}`}>
+            {isEN ? '🔥 Merit Burn' : '🔥 功德模式'}
+          </span>
+        </div>
+        <div className={`mt-2 text-xs ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
+          {gameMode === 'meditation'
+            ? (isEN ? 'Free play, no token consumption' : '免费游玩，不消耗代币')
+            : (isEN ? 'Burns $GD tokens, earns real merit' : '消耗$GD代币，积累真实功德')
+          }
+        </div>
+      </div>
+
       {/* 功德计数器 */}
       <div className={`text-center mb-6 ${isDegen ? 'font-pixel' : ''}`}>
         <div className={`text-5xl font-bold mb-2 ${isDegen ? 'text-degen-yellow neon-text' : 'text-goldman-gold'}`}>
@@ -291,38 +532,55 @@ export const WoodenFish: React.FC = () => {
         >
           <button
             onClick={handleCenterClick}
-            disabled={gdBalance < burnCost}
+            disabled={gameMode === 'merit' && gdBalance < burnCost}
             style={{
               width: '100%',
               height: '100%',
               boxShadow: isFishPressed
-                ? isDegen ? '0 0 60px #39ff14' : '0 0 60px #c9a962'
-                : isDegen ? '0 0 30px rgba(57,255,20,0.25)' : '0 0 30px rgba(201,169,98,0.25)'
+                ? (gameMode === 'merit'
+                   ? (isDegen ? '0 0 80px #ffd700' : '0 0 80px #ffd700')
+                   : (isDegen ? '0 0 60px #39ff14' : '0 0 60px #c9a962'))
+                : (gameMode === 'merit'
+                   ? (isDegen ? '0 0 40px rgba(255,215,0,0.5)' : '0 0 40px rgba(255,215,0,0.5)')
+                   : (isDegen ? '0 0 30px rgba(57,255,20,0.25)' : '0 0 30px rgba(201,169,98,0.25)'))
             }}
             className={`
               rounded-full flex items-center justify-center
               cursor-pointer select-none
-              ${gdBalance < burnCost ? 'cursor-default opacity-50' : ''}
-              ${isDegen 
-                ? 'bg-gradient-to-br from-degen-green/30 to-degen-purple/30 border-4 border-degen-green' 
-                : 'bg-gradient-to-br from-goldman-gold/20 to-amber-900/30 border-4 border-goldman-gold'
+              ${gameMode === 'merit' && gdBalance < burnCost ? 'cursor-default opacity-50' : ''}
+              ${gameMode === 'merit'
+                ? (isDegen
+                   ? 'bg-gradient-to-br from-yellow-400/40 to-amber-600/40 border-4 border-yellow-400'
+                   : 'bg-gradient-to-br from-yellow-300/40 to-amber-700/40 border-4 border-yellow-400')
+                : (isDegen
+                   ? 'bg-gradient-to-br from-degen-green/30 to-degen-purple/30 border-4 border-degen-green'
+                   : 'bg-gradient-to-br from-goldman-gold/20 to-amber-900/30 border-4 border-goldman-gold')
               }
+              ${gameMode === 'merit' ? 'animate-pulse-slow' : ''}
             `}
           >
           {/* 静态图 - 始终存在，点击时隐藏 */}
-          <img 
+          <img
             src="/muyu-static.gif"
             alt={isEN ? "Wooden Fish" : "木鱼"}
             className={`w-44 h-44 object-cover rounded-full select-none absolute inset-0 m-auto transition-opacity duration-75 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
             draggable={false}
           />
           {/* 动态GIF - 始终存在，点击时显示 */}
-          <img 
+          <img
             src="/muyu.gif"
             alt={isEN ? "Wooden Fish Animation" : "木鱼动画"}
             className={`w-44 h-44 object-cover rounded-full select-none transition-opacity duration-75 ${isAnimating ? 'opacity-100' : 'opacity-0'}`}
             draggable={false}
           />
+          
+          {/* 功德模式光晕效果 */}
+          {gameMode === 'merit' && (
+            <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-amber-500/10 to-yellow-400/20 animate-glow-slow"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-300/10 via-transparent to-amber-600/10 animate-spin-slow"></div>
+            </div>
+          )}
           
         </button>
         </div>
@@ -373,7 +631,7 @@ export const WoodenFish: React.FC = () => {
               animate={{ scale: 1, opacity: 0.7 }}
               exit={{ scale: 0, opacity: 0 }}
               onClick={(e) => handleTargetClick(target.id, e)}
-              disabled={gdBalance < burnCost}
+              disabled={gameMode === 'merit' && gdBalance < burnCost}
               style={{
                 position: 'absolute',
                 left: `calc(50% + ${target.x}px)`,
@@ -383,7 +641,7 @@ export const WoodenFish: React.FC = () => {
               className={`
                 w-16 h-16 rounded-full flex items-center justify-center
                 cursor-pointer select-none pointer-events-auto
-                ${gdBalance < burnCost ? 'opacity-50 cursor-not-allowed' : ''}
+                ${gameMode === 'merit' && gdBalance < burnCost ? 'opacity-50 cursor-not-allowed' : ''}
                 border-2 border-dashed
                 ${isDegen ? 'border-gray-400 bg-gray-800/30' : 'border-gray-500 bg-gray-700/20'}
               `}
@@ -452,10 +710,82 @@ export const WoodenFish: React.FC = () => {
         </AnimatePresence>
       </div>
 
+      {/* 暴击奖励特别放大显示 - 透明背景版 */}
+      <AnimatePresence>
+        {criticalReward && (
+          <motion.div
+            key="critical-reward"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
+          >
+            {/* 半透明遮罩 */}
+            <div className="absolute inset-0 bg-black/40"></div>
+            
+            {/* 中心奖励卡片 - 透明背景无描边 */}
+            <motion.div
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{
+                scale: 1,
+                y: 0
+              }}
+              transition={{
+                duration: 0.4,
+                type: 'spring',
+                stiffness: 200
+              }}
+              className="relative z-10 text-center px-8 py-10 rounded-2xl bg-black/70 backdrop-blur-sm max-w-lg w-full mx-4"
+            >
+              {/* 标题 - 金色字 */}
+              <div className="text-4xl font-bold mb-4 text-yellow-400">
+                {isEN ? '🎯 JACKPOT! 🎯' : '🎯 功德暴击！ 🎯'}
+              </div>
+              
+              {/* 奖励金额 - 金色字 */}
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{
+                  duration: 0.8,
+                  times: [0, 0.5, 1],
+                  repeat: 1
+                }}
+                className="text-6xl font-bold mb-6 text-yellow-300"
+              >
+                +{criticalReward.amount} $GD
+              </motion.div>
+              
+              {/* 奖励描述 - 白色字 */}
+              <div className="text-2xl mb-6 text-white">
+                {criticalReward.text}
+              </div>
+              
+              {/* 庆祝文字 - 红色字 */}
+              <motion.div
+                animate={{
+                  y: [0, -3, 0]
+                }}
+                transition={{
+                  duration: 1.2,
+                  repeat: Infinity
+                }}
+                className="text-xl text-red-400 font-bold"
+              >
+                {isEN ? '🎉 Congratulations! 🎉' : '🎉 恭喜发财！ 🎉'}
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 操作提示 - 紧跟木鱼下方 */}
       <div className={`text-center ${isDegen ? 'font-pixel text-base' : 'text-lg'}`}>
         <p className={isDegen ? 'text-degen-green' : 'text-gray-400'}>
-          {clickTargets.length > 0 
+          {clickTargets.length > 0
             ? (isEN ? 'CATCH THE CIRCLE! ⭕' : '快点圈圈！')
             : (isEN ? 'CLICK THE FROG TO START 🐸' : '点击蛙蛙开始')
           }
