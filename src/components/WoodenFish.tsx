@@ -3,6 +3,29 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useThemeStore } from '../stores/themeStore'
 import { useGachaStore } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
+import { useWalletStore } from '../stores/walletStore'
+import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js'
+import { createTransferInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
+
+// 扩展全局窗口接口以包含Phantom钱包的完整类型
+declare global {
+  interface Window {
+    phantom?: {
+      solana?: {
+        isPhantom?: boolean
+        connect: () => Promise<{ publicKey: { toString: () => string } }>
+        signTransaction: (transaction: Transaction) => Promise<Transaction>
+        signAllTransactions?: (transactions: Transaction[]) => Promise<Transaction[]>
+      }
+    }
+    solana?: {
+      isPhantom?: boolean
+      connect: () => Promise<{ publicKey: { toString: () => string } }>
+      signTransaction: (transaction: Transaction) => Promise<Transaction>
+      signAllTransactions?: (transactions: Transaction[]) => Promise<Transaction[]>
+    }
+  }
+}
 
 interface MeritPopup {
   id: number
@@ -18,6 +41,7 @@ interface ClickTarget {
   y: number
   timestamp: number
 }
+
 
 // 正常模式文案 - 中文
 const NORMAL_TEXTS_CN = [
@@ -96,7 +120,7 @@ export const WoodenFish: React.FC = () => {
   const { gdBalance, spendGD, addGD } = useGachaStore()
   const { lang } = useLangStore()
   const [merits, setMerits] = useState<MeritPopup[]>([])
-  const [totalMerits, setTotalMerits] = useState(0)
+  const [totalMerits, setTotalMerits] = useState(0) // 本次修行功德
   const [combo, setCombo] = useState(0)
   const comboTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const idRef = useRef(0)
@@ -111,9 +135,74 @@ export const WoodenFish: React.FC = () => {
   const [criticalReward, setCriticalReward] = useState<{ amount: number; text: string } | null>(null) // 暴击奖励显示
   const rewardAudioRef = useRef<HTMLAudioElement | null>(null) // 奖励音效
   
+  // 伪随机保底系统
+  const [currentCritRate, setCurrentCritRate] = useState(0.03) // 当前暴击率（3%基础）
+  const [critStreak, setCritStreak] = useState(0) // 连续未暴击次数
+  const [hiddenCombo, setHiddenCombo] = useState(0) // 隐藏连击值（用于手感加权）
+  
+  // 三重暴击等级系统
+  const [lastCritTime, setLastCritTime] = useState<number | null>(null) // 上次暴击时间
+  const [todayFirstHit, setTodayFirstHit] = useState(true) // 今日第一次必爽
+  
+  
+  // 屏幕停顿效果
+  const [isScreenPaused, setIsScreenPaused] = useState(false)
+  
+  // 暴击等级反馈
+  const [critLevel, setCritLevel] = useState<'normal' | 'rare' | 'epic' | null>(null)
+  
+  // 自动挂机相关状态
+  const [isAutoClicking, setIsAutoClicking] = useState(false)
+  const [autoClickInterval, setAutoClickInterval] = useState<NodeJS.Timeout | null>(null)
+  const [isPaying, setIsPaying] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [paymentSuccess, setPaymentSuccess] = useState(false)
+  
+  // 收款地址和SKR合约地址（需要用户提供）
+  const RECIPIENT_ADDRESS = '这里填你自己的Solana钱包地址' // 需要用户提供
+  const SKR_TOKEN_ADDRESS = '这里填 SKR 的 Token Address' // 需要用户提供
+  
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
   const burnCost = 100
+  const { solanaAddress } = useWalletStore()
+  
+  // 自动挂机系统状态
+  const [autoClickMultiplier, setAutoClickMultiplier] = useState(0) // 0=无, 1=33 SKR, 3=66 SKR, 5=108 SKR
+  const [autoClickEndTime, setAutoClickEndTime] = useState<number | null>(null) // 结束时间戳
+  const [showAutoClickOptions, setShowAutoClickOptions] = useState(false) // 是否显示选项
+  
+  // 自动挂机价格选项
+  const AUTO_CLICK_OPTIONS = [
+    { price: 33, multiplier: 1, label: '自动代敲', description: '小沙弥为你代劳', emoji: '🤖' },
+    { price: 58, multiplier: 3, label: '功德加持', description: '功德×3，效率提升', emoji: '✨' },
+    { price: 108, multiplier: 5, label: '方丈加持', description: '法力无边，功德×5', emoji: '👨‍🦲' }
+  ]
+  
+  // 检查自动挂机是否有效
+  const isAutoClickActive = autoClickMultiplier > 0 && autoClickEndTime && Date.now() < autoClickEndTime
+  
+  // 剩余时间格式化
+  const getRemainingTime = () => {
+    if (!autoClickEndTime) return '0:00'
+    const remaining = Math.max(0, autoClickEndTime - Date.now())
+    const hours = Math.floor(remaining / (1000 * 60 * 60))
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
+    return `${hours}:${minutes.toString().padStart(2, '0')}`
+  }
+  
+  // 检查是否是今天第一次
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const lastPlayDate = localStorage.getItem('lastPlayDate')
+    if (lastPlayDate !== today) {
+      setTodayFirstHit(true)
+      localStorage.setItem('lastPlayDate', today)
+    } else {
+      setTodayFirstHit(false)
+    }
+  }, [])
+  
 
   useEffect(() => {
     audioRef.current = new Audio('/muyu.mp3')
@@ -176,6 +265,10 @@ export const WoodenFish: React.FC = () => {
           const randomMiss = missTexts[Math.floor(Math.random() * missTexts.length)]
           setMissText(randomMiss)
           setTimeout(() => setMissText(null), 2500)
+          
+          // Miss时清零隐藏连击值
+          setHiddenCombo(0)
+          
           return prev.filter(t => t.id !== newTarget.id)
         }
         return prev
@@ -264,32 +357,73 @@ export const WoodenFish: React.FC = () => {
       
       spendGD(burnCost)
       
-      // 20%概率触发暴击（佛祖显灵）- 增加暴击几率
-      const isCriticalHit = Math.random() < 0.2
+      // 伪随机保底系统 + 连击手感加权 + 三重暴击等级
+      // 基础暴击率 2.5%，每次未暴击增加 0.5%，连击额外加权
+      const baseCritRate = 0.025
+      const streakBonus = critStreak * 0.005 // 未暴击次数加成
+      const comboBonus = hiddenCombo * 0.006 // 连击手感加成
+      
+      // 今日第一次必爽：暴击概率翻倍
+      const firstHitBonus = todayFirstHit ? baseCritRate : 0
+      
+      // 计算实际暴击率（上限不超过 28%）
+      let actualCritRate = Math.min(baseCritRate + streakBonus + comboBonus + firstHitBonus, 0.28)
+      
+      // 节奏心理保底：连续18次未暴击且成功率≥70%时强制暴击
+      const shouldForceCrit = critStreak >= 18 && actualCritRate >= 0.7
+      
+      // 判断是否暴击
+      const isCriticalHit = shouldForceCrit || Math.random() < actualCritRate
       let meritBonus = 1
+      let gdRewardMultiplier = 1
       let criticalText = ''
+      let critType: 'normal' | 'rare' | 'epic' = 'normal'
       
       if (isCriticalHit) {
+        // 确定暴击等级
+        const critRoll = Math.random()
+        let gdReward = 0
+        
+        // 三重暴击等级概率
+        if (hiddenCombo >= 5 && critRoll < 0.04) {
+          // 天启级暴击 (4%) - 需要combo≥5
+          critType = 'epic'
+          gdRewardMultiplier = 5
+          gdReward = 5000
+          criticalText = isEN ? '✨ HEAVENLY REVELATION! 5000 $GD! ✨' : '✨ 天启降临！5000 $GD！ ✨'
+        } else if (hiddenCombo >= 3 && critRoll < 0.22) {
+          // 福报级暴击 (18%) - 需要combo≥3
+          critType = 'rare'
+          gdRewardMultiplier = 2
+          gdReward = 2000
+          criticalText = isEN ? '✨ KARMIC BLESSING! 2000 $GD! ✨' : '✨ 福报加持！2000 $GD！ ✨'
+        } else {
+          // 因果级暴击 (78%)
+          critType = 'normal'
+          gdRewardMultiplier = 1
+          gdReward = 1000
+          criticalText = isEN ? '✨ BUDDHA BLESS! 1000 $GD! ✨' : '✨ 佛祖显灵！1000 $GD！ ✨'
+        }
+        
+        // 设置暴击等级反馈
+        setCritLevel(critType)
+        setTimeout(() => setCritLevel(null), 6000) // 延长到6秒，让玩家看清
+        
         meritBonus = 10 // 暴击获得10倍功德
-        criticalText = isEN ? '✨ BUDDHA BLESS! 10x MERIT! ✨' : '✨ 佛祖显灵！功德x10！ ✨'
-      }
-      
-      // GD奖励逻辑 - 增加100 GD以上暴击几率
-      let gdReward = 0
-      let gdRewardText = ''
-      const randomValue = Math.random()
-      
-      // 微小概率：10000 GD (0.5%) - 增加
-      if (randomValue < 0.005) {
-        gdReward = 10000
-        addGD(gdReward)
-        gdRewardText = isEN ? `💰💰💰 MEGA JACKPOT! +${gdReward} $GD! 💰💰💰` : `💰💰💰 功德无量！+${gdReward} $GD！ 💰💰💰`
         
-        // 触发暴击奖励特别放大显示
+        // 屏幕停顿效果（延长到1000ms）
+        setIsScreenPaused(true)
+        setTimeout(() => setIsScreenPaused(false), 1000)
+        
+        // 添加GD奖励
+        addGD(gdReward)
+        
+        // 设置暴击奖励显示（用于UI展示）
         setCriticalReward({
           amount: gdReward,
-          text: gdRewardText
+          text: criticalText
         })
+        setTimeout(() => setCriticalReward(null), 6000) // 延长到6秒
         
         // 播放奖励音效
         if (rewardAudioRef.current) {
@@ -298,65 +432,48 @@ export const WoodenFish: React.FC = () => {
           rewardAudioRef.current.play().catch(() => {})
         }
         
-        setTimeout(() => setCriticalReward(null), 3000) // 3秒后消失
-      }
-      // 微小概率：5000 GD (1%) - 增加
-      else if (randomValue < 0.015) {
-        gdReward = 5000
-        addGD(gdReward)
-        gdRewardText = isEN ? `💰💰💰 SUPER JACKPOT! +${gdReward} $GD! 💰💰💰` : `💰💰💰 功德圆满！+${gdReward} $GD！ 💰💰💰`
-        
-        // 触发暴击奖励特别放大显示
-        setCriticalReward({
-          amount: gdReward,
-          text: gdRewardText
-        })
-        
-        // 播放奖励音效
-        if (rewardAudioRef.current) {
-          rewardAudioRef.current.currentTime = 0
-          rewardAudioRef.current.playbackRate = 1.0
-          rewardAudioRef.current.play().catch(() => {})
+        // 暴击后重置保底计数和今日第一次标记
+        setCritStreak(0)
+        setCurrentCritRate(baseCritRate)
+        if (todayFirstHit) {
+          setTodayFirstHit(false)
         }
         
-        setTimeout(() => setCriticalReward(null), 3000) // 3秒后消失
+        // 记录暴击时间
+        setLastCritTime(Date.now())
+      } else {
+        // 未暴击时增加保底计数
+        setCritStreak(prev => prev + 1)
+        setCurrentCritRate(actualCritRate)
       }
-      // 概率：1000 GD (3%) - 增加
-      else if (randomValue < 0.045) {
-        gdReward = 1000
-        addGD(gdReward)
-        gdRewardText = isEN ? `💰💰💰 JACKPOT! +${gdReward} $GD! 💰💰💰` : `💰💰💰 功德暴击！+${gdReward} $GD！ 💰💰💰`
-        
-        // 触发暴击奖励特别放大显示
-        setCriticalReward({
-          amount: gdReward,
-          text: gdRewardText
-        })
-        
-        // 播放奖励音效
-        if (rewardAudioRef.current) {
-          rewardAudioRef.current.currentTime = 0
-          rewardAudioRef.current.playbackRate = 1.0
-          rewardAudioRef.current.play().catch(() => {})
-        }
-        
-        setTimeout(() => setCriticalReward(null), 3000) // 3秒后消失
-      }
-      // 概率：200 GD (10%) - 新增中等奖励
-      else if (randomValue < 0.145) {
-        gdReward = 200
-        addGD(gdReward)
-        gdRewardText = isEN ? `💰💰 NICE! +${gdReward} $GD! 💰💰` : `💰💰 不错！+${gdReward} $GD！ 💰💰`
-      }
-      // 最大概率：50 GD (50%)
-      else if (randomValue < 0.645) {
-        gdReward = 50 // 固定50 GD
-        addGD(gdReward)
-        gdRewardText = isEN ? `💰 +${gdReward} $GD!` : `💰 +${gdReward} $GD！`
-      }
-      // 小概率不给：35.5% (randomValue >= 0.645)
       
-      const isGDReward = gdReward > 0
+      // 更新隐藏连击值（点击质量判断）
+      // 这里简化：每次点击都增加连击值，但miss时会清零
+      setHiddenCombo(prev => {
+        // 如果有随机圈且点击准确，增加更多
+        if (clickTargets.length > 0) {
+          return prev + 1.5 // Perfect点击
+        }
+        return prev + 1 // Good点击
+      })
+      
+      // 非暴击时的小额GD奖励（避免与暴击GD重复）
+      if (!isCriticalHit) {
+        const randomValue = Math.random()
+        let smallGdReward = 0
+        
+        // 概率：150 GD (10%)
+        if (randomValue < 0.10) {
+          smallGdReward = 150
+          addGD(smallGdReward)
+        }
+        // 最大概率：50 GD (45%)
+        else if (randomValue < 0.55) {
+          smallGdReward = 50
+          addGD(smallGdReward)
+        }
+        // 小概率不给：45%
+      }
       
       setTotalMerits(prev => {
         const newTotal = prev + meritBonus
@@ -402,14 +519,11 @@ export const WoodenFish: React.FC = () => {
       const textPool = combo > 5 ? RAGE_TEXTS : NORMAL_TEXTS
       const randomItem = textPool[Math.floor(Math.random() * textPool.length)]
       
-      // 决定显示哪个文案（优先级：GD奖励 > 暴击 > 普通）
+      // 决定显示哪个文案（暴击优先显示暴击文案）
       let displayText = randomItem.text
       let displayColor = randomItem.color
       
-      if (isGDReward) {
-        displayText = gdRewardText
-        displayColor = 'text-green-400'
-      } else if (isCriticalHit) {
+      if (isCriticalHit) {
         displayText = criticalText
         displayColor = 'text-yellow-400'
       }
@@ -432,13 +546,14 @@ export const WoodenFish: React.FC = () => {
 
   const handleTargetClick = useCallback((targetId: number, e: React.MouseEvent) => {
     e.stopPropagation()
+    
     // 移除目标
     setClickTargets(prev => prev.filter(t => t.id !== targetId))
     // 触发功德并生成新圈
     addMerit(true)
   }, [addMerit])
 
-  const handleCenterClick = () => {
+  const handleCenterClick = (e: React.MouseEvent) => {
     // 只有在没有随机圈时才响应中心点击（第一次点击）
     if (clickTargets.length === 0) {
       setIsFishPressed(true)
@@ -449,6 +564,219 @@ export const WoodenFish: React.FC = () => {
 
   // 不在初始时生成目标，等第一次点击后才开始
 
+  // 检查自动挂机是否过期
+  useEffect(() => {
+    const checkExpiry = () => {
+      if (autoClickEndTime && Date.now() >= autoClickEndTime) {
+        // 自动挂机已过期
+        setIsAutoClicking(false)
+        setAutoClickMultiplier(0)
+        setAutoClickEndTime(null)
+      }
+    }
+    
+    // 立即检查一次
+    checkExpiry()
+    
+    // 每30秒检查一次
+    const expiryInterval = setInterval(checkExpiry, 30000)
+    
+    return () => clearInterval(expiryInterval)
+  }, [autoClickEndTime])
+  
+  // 自动挂机定时器 - 考虑倍率
+  useEffect(() => {
+    if (isAutoClicking && !autoClickInterval) {
+      const interval = setInterval(() => {
+        // 根据倍率多次调用addMerit
+        const multiplier = autoClickMultiplier || 1
+        for (let i = 0; i < multiplier; i++) {
+          addMerit()
+        }
+      }, 1000) // 每1秒自动点击一次
+      setAutoClickInterval(interval)
+    } else if (!isAutoClicking && autoClickInterval) {
+      clearInterval(autoClickInterval)
+      setAutoClickInterval(null)
+    }
+    
+    return () => {
+      if (autoClickInterval) {
+        clearInterval(autoClickInterval)
+      }
+    }
+  }, [isAutoClicking, autoClickInterval, addMerit, autoClickMultiplier])
+  
+  // 支付成功后自动开始挂机
+  useEffect(() => {
+    if (paymentSuccess) {
+      setIsAutoClicking(true)
+      // 3秒后隐藏成功提示
+      const timer = setTimeout(() => {
+        setPaymentSuccess(false)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [paymentSuccess])
+  
+  // 处理雇佣赛博方丈支付
+  const handleHireMonk = async () => {
+    if (!solanaAddress) {
+      setPaymentError(isEN ? 'Please connect Phantom wallet first' : '请先连接Phantom钱包')
+      return
+    }
+    
+    if (RECIPIENT_ADDRESS === '这里填你自己的Solana钱包地址' || SKR_TOKEN_ADDRESS === '这里填 SKR 的 Token Address') {
+      setPaymentError(isEN ? 'Please configure recipient address and SKR token address' : '请配置收款地址和SKR代币地址')
+      return
+    }
+    
+    setIsPaying(true)
+    setPaymentError(null)
+    
+    try {
+      // 获取Phantom钱包提供者
+      const provider = window.phantom?.solana || window.solana
+      if (!provider?.isPhantom) {
+        throw new Error(isEN ? 'Phantom wallet not found' : '未找到Phantom钱包')
+      }
+      
+      // 连接到Solana网络
+      const connection = new Connection('https://api.mainnet-beta.solana.com')
+      
+      // 获取代币账户地址
+      const tokenMint = new PublicKey(SKR_TOKEN_ADDRESS)
+      const fromTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        new PublicKey(solanaAddress)
+      )
+      const toTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        new PublicKey(RECIPIENT_ADDRESS)
+      )
+      
+      // 注意：这里需要从选项中选择价格，但现在我们先使用第一个选项的价格
+      // 稍后我们会修改为从选择的选项获取价格
+      const selectedOption = AUTO_CLICK_OPTIONS[0] // 临时使用第一个选项
+      const price = selectedOption.price
+      
+      // 创建转账指令
+      const transferInstruction = createTransferInstruction(
+        fromTokenAccount,
+        toTokenAccount,
+        new PublicKey(solanaAddress),
+        price * (10 ** 9) // 根据选项确定SKR数量 (假设9位小数)
+      )
+      
+      // 创建交易
+      const transaction = new Transaction().add(transferInstruction)
+      
+      // 获取最新区块哈希
+      const { blockhash } = await connection.getLatestBlockhash()
+      transaction.recentBlockhash = blockhash
+      transaction.feePayer = new PublicKey(solanaAddress)
+      
+      // 签名并发送交易
+      const signedTransaction = await provider.signTransaction(transaction)
+      const signature = await connection.sendRawTransaction(signedTransaction.serialize())
+      
+      // 确认交易
+      await connection.confirmTransaction(signature)
+      
+      // 支付成功
+      setPaymentSuccess(true)
+      
+    } catch (error: any) {
+      console.error('Payment error:', error)
+      setPaymentError(error.message || (isEN ? 'Payment failed' : '支付失败'))
+    } finally {
+      setIsPaying(false)
+    }
+  }
+  
+  // 停止自动挂机
+  const stopAutoClicking = () => {
+    setIsAutoClicking(false)
+    setAutoClickMultiplier(0)
+    setAutoClickEndTime(null)
+  }
+  
+  // 处理选择选项
+  const handleSelectOption = async (option: typeof AUTO_CLICK_OPTIONS[0]) => {
+    if (!solanaAddress) {
+      setPaymentError(isEN ? 'Please connect Phantom wallet first' : '请先连接Phantom钱包')
+      return
+    }
+    
+    if (RECIPIENT_ADDRESS === '这里填你自己的Solana钱包地址' || SKR_TOKEN_ADDRESS === '这里填 SKR 的 Token Address') {
+      setPaymentError(isEN ? 'Please configure recipient address and SKR token address' : '请配置收款地址和SKR代币地址')
+      return
+    }
+    
+    setIsPaying(true)
+    setPaymentError(null)
+    
+    try {
+      // 获取Phantom钱包提供者
+      const provider = window.phantom?.solana || window.solana
+      if (!provider?.isPhantom) {
+        throw new Error(isEN ? 'Phantom wallet not found' : '未找到Phantom钱包')
+      }
+      
+      // 连接到Solana网络
+      const connection = new Connection('https://api.mainnet-beta.solana.com')
+      
+      // 获取代币账户地址
+      const tokenMint = new PublicKey(SKR_TOKEN_ADDRESS)
+      const fromTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        new PublicKey(solanaAddress)
+      )
+      const toTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        new PublicKey(RECIPIENT_ADDRESS)
+      )
+      
+      // 创建转账指令
+      const transferInstruction = createTransferInstruction(
+        fromTokenAccount,
+        toTokenAccount,
+        new PublicKey(solanaAddress),
+        option.price * (10 ** 9) // 根据选项确定SKR数量 (假设9位小数)
+      )
+      
+      // 创建交易
+      const transaction = new Transaction().add(transferInstruction)
+      
+      // 获取最新区块哈希
+      const { blockhash } = await connection.getLatestBlockhash()
+      transaction.recentBlockhash = blockhash
+      transaction.feePayer = new PublicKey(solanaAddress)
+      
+      // 签名并发送交易
+      const signedTransaction = await provider.signTransaction(transaction)
+      const signature = await connection.sendRawTransaction(signedTransaction.serialize())
+      
+      // 确认交易
+      await connection.confirmTransaction(signature)
+      
+      // 支付成功，设置自动挂机状态
+      setAutoClickMultiplier(option.multiplier)
+      setAutoClickEndTime(Date.now() + 3 * 60 * 60 * 1000) // 3小时
+      setIsAutoClicking(true)
+      setPaymentSuccess(true)
+      setShowAutoClickOptions(false)
+      
+      // 3秒后隐藏成功提示
+      setTimeout(() => setPaymentSuccess(false), 3000)
+      
+    } catch (error: any) {
+      console.error('Payment error:', error)
+      setPaymentError(error.message || (isEN ? 'Payment failed' : '支付失败'))
+    } finally {
+      setIsPaying(false)
+    }
+  }
 
   const getTitle = () => {
     if (totalMerits >= 10000) return '赛博活佛 Cyber Buddha'
@@ -459,20 +787,105 @@ export const WoodenFish: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center -mt-4">
+    <div className={`flex flex-col items-center justify-center -mt-2 ${isScreenPaused ? 'screen-paused' : ''}`}>
+      {/* 暴击闪光效果 + 文字 - 融合版（包含GD奖励）*/}
+      <AnimatePresence>
+        {isScreenPaused && critLevel && (
+          <>
+            {/* 满屏颜色闪光 */}
+            <motion.div
+              key={`critical-flash-${critLevel}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ 
+                duration: 0.4,
+                ease: "easeInOut"
+              }}
+              className={`critical-flash ${critLevel === 'rare' ? 'rare' : ''} ${critLevel === 'epic' ? 'epic' : ''}`}
+            />
+            
+            {/* 居中文字 - 延迟放大 */}
+            <motion.div
+              key={`crit-text-${critLevel}`}
+              initial={{ opacity: 0, scale: 0.5, y: 30 }}
+              animate={{ 
+                opacity: 1, 
+                scale: [0.5, 1.15, 1],
+                y: 0
+              }}
+              exit={{ opacity: 0, scale: 0.8, y: -20 }}
+              transition={{ 
+                duration: 1.0,
+                delay: 0.2,
+                ease: "easeOut",
+                scale: {
+                  times: [0, 0.7, 1],
+                  duration: 1.0,
+                  ease: "easeOut"
+                }
+              }}
+              className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9999]"
+            >
+              <div className="flex flex-col items-center gap-4">
+                {/* 暴击等级文字 */}
+                <div className={`
+                  px-8 py-4 rounded-2xl font-bold text-3xl shadow-2xl backdrop-blur-sm
+                  ${critLevel === 'normal' ? 'bg-yellow-500/40 text-yellow-100 border-2 border-yellow-300 shadow-yellow-500/50' : ''}
+                  ${critLevel === 'rare' ? 'bg-cyan-500/40 text-cyan-100 border-2 border-cyan-300 shadow-cyan-500/50' : ''}
+                  ${critLevel === 'epic' ? 'bg-purple-500/40 text-purple-100 border-2 border-purple-300 shadow-purple-500/50' : ''}
+                `}
+                style={{ textShadow: '0 0 20px rgba(255,255,255,0.8)' }}
+                >
+                  {critLevel === 'normal' ? (isEN ? '✨ CAUSAL BLESSING ✨' : '✨ 因果加持 ✨') : ''}
+                  {critLevel === 'rare' ? (isEN ? '✨ KARMIC FORTUNE ✨' : '✨ 福报降临 ✨') : ''}
+                  {critLevel === 'epic' ? (isEN ? '✨ HEAVENLY REVELATION ✨' : '✨ 天启显现 ✨') : ''}
+                </div>
+                
+                {/* GD奖励金额 - 如果有的话 */}
+                {criticalReward && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: 0,
+                      scale: 1
+                    }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ 
+                      delay: 0.5,
+                      duration: 0.6,
+                      ease: "easeOut"
+                    }}
+                    className="px-6 py-3 rounded-xl bg-yellow-500/30 border-2 border-yellow-400 backdrop-blur-sm"
+                  >
+                    <div className="text-4xl font-bold text-yellow-200" style={{ textShadow: '0 0 15px rgba(255,255,0,0.8)' }}>
+                      +{criticalReward.amount} $GD
+                    </div>
+                    <div className="text-sm text-yellow-100 mt-1">
+                      {criticalReward.text}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      
       {/* 模式切换开关 */}
-      <div className={`mb-6 flex flex-col items-center ${isDegen ? 'font-pixel' : ''}`}>
-        <div className={`text-lg font-bold mb-2 ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
+      <div className={`mb-4 flex flex-col items-center ${isDegen ? 'font-pixel' : ''}`}>
+        <div className={`text-base font-bold mb-0.5 ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
           {isEN ? 'Game Mode' : '游戏模式'}
         </div>
-        <div className="flex items-center space-x-4">
-          <span className={`text-sm ${gameMode === 'meditation' ? (isDegen ? 'text-degen-green font-bold' : 'text-green-500 font-bold') : 'text-gray-500'}`}>
+        <div className="flex items-center space-x-3">
+          <span className={`text-xs ${gameMode === 'meditation' ? (isDegen ? 'text-degen-green font-bold' : 'text-green-500 font-bold') : 'text-gray-500'}`}>
             {isEN ? '🧘 Meditation' : '🧘 冥想模式'}
           </span>
           <button
             onClick={() => setGameMode(gameMode === 'meditation' ? 'merit' : 'meditation')}
             className={`
-              relative inline-flex h-8 w-16 items-center rounded-full
+              relative inline-flex h-7 w-14 items-center rounded-full
               transition-colors duration-300 focus:outline-none
               ${gameMode === 'merit'
                 ? (isDegen ? 'bg-degen-purple' : 'bg-goldman-gold')
@@ -482,43 +895,75 @@ export const WoodenFish: React.FC = () => {
           >
             <span
               className={`
-                inline-block h-6 w-6 transform rounded-full bg-white
+                inline-block h-5 w-5 transform rounded-full bg-white
                 transition-transform duration-300
-                ${gameMode === 'merit' ? 'translate-x-9' : 'translate-x-1'}
+                ${gameMode === 'merit' ? 'translate-x-7' : 'translate-x-1'}
                 ${gameMode === 'merit' ? (isDegen ? 'shadow-degen-glow' : 'shadow-gold-glow') : ''}
               `}
             />
           </button>
-          <span className={`text-sm ${gameMode === 'merit' ? (isDegen ? 'text-degen-yellow font-bold' : 'text-yellow-500 font-bold') : 'text-gray-500'}`}>
+          <span className={`text-xs ${gameMode === 'merit' ? (isDegen ? 'text-degen-yellow font-bold' : 'text-yellow-500 font-bold') : 'text-gray-500'}`}>
             {isEN ? '🔥 Merit Burn' : '🔥 功德模式'}
           </span>
         </div>
-        <div className={`mt-2 text-xs ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
+        <div className={`mt-0.5 text-xs ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {gameMode === 'meditation'
             ? (isEN ? 'Free play, no token consumption' : '免费游玩，不消耗代币')
             : (isEN ? 'Burns $GD tokens, earns real merit' : '消耗$GD代币，积累真实功德')
           }
         </div>
+        
+        {/* 世界观轮换文案 - 移动到模式描述和本次修行之间 */}
+        <motion.div
+          key={Date.now() % 3}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className={`mt-1 text-xs italic ${isDegen ? 'text-degen-cyan' : 'text-gray-500'}`}
+        >
+          {(() => {
+            const wisdomTexts = isEN ? [
+              'Causality has its course, fortune has its time',
+              'Deep merit calls forth heaven\'s response',
+              'Not sought but gained, that is true gain'
+            ] : [
+              '因果有常，福报有时',
+              '功深者，天自应之',
+              '非求而得，方为真得'
+            ]
+            const index = Math.floor(Date.now() / 10000) % wisdomTexts.length // 每10秒轮换
+            return wisdomTexts[index]
+          })()}
+        </motion.div>
       </div>
 
-      {/* 功德计数器 */}
-      <div className={`text-center mb-6 ${isDegen ? 'font-pixel' : ''}`}>
-        <div className={`text-5xl font-bold mb-2 ${isDegen ? 'text-degen-yellow neon-text' : 'text-goldman-gold'}`}>
-          {totalMerits.toLocaleString()}
+      {/* 功德计数器 - 只显示本次修行 */}
+      <div className={`text-center mb-4 ${isDegen ? 'font-pixel' : ''}`}>
+        {/* 本次修行 */}
+        <div className="mb-1">
+          <div className={`text-xs ${isDegen ? 'text-degen-green' : 'text-gray-400'} mb-0.5`}>
+            {isEN ? '🧘 This Session' : '🧘 本次修行'}
+          </div>
+          <div className={`text-3xl font-bold ${isDegen ? 'text-degen-green' : 'text-green-500'}`}>
+            {totalMerits.toLocaleString()}
+          </div>
+          <div className={`text-xs mt-0.5 ${isDegen ? 'text-degen-cyan' : 'text-gray-500'}`}>
+            {isEN ? 'Your clicks this session' : '您本次的敲击数'}
+          </div>
         </div>
-        <div className={`text-lg ${isDegen ? 'text-degen-green' : 'text-gray-400'}`}>
-          {isEN ? 'Merit' : '功德 Merit'}
-        </div>
-        <div className={`text-base mt-1 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold/70'}`}>
+        
+        {/* 称号和COMBO */}
+        <div className={`text-sm mt-0.5 ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold/70'}`}>
           {getTitle()}
         </div>
-        <div className={`text-lg font-bold mt-2 h-7 ${isDegen ? 'text-degen-pink' : 'text-orange-400'}`}>
+        <div className={`text-base font-bold mt-0.5 h-5 ${isDegen ? 'text-degen-pink' : 'text-orange-400'}`}>
           {combo > 3 ? `🔥 COMBO x${combo}` : ''}
         </div>
       </div>
 
       {/* 木鱼容器 - 包含随机圈 */}
-      <div className="relative" style={{ width: '320px', height: '320px' }}>
+      <div className="relative mt-0" style={{ width: '320px', height: '320px' }}>
+        
         {/* 木鱼按钮 - 居中 */}
         <div
           style={{
@@ -710,78 +1155,6 @@ export const WoodenFish: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* 暴击奖励特别放大显示 - 透明背景版 */}
-      <AnimatePresence>
-        {criticalReward && (
-          <motion.div
-            key="critical-reward"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 flex items-center justify-center pointer-events-none z-50"
-          >
-            {/* 半透明遮罩 */}
-            <div className="absolute inset-0 bg-black/40"></div>
-            
-            {/* 中心奖励卡片 - 透明背景无描边 */}
-            <motion.div
-              initial={{ scale: 0.8, y: 20 }}
-              animate={{
-                scale: 1,
-                y: 0
-              }}
-              transition={{
-                duration: 0.4,
-                type: 'spring',
-                stiffness: 200
-              }}
-              className="relative z-10 text-center px-8 py-10 rounded-2xl bg-black/70 backdrop-blur-sm max-w-lg w-full mx-4"
-            >
-              {/* 标题 - 金色字 */}
-              <div className="text-4xl font-bold mb-4 text-yellow-400">
-                {isEN ? '🎯 JACKPOT! 🎯' : '🎯 功德暴击！ 🎯'}
-              </div>
-              
-              {/* 奖励金额 - 金色字 */}
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{
-                  scale: [1, 1.1, 1]
-                }}
-                transition={{
-                  duration: 0.8,
-                  times: [0, 0.5, 1],
-                  repeat: 1
-                }}
-                className="text-6xl font-bold mb-6 text-yellow-300"
-              >
-                +{criticalReward.amount} $GD
-              </motion.div>
-              
-              {/* 奖励描述 - 白色字 */}
-              <div className="text-2xl mb-6 text-white">
-                {criticalReward.text}
-              </div>
-              
-              {/* 庆祝文字 - 红色字 */}
-              <motion.div
-                animate={{
-                  y: [0, -3, 0]
-                }}
-                transition={{
-                  duration: 1.2,
-                  repeat: Infinity
-                }}
-                className="text-xl text-red-400 font-bold"
-              >
-                {isEN ? '🎉 Congratulations! 🎉' : '🎉 恭喜发财！ 🎉'}
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* 操作提示 - 紧跟木鱼下方 */}
       <div className={`text-center ${isDegen ? 'font-pixel text-base' : 'text-lg'}`}>
         <p className={isDegen ? 'text-degen-green' : 'text-gray-400'}>
@@ -791,12 +1164,150 @@ export const WoodenFish: React.FC = () => {
           }
         </p>
         <p className={`mt-1 text-lg ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
-          {isEN ? `Cost: ${burnCost} $GD each` : `每次消耗 ${burnCost} $GD`}
+          {gameMode === 'meditation'
+            ? (isEN ? 'Cost: 0 $GD (Free)' : '每次消耗 0 $GD (免费)')
+            : (isEN ? `Cost: ${burnCost} $GD each` : `每次消耗 ${burnCost} $GD`)
+          }
         </p>
       </div>
 
-      {/* 余额不足提示 */}
-      {gdBalance < burnCost && (
+      {/* 自动挂机系统 - 折叠式设计 */}
+      <div className="mt-6 flex flex-col items-center w-full max-w-md">
+        {/* 主折叠按钮 - 精简版 */}
+        <motion.button
+          onClick={() => setShowAutoClickOptions(!showAutoClickOptions)}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className={`
+            flex items-center justify-between w-full px-4 py-2.5 rounded-lg font-bold text-sm
+            transition-all duration-200 border-2
+            ${isAutoClicking
+              ? (isDegen
+                ? 'bg-degen-purple/20 text-degen-purple border-degen-purple'
+                : 'bg-green-900/20 text-green-400 border-green-500')
+              : (isDegen
+                ? 'bg-degen-green/20 text-degen-green border-degen-green hover:bg-degen-green/30'
+                : 'bg-yellow-900/20 text-yellow-400 border-yellow-500 hover:bg-yellow-900/30')
+            }
+          `}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base">{isAutoClicking ? '🤖' : '⚡'}</span>
+            <span>
+              {isAutoClicking
+                ? (isEN ? 'Monk Working' : '方丈工作中')
+                : (isEN ? 'Hire Monk' : '雇佣方丈')
+              }
+            </span>
+            {isAutoClicking && (
+              <span className="text-xs px-1.5 py-0.5 rounded bg-black/30">
+                ×{autoClickMultiplier}
+              </span>
+            )}
+          </div>
+          <motion.span
+            animate={{ rotate: showAutoClickOptions ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-xs"
+          >
+            ▼
+          </motion.span>
+        </motion.button>
+        
+        {/* 折叠内容 - 精简版 */}
+        <AnimatePresence>
+          {showAutoClickOptions && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="w-full overflow-hidden"
+            >
+              <div className="mt-2 space-y-1.5">
+                {AUTO_CLICK_OPTIONS.map((option, index) => (
+                  <motion.button
+                    key={index}
+                    onClick={() => handleSelectOption(option)}
+                    disabled={isPaying || !solanaAddress}
+                    whileHover={{ scale: 1.005 }}
+                    whileTap={{ scale: 0.995 }}
+                    className={`
+                      flex items-center justify-between w-full px-3 py-2 rounded-lg
+                      transition-all duration-150 text-xs border
+                      ${isPaying || !solanaAddress
+                        ? 'bg-gray-800/30 text-gray-500 cursor-not-allowed border-gray-700'
+                        : isDegen
+                          ? 'bg-black/30 hover:bg-black/50 text-white border-degen-green/30 hover:border-degen-green'
+                          : 'bg-gray-900/30 hover:bg-gray-900/50 text-white border-gray-700 hover:border-yellow-500'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{option.emoji}</span>
+                      <div className="text-left">
+                        <div className="font-bold">{option.label}</div>
+                        <div className="text-[10px] text-gray-400">{option.description}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-yellow-400">{option.price} SKR</div>
+                      <div className="text-[10px] text-gray-400">×{option.multiplier} · 3h</div>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* 当前激活状态 - 精简版 */}
+        {isAutoClickActive && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-2 w-full"
+          >
+            <div className={`
+              flex items-center justify-between px-3 py-2 rounded-lg text-xs border
+              ${isDegen
+                ? 'bg-degen-purple/10 border-degen-purple/30 text-degen-purple'
+                : 'bg-green-900/10 border-green-500/30 text-green-400'
+              }
+            `}>
+              <div className="flex items-center gap-2">
+                <span>⏳</span>
+                <span className="font-bold">×{autoClickMultiplier} {isEN ? 'Active' : '生效中'}</span>
+              </div>
+              <div className="font-bold">{getRemainingTime()}</div>
+            </div>
+          </motion.div>
+        )}
+        
+        {/* 支付状态提示 */}
+        {paymentError && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mt-3 px-4 py-2 rounded-lg ${isDegen ? 'bg-red-900/50 text-degen-pink' : 'bg-red-900/30 text-red-400'}`}
+          >
+            {paymentError}
+          </motion.div>
+        )}
+        
+        {paymentSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`mt-3 px-4 py-2 rounded-lg ${isDegen ? 'bg-green-900/50 text-degen-green' : 'bg-green-900/30 text-green-400'}`}
+          >
+            {isEN ? '✅ Payment successful!' : '✅ 支付成功！'}
+          </motion.div>
+        )}
+      </div>
+
+      {/* 余额不足提示 - 只在功德模式下显示 */}
+      {gameMode === 'merit' && gdBalance < burnCost && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
