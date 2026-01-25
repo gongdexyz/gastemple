@@ -4,8 +4,10 @@ import { Flame, Users, Globe, Trophy } from 'lucide-react'
 import { Header } from '../components/Header'
 import { GlitchTransition } from '../components/GlitchTransition'
 import { WoodenFish } from '../components/WoodenFish'
+import { VisualEffectsOverlay } from '../components/VisualEffectsOverlay'
 import { useThemeStore } from '../stores/themeStore'
 import { useLangStore } from '../stores/langStore'
+import { useEffectsStore } from '../stores/effectsStore'
 import { priceService } from '../services/priceService'
 
 const TOP_BURNERS_CN = [
@@ -43,6 +45,7 @@ interface TokenPrices {
 export const TemplePage: React.FC = () => {
   const { mode } = useThemeStore()
   const { lang } = useLangStore()
+  const { targetFlash } = useEffectsStore()
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
   const TOP_BURNERS = isEN ? TOP_BURNERS_EN : TOP_BURNERS_CN
@@ -131,6 +134,7 @@ export const TemplePage: React.FC = () => {
     <div className={`min-h-screen ${isDegen ? 'bg-degen-bg' : 'bg-goldman-bg'}`}>
       <GlitchTransition />
       <Header />
+      <VisualEffectsOverlay />
       
       <main className="pt-20 pb-10 px-4">
         <div className="max-w-4xl mx-auto">
@@ -155,7 +159,12 @@ export const TemplePage: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className={`hidden md:block p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
+              data-skr-panel
+              className={`
+                hidden md:block p-4 rounded-xl transition-all duration-200
+                ${targetFlash ? 'ring-4 ring-yellow-400 animate-pulse' : ''}
+                ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}
+              `}
             >
               {/* 标题 */}
               <div className="mb-3">

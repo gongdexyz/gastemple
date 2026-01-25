@@ -4,6 +4,7 @@ import { useThemeStore } from '../stores/themeStore'
 import { useGachaStore } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
 import { useWalletStore } from '../stores/walletStore'
+import { useEffectsStore } from '../stores/effectsStore'
 import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js'
 import { createTransferInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
 import TokenExchange from './TokenExchange'
@@ -120,6 +121,7 @@ export const WoodenFish: React.FC = () => {
   const { mode } = useThemeStore()
   const { gdBalance, spendGD, addGD } = useGachaStore()
   const { lang } = useLangStore()
+  const { triggerBurnEffect } = useEffectsStore()
   const [merits, setMerits] = useState<MeritPopup[]>([])
   const [totalMerits, setTotalMerits] = useState(0) // 本次修行功德
   const [combo, setCombo] = useState(0)
@@ -135,6 +137,7 @@ export const WoodenFish: React.FC = () => {
   const [gameMode, setGameMode] = useState<'meditation' | 'merit'>('meditation') // 默认冥想模式
   const [criticalReward, setCriticalReward] = useState<{ amount: number; text: string } | null>(null) // 暴击奖励显示
   const rewardAudioRef = useRef<HTMLAudioElement | null>(null) // 奖励音效
+  const fishButtonRef = useRef<HTMLButtonElement | null>(null) // 木鱼按钮引用
   
   // 伪随机保底系统
   const [currentCritRate, setCurrentCritRate] = useState(0.03) // 当前暴击率（3%基础）
@@ -645,17 +648,32 @@ export const WoodenFish: React.FC = () => {
   const handleTargetClick = useCallback((targetId: number, e: React.MouseEvent) => {
     e.stopPropagation()
     
+    // 触发能量传输效果
+    const rect = e.currentTarget.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    triggerBurnEffect({ x: centerX, y: centerY })
+    
     // 移除目标
     setClickTargets(prev => prev.filter(t => t.id !== targetId))
     // 触发功德并生成新圈
     addMerit(true)
-  }, [addMerit])
+  }, [addMerit, triggerBurnEffect])
 
   const handleCenterClick = (e: React.MouseEvent) => {
     // 只有在没有随机圈时才响应中心点击（第一次点击）
     if (clickTargets.length === 0) {
       setIsFishPressed(true)
       setTimeout(() => setIsFishPressed(false), 150)
+      
+      // 触发能量传输效果
+      if (fishButtonRef.current) {
+        const rect = fishButtonRef.current.getBoundingClientRect()
+        const centerX = rect.left + rect.width / 2
+        const centerY = rect.top + rect.height / 2
+        triggerBurnEffect({ x: centerX, y: centerY })
+      }
+      
       addMerit()
     }
   }
@@ -1122,6 +1140,7 @@ export const WoodenFish: React.FC = () => {
           }}
         >
           <button
+            ref={fishButtonRef}
             onClick={handleCenterClick}
             disabled={gameMode === 'merit' && !isGongdeTestMode() && gdBalance < burnCost}
             style={{
