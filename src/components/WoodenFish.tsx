@@ -7,7 +7,7 @@ import { useWalletStore } from '../stores/walletStore'
 import { useEffectsStore } from '../stores/effectsStore'
 import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js'
 import { createTransferInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
-import TokenExchange from './TokenExchange'
+import { WithdrawalDialog } from './WithdrawalDialog'
 
 // 扩展全局窗口接口以包含Phantom钱包的完整类型
 declare global {
@@ -161,7 +161,7 @@ export const WoodenFish: React.FC = () => {
   const [isPaying, setIsPaying] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [showExchange, setShowExchange] = useState(false) // 兑换弹窗
+  const [showWithdrawal, setShowWithdrawal] = useState(false) // 提现弹窗
   
   // 收款地址和SKR合约地址（从环境变量读取）
   const RECIPIENT_ADDRESS = import.meta.env.VITE_RECIPIENT_ADDRESS || '这里填你自己的Solana钱包地址'
@@ -1524,9 +1524,9 @@ export const WoodenFish: React.FC = () => {
         }
       </motion.p>
 
-      {/* 兑换入口按钮 */}
+      {/* 提现入口按钮 */}
       <button
-        onClick={() => setShowExchange(true)}
+        onClick={() => setShowWithdrawal(true)}
         className={`
           mt-4 px-6 py-2 rounded-lg font-bold text-sm transition-all
           ${isDegen
@@ -1535,13 +1535,13 @@ export const WoodenFish: React.FC = () => {
           }
         `}
       >
-        💱 {isEN ? 'Token Exchange' : '代币兑换'}
+        💰 {isEN ? 'Withdraw $GONGDE' : '提现 $GONGDE'}
       </button>
 
-      {/* 兑换弹窗 */}
+      {/* 提现弹窗 */}
       <AnimatePresence>
-        {showExchange && (
-          <TokenExchange onClose={() => setShowExchange(false)} />
+        {showWithdrawal && (
+          <WithdrawalDialog onClose={() => setShowWithdrawal(false)} />
         )}
       </AnimatePresence>
     </div>
