@@ -259,6 +259,47 @@ export const AboutPage: React.FC = () => {
               <MessageCircle className="w-5 h-5" />
             </a>
           </motion.div>
+          
+          {/* Powered by Seeker + Built on Solana */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.6 }}
+            className="mt-8 pt-6 border-t border-gray-700"
+          >
+            <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <span>⚡</span>
+                <span>{isEN ? 'Powered by' : '基于'}</span>
+                <a 
+                  href="https://seeker.io" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`font-bold transition-colors ${isDegen ? 'text-degen-cyan hover:text-degen-green' : 'text-cyan-400 hover:text-cyan-300'}`}
+                >
+                  Seeker ($SKR)
+                </a>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <span>🔗</span>
+                <span>{isEN ? 'Built on' : '构建于'}</span>
+                <a 
+                  href="https://solana.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`font-bold transition-colors ${isDegen ? 'text-degen-purple hover:text-degen-pink' : 'text-purple-400 hover:text-purple-300'}`}
+                >
+                  Solana
+                </a>
+              </div>
+              <div className={`text-xs italic ${isDegen ? 'text-degen-cyan' : 'text-gray-500'}`}>
+                {isEN 
+                  ? 'Layer-2 Loyalty Program for Seeker Stakers'
+                  : 'Seeker 质押者的 Layer-2 忠诚度计划'
+                }
+              </div>
+            </div>
+          </motion.div>
         </div>
       </main>
     </div>

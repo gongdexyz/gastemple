@@ -174,36 +174,38 @@ export const TemplePage: React.FC = () => {
 
               {/* 核心指标：预计 SKR 回购量 */}
               <motion.div 
-                className={`mb-3 p-3 rounded-lg ${isDegen ? 'bg-degen-green/10 border border-degen-green/30' : 'bg-green-900/40 border border-green-500/30'}`}
-                animate={flashBoost ? { scale: [1, 1.02, 1] } : {}}
-                transition={{ duration: 0.3 }}
+                className={`mb-3 p-3 rounded-lg relative ${isDegen ? 'bg-degen-green/10 border border-degen-green/30' : 'bg-green-900/40 border border-green-500/30'}`}
               >
                 <h4 className="text-[10px] font-bold text-gray-400 mb-1">
                   {isEN ? '💰 Est. SKR Buyback' : '💰 预计 SKR 回购'}
                 </h4>
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-1 relative">
                   <motion.div 
                     className={`text-xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-green-400'}`}
-                    animate={flashBoost ? { scale: [1, 1.1, 1] } : {}}
                   >
                     {simulator.totalSkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </motion.div>
                   <div className="text-xs text-gray-400">SKR</div>
+                  
+                  {/* 增加数值显示在右边 - 使用绝对定位避免影响布局 */}
+                  <AnimatePresence>
+                    {flashBoost && simulator.lastInteractionBoost > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className={`absolute right-0 top-0 text-sm font-bold ${isDegen ? 'text-degen-green' : 'text-green-300'}`}
+                        style={{ pointerEvents: 'none' }}
+                      >
+                        +{simulator.lastInteractionBoost.toFixed(2)}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
                 <div className="text-[9px] text-gray-500 mt-1">
                   ≈ ${(simulator.totalSkrBuyback * prices.skr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
                 </div>
-                
-                {flashBoost && simulator.lastInteractionBoost > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className={`mt-1 text-[9px] font-bold ${isDegen ? 'text-degen-green' : 'text-green-300'}`}
-                  >
-                    +{simulator.lastInteractionBoost.toFixed(2)} SKR!
-                  </motion.div>
-                )}
               </motion.div>
 
               {/* 国库通缩进度 */}

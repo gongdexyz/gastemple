@@ -318,7 +318,7 @@ export const WoodenFish: React.FC = () => {
     }, 2000)
   }, [lang])
 
-  const addMerit = useCallback((shouldSpawnTarget: boolean = true) => {
+  const addMerit = useCallback((shouldSpawnTarget: boolean = true): boolean => {
     // 冥想模式：免费游玩，不消耗代币，有小几率获得GD奖励
     if (gameMode === 'meditation') {
       setTotalMerits(prev => {
@@ -422,7 +422,8 @@ export const WoodenFish: React.FC = () => {
       setMerits(prev => [...prev.slice(-15), newMerit])
       setTimeout(() => setMerits(prev => prev.filter(m => m.id !== newMerit.id)), 1000)
       
-      return true
+      // 返回是否产生了收益
+      return isGDReward
     }
     // 功德模式：消耗代币，有概率暴击和获得GD
     else if (gameMode === 'merit') {
@@ -456,8 +457,8 @@ export const WoodenFish: React.FC = () => {
       let critType: 'normal' | 'rare' | 'epic' = 'normal'
       
       if (isCriticalHit) {
-        // 触发能量传输特效 - 暴击模式
-        if (fishButtonRef.current && shouldSpawnTarget) {
+        // 触发能量传输特效 - 暴击模式（只在功德模式下触发）
+        if (gameMode === 'merit' && fishButtonRef.current && shouldSpawnTarget) {
           const rect = fishButtonRef.current.getBoundingClientRect()
           const centerX = rect.left + rect.width / 2
           const centerY = rect.top + rect.height / 2
@@ -656,16 +657,19 @@ export const WoodenFish: React.FC = () => {
   const handleTargetClick = useCallback((targetId: number, e: React.MouseEvent) => {
     e.stopPropagation()
     
-    // 触发能量传输效果
-    const rect = e.currentTarget.getBoundingClientRect()
-    const centerX = rect.left + rect.width / 2
-    const centerY = rect.top + rect.height / 2
-    triggerBurnEffect({ x: centerX, y: centerY })
-    
     // 移除目标
     setClickTargets(prev => prev.filter(t => t.id !== targetId))
-    // 触发功德并生成新圈
-    addMerit(true)
+    
+    // 触发功德并生成新圈，获取是否有收益
+    const hasReward = addMerit(true)
+    
+    // 只有在有收益时才触发能量传输效果
+    if (hasReward) {
+      const rect = e.currentTarget.getBoundingClientRect()
+      const centerX = rect.left + rect.width / 2
+      const centerY = rect.top + rect.height / 2
+      triggerBurnEffect({ x: centerX, y: centerY })
+    }
   }, [addMerit, triggerBurnEffect])
 
   const handleCenterClick = (e: React.MouseEvent) => {
@@ -674,15 +678,16 @@ export const WoodenFish: React.FC = () => {
       setIsFishPressed(true)
       setTimeout(() => setIsFishPressed(false), 150)
       
-      // 触发能量传输效果
-      if (fishButtonRef.current) {
+      // 触发功德，获取是否有收益
+      const hasReward = addMerit()
+      
+      // 只有在有收益时才触发能量传输效果
+      if (hasReward && fishButtonRef.current) {
         const rect = fishButtonRef.current.getBoundingClientRect()
         const centerX = rect.left + rect.width / 2
         const centerY = rect.top + rect.height / 2
         triggerBurnEffect({ x: centerX, y: centerY })
       }
-      
-      addMerit()
     }
   }
 

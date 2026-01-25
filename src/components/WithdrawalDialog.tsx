@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, AlertTriangle, TrendingUp, ExternalLink } from 'lucide-react'
+import { X, TrendingUp, ExternalLink, Sparkles } from 'lucide-react'
 import { useWalletStore } from '../stores/walletStore'
 import { useGachaStore } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
@@ -32,6 +32,9 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
   const [userTier, setUserTier] = useState<StakingTier>(STAKING_TIERS[0])
   const [loading, setLoading] = useState(false)
   const [checking, setChecking] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [tierUpgraded, setTierUpgraded] = useState(false)
+  const previousTierRef = useRef<StakingTier>(STAKING_TIERS[0])
   
   // 获取用户 SKR 余额和等级
   useEffect(() => {
@@ -40,7 +43,20 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
       getUserSKRBalance(solanaAddress)
         .then(balance => {
           setSkrBalance(balance)
-          setUserTier(getUserTier(balance))
+          const newTier = getUserTier(balance)
+          
+          // 检测等级提升
+          if (previousTierRef.current && newTier.minStake > previousTierRef.current.minStake) {
+            setTierUpgraded(true)
+            setShowCelebration(true)
+            setTimeout(() => {
+              setShowCelebration(false)
+              setTierUpgraded(false)
+            }, 3000)
+          }
+          
+          setUserTier(newTier)
+          previousTierRef.current = newTier
         })
         .finally(() => setChecking(false))
     }
@@ -62,6 +78,31 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
     }, 2000)
   }
   
+  const handleRefresh = () => {
+    if (solanaAddress) {
+      setChecking(true)
+      getUserSKRBalance(solanaAddress)
+        .then(balance => {
+          setSkrBalance(balance)
+          const newTier = getUserTier(balance)
+          
+          // 检测等级提升
+          if (newTier.minStake > userTier.minStake) {
+            setTierUpgraded(true)
+            setShowCelebration(true)
+            setTimeout(() => {
+              setShowCelebration(false)
+              setTierUpgraded(false)
+            }, 3000)
+          }
+          
+          setUserTier(newTier)
+          previousTierRef.current = newTier
+        })
+        .finally(() => setChecking(false))
+    }
+  }
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -76,10 +117,75 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
         className={`
-          w-full max-w-md rounded-2xl p-6 relative
+          w-full max-w-md rounded-2xl p-6 relative overflow-hidden
           ${isDegen ? 'bg-black border-2 border-degen-green' : 'bg-gray-900 border border-goldman-border'}
         `}
       >
+        {/* 庆祝彩带效果 */}
+        <AnimatePresence>
+          {showCelebration && (
+            <>
+              {/* 彩带粒子 */}
+              {Array.from({ length: 30 }).map((_, i) => (
+                <motion.div
+                  key={`confetti-${i}`}
+                  initial={{
+                    x: '50%',
+                    y: '50%',
+                    scale: 0,
+                    rotate: 0,
+                    opacity: 1
+                  }}
+                  animate={{
+                    x: `${50 + (Math.random() - 0.5) * 200}%`,
+                    y: `${50 + (Math.random() - 0.5) * 200}%`,
+                    scale: [0, 1, 0.8],
+                    rotate: Math.random() * 720,
+                    opacity: [1, 1, 0]
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    duration: 2 + Math.random(),
+                    ease: "easeOut"
+                  }}
+                  className="absolute pointer-events-none"
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: ['#FFD700', '#FFA500', '#FF69B4', '#00CED1', '#7FFF00'][Math.floor(Math.random() * 5)],
+                    borderRadius: Math.random() > 0.5 ? '50%' : '2px'
+                  }}
+                />
+              ))}
+              
+              {/* 升级提示 */}
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 1.2, 1], opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none"
+              >
+                <div className={`
+                  px-6 py-4 rounded-2xl backdrop-blur-xl border-2
+                  ${isDegen ? 'bg-degen-green/20 border-degen-green' : 'bg-goldman-gold/20 border-goldman-gold'}
+                `}>
+                  <div className="flex items-center gap-3">
+                    <Sparkles className={`w-8 h-8 ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`} />
+                    <div>
+                      <div className={`text-2xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>
+                        {isEN ? 'TIER UP!' : '等级提升！'}
+                      </div>
+                      <div className="text-sm text-white">
+                        {userTier.emoji} {isEN ? userTier.nameEN : userTier.name}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
         {/* 关闭按钮 */}
         <button
           onClick={onClose}
@@ -96,28 +202,32 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
         </h2>
         
         {/* 用户等级显示 */}
-        <div className={`mb-6 p-4 rounded-xl ${isDegen ? 'bg-degen-purple/10 border border-degen-purple/30' : 'bg-gray-800 border border-gray-700'}`}>
+        <motion.div 
+          className={`mb-6 p-4 rounded-xl ${isDegen ? 'bg-degen-purple/10 border border-degen-purple/30' : 'bg-gray-800 border border-gray-700'}`}
+          animate={tierUpgraded ? {
+            boxShadow: [
+              '0 0 0px rgba(255, 215, 0, 0)',
+              '0 0 30px rgba(255, 215, 0, 0.8)',
+              '0 0 0px rgba(255, 215, 0, 0)'
+            ]
+          } : {}}
+          transition={{ duration: 1, repeat: tierUpgraded ? 2 : 0 }}
+        >
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-xs text-gray-400 mb-1">
                 {isEN ? 'Your Status' : '您的身份'}
               </div>
-              <div className={`text-xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>
+              <motion.div 
+                className={`text-xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}
+                animate={tierUpgraded ? { scale: [1, 1.2, 1] } : {}}
+                transition={{ duration: 0.5 }}
+              >
                 {userTier.emoji} {isEN ? userTier.nameEN : userTier.name}
-              </div>
+              </motion.div>
             </div>
             <button
-              onClick={() => {
-                if (solanaAddress) {
-                  setChecking(true)
-                  getUserSKRBalance(solanaAddress)
-                    .then(balance => {
-                      setSkrBalance(balance)
-                      setUserTier(getUserTier(balance))
-                    })
-                    .finally(() => setChecking(false))
-                }
-              }}
+              onClick={handleRefresh}
               disabled={checking}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
                 isDegen 
@@ -138,18 +248,29 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
             </div>
             <div>
               <div className="text-gray-400">{isEN ? 'Fee Rate' : '税率'}</div>
-              <div className={`font-bold ${
-                userTier.withdrawalFee < 0 
-                  ? (isDegen ? 'text-degen-green' : 'text-green-400')
-                  : userTier.withdrawalFee === 0
-                    ? (isDegen ? 'text-degen-cyan' : 'text-cyan-400')
-                    : 'text-red-400'
-              }`}>
+              <motion.div 
+                className={`font-bold ${
+                  userTier.withdrawalFee < 0 
+                    ? (isDegen ? 'text-degen-green' : 'text-green-400')
+                    : userTier.withdrawalFee === 0
+                      ? (isDegen ? 'text-degen-cyan' : 'text-cyan-400')
+                      : 'text-red-400'
+                }`}
+                animate={tierUpgraded ? { 
+                  scale: [1, 1.5, 1],
+                  textShadow: [
+                    '0 0 0px rgba(255, 215, 0, 0)',
+                    '0 0 20px rgba(255, 215, 0, 1)',
+                    '0 0 0px rgba(255, 215, 0, 0)'
+                  ]
+                } : {}}
+                transition={{ duration: 0.8 }}
+              >
                 {userTier.withdrawalFee < 0 ? '+' : ''}{Math.abs(userTier.withdrawalFee * 100)}%
-              </div>
+              </motion.div>
             </div>
           </div>
-        </div>
+        </motion.div>
         
         {/* 提现金额输入 */}
         <div className="mb-4">
@@ -246,19 +367,20 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
                   {isEN ? 'Save' : '立省'} {savings.toLocaleString()} $GONGDE!
                 </div>
                 <a
-                  href="https://raydium.io"
+                  href="https://seeker.io/stake"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`
                     mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm
-                    transition-colors
+                    transition-all hover:scale-105
                     ${isDegen 
-                      ? 'bg-degen-yellow/20 text-degen-yellow hover:bg-degen-yellow/30' 
-                      : 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30' 
+                      : 'bg-gradient-to-r from-cyan-600/20 to-blue-600/20 text-cyan-400 hover:from-cyan-600/30 hover:to-blue-600/30 border border-cyan-500/30'
                     }
                   `}
                 >
-                  {isEN ? 'Buy SKR on Raydium' : '去 Raydium 买 SKR'}
+                  <Sparkles className="w-4 h-4" />
+                  {isEN ? 'Stake on Seeker Official' : '去 Seeker 官网质押'}
                   <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
