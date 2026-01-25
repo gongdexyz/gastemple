@@ -157,7 +157,6 @@ export const WoodenFish: React.FC = () => {
   
   // 自动挂机相关状态
   const [isAutoClicking, setIsAutoClicking] = useState(false)
-  const [autoClickInterval, setAutoClickInterval] = useState<NodeJS.Timeout | null>(null)
   const [isPaying, setIsPaying] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
@@ -713,28 +712,41 @@ export const WoodenFish: React.FC = () => {
     return () => clearInterval(expiryInterval)
   }, [autoClickEndTime])
   
-  // 自动挂机定时器 - 考虑倍率
+  // 自动挂机定时器 - 真实人类速度（随机间隔 300-800ms）
   useEffect(() => {
-    if (isAutoClicking && !autoClickInterval) {
-      const interval = setInterval(() => {
+    let timeoutId: NodeJS.Timeout | null = null
+    let isActive = false
+    
+    const scheduleNextClick = () => {
+      if (!isActive) return
+      
+      // 随机延迟 300-800ms，模拟真实人类点击速度
+      const randomDelay = Math.floor(Math.random() * 500) + 300 // 300-800ms
+      
+      timeoutId = setTimeout(() => {
         // 根据倍率多次调用addMerit
         const multiplier = autoClickMultiplier || 1
         for (let i = 0; i < multiplier; i++) {
           addMerit(false) // 自动挂机时不生成随机圈
         }
-      }, 1000) // 每1秒自动点击一次
-      setAutoClickInterval(interval)
-    } else if (!isAutoClicking && autoClickInterval) {
-      clearInterval(autoClickInterval)
-      setAutoClickInterval(null)
+        
+        // 递归调度下一次点击
+        scheduleNextClick()
+      }, randomDelay)
+    }
+    
+    if (isAutoClicking) {
+      isActive = true
+      scheduleNextClick()
     }
     
     return () => {
-      if (autoClickInterval) {
-        clearInterval(autoClickInterval)
+      isActive = false
+      if (timeoutId) {
+        clearTimeout(timeoutId)
       }
     }
-  }, [isAutoClicking, autoClickInterval, addMerit, autoClickMultiplier])
+  }, [isAutoClicking, addMerit, autoClickMultiplier])
   
   // 支付成功后自动开始挂机
   useEffect(() => {
@@ -964,7 +976,7 @@ export const WoodenFish: React.FC = () => {
   }
 
   return (
-    <div className={`flex flex-col items-center justify-center -mt-2 ${isScreenPaused ? 'screen-paused' : ''}`}>
+    <div className={`flex flex-col items-center justify-center -mt-2 ${isScreenPaused ? 'screen-paused' : ''}`} data-wooden-fish>
       {/* 暴击闪光效果 + 文字 - 融合版（包含GD奖励）*/}
       <AnimatePresence>
         {isScreenPaused && critLevel && (

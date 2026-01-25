@@ -83,15 +83,39 @@ export const TemplePage: React.FC = () => {
     return () => clearInterval(heartbeat)
   }, [])
   
-  // 监听用户互动
+  // 监听用户互动 - 根据实际消耗计算 SKR 回购
   useEffect(() => {
-    const handleUserInteraction = () => {
-      const boost = Math.random() * 50 + 50
+    const handleUserInteraction = (e: MouseEvent) => {
+      // 只监听木鱼区域的点击
+      const target = e.target as HTMLElement
+      const isWoodenFishClick = target.closest('[data-wooden-fish]') !== null
+      
+      if (!isWoodenFishClick) return
+      
+      // 根据游戏模式计算实际的 SKR 回购量
+      // 功德模式：每次消耗 100 GONGDE
+      // 假设 GONGDE 价格约为 $0.00029600
+      // SKR 价格约为 $0.029600
+      // 100 GONGDE = $0.0296
+      // 可以回购 $0.0296 / $0.029600 = 1 SKR
+      
+      const gongdePrice = prices.gongde || 0.00029600
+      const skrPrice = prices.skr || 0.029600
+      const burnCost = 100 // 每次消耗 100 GONGDE
+      
+      // 计算实际回购量
+      const usdValue = burnCost * gongdePrice
+      const skrBuyback = usdValue / skrPrice
+      
+      // 只有在功德模式下才增加（冥想模式不消耗代币）
+      // 这里简化处理，实际应该从 WoodenFish 组件传递事件
+      const boost = skrBuyback
+      
       setSimulator(prev => ({
         ...prev,
         totalSkrBuyback: prev.totalSkrBuyback + boost,
         dailySkrBuyback: prev.dailySkrBuyback + boost * 0.5,
-        deflationProgress: Math.min(99.99, prev.deflationProgress + 0.5),
+        deflationProgress: Math.min(99.99, prev.deflationProgress + 0.01),
         lastInteractionBoost: boost
       }))
       
@@ -99,9 +123,9 @@ export const TemplePage: React.FC = () => {
       setTimeout(() => setFlashBoost(false), 500)
     }
     
-    window.addEventListener('click', handleUserInteraction)
-    return () => window.removeEventListener('click', handleUserInteraction)
-  }, [])
+    window.addEventListener('click', handleUserInteraction as EventListener)
+    return () => window.removeEventListener('click', handleUserInteraction as EventListener)
+  }, [prices])
   
   // 获取价格
   useEffect(() => {

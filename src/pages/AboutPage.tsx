@@ -14,13 +14,13 @@ export const AboutPage: React.FC = () => {
 
   // CN version (Goldman mode - homepage)
   const roadmapCN = [
-    { phase: '阶段一：黑客松', items: ['参加 Solana Hackathon，做个能用的产品', '公平发射 $GONGDE，无预售无老鼠仓', '开源代码，接受社区审计'] },
+    { phase: '阶段一：黑客松', items: ['参加 Solana Hackathon，做个能用的产品', '公平发射 $GONGDE，无预售无老鼠仓', '前端开源，逻辑透明'] },
     { phase: '阶段二：发射', items: ['Pump.fun 发射 $GONGDE', '启动 SKR 赋能机制（国库分配）', '上线木鱼游戏，开始积累 TVL'] },
     { phase: '阶段三：赋能', items: ['持续支持 $SKR 流动性', '扩展更多玩法（抽卡、排行榜）', '增强 Seeker 生态共识'] },
   ]
 
   const roadmapEN = [
-    { phase: 'Phase 1: HACKATHON', items: ['Build a working product for Solana Hackathon', 'Fair launch $GONGDE via Pump.fun (no presale, no VC)', 'Open source everything'] },
+    { phase: 'Phase 1: HACKATHON', items: ['Build a working product for Solana Hackathon', 'Fair launch $GONGDE via Pump.fun (no presale, no VC)', 'Frontend open source & transparent logic'] },
     { phase: 'Phase 2: LAUNCH', items: ['Deploy $GONGDE on Pump.fun', 'Activate SKR empowerment (treasury allocation)', 'Launch wooden fish game, accumulate TVL'] },
     { phase: 'Phase 3: EMPOWER', items: ['Keep supporting $SKR liquidity', 'Add more features (gacha, leaderboard)', 'Strengthen Seeker ecosystem consensus'] },
   ]
@@ -28,14 +28,14 @@ export const AboutPage: React.FC = () => {
   const faqsCN = [
     { q: '为什么要为 $SKR 做这个？', a: '因为 Seeker 社区有技术、有共识，但缺少趣味性和流动性。我们用游戏化的方式增强社区粘性，同时用国库收入支持 SKR 生态建设。' },
     { q: '$GONGDE 和 $SKR 什么关系？', a: '$GONGDE 是游戏代币，你玩游戏赚 $GONGDE。玩家用 $SKR 购买代敲服务，这些 SKR 进入国库：50% 回购销毁 $GONGDE，30% 支持 SKR 流动性（减少抛压），20% 用于开发。两个币独立但互相赋能。' },
-    { q: '这是黑客松项目？', a: '对，参加 Solana Hackathon。代码开源，逻辑透明，不是 PPT 项目。主打一个真诚。' },
+    { q: '这是黑客松项目？', a: '对，参加 Solana Hackathon。前端代码开源，逻辑透明，不是 PPT 项目。主打一个真诚。' },
     { q: 'Dev 会跑路吗？', a: 'Pump.fun 发射，LP 自动烧毁，合约开源。想跑也跑不了，链上透明自己查。' },
   ]
 
   const faqsEN = [
     { q: 'Why build this for $SKR?', a: 'Seeker community has solid tech & consensus, but lacks fun & liquidity. We use gamification to boost engagement, while treasury revenue supports SKR ecosystem growth.' },
     { q: 'What\'s the relationship between $GONGDE and $SKR?', a: '$GONGDE is the game token. You play, earn $GONGDE. Players pay $SKR for auto-tap service → Treasury: 50% buyback & burn $GONGDE, 30% support SKR liquidity (reduce sell pressure), 20% dev & ops. Two tokens, mutual empowerment.' },
-    { q: 'Is this a hackathon project?', a: 'Yes, for Solana Hackathon. Code is open source, logic is transparent. Not a PPT project. We keep it real.' },
+    { q: 'Is this a hackathon project?', a: 'Yes, for Solana Hackathon. Frontend is open source, logic is transparent. Not a PPT project. We keep it real.' },
     { q: 'Will dev rug?', a: 'Pump.fun launch, LP burned, contract open source. Can\'t rug even if I wanted to. Check on-chain yourself.' },
   ]
 
@@ -166,13 +166,13 @@ export const AboutPage: React.FC = () => {
               {/* Audit */}
               <div className={`p-3 rounded ${isDegen ? 'bg-black/40' : 'bg-goldman-gold/10'}`}>
                 <div className="flex justify-between items-start">
-                  <span className={isDegen ? 'text-green-400' : 'text-goldman-gold'}>{isEN ? 'AUDIT:' : '审计:'}</span>
+                  <span className={isDegen ? 'text-green-400' : 'text-goldman-gold'}>{isEN ? 'CODE:' : '代码:'}</span>
                   <div className="text-right">
-                    <span className={`px-2 py-0.5 text-xs rounded ${isDegen ? 'bg-degen-pink/20 text-degen-pink' : 'bg-pink-500/20 text-pink-400'}`}>
-                      {isEN ? 'Hackathon Build' : '黑客松作品'}
+                    <span className={`px-2 py-0.5 text-xs rounded ${isDegen ? 'bg-degen-cyan/20 text-degen-cyan' : 'bg-cyan-500/20 text-cyan-400'}`}>
+                      {isEN ? 'Frontend Open Source' : '前端开源'}
                     </span>
                     <p className={`text-xs ${isDegen ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
-                      ({isEN ? 'Open source on GitHub' : 'GitHub 开源'})
+                      ({isEN ? 'Transparent logic on GitHub' : 'GitHub 逻辑透明'})
                     </p>
                   </div>
                 </div>
