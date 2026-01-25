@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Flame, Users, Globe, Trophy } from 'lucide-react'
 import { Header } from '../components/Header'
 import { GlitchTransition } from '../components/GlitchTransition'
@@ -45,7 +45,7 @@ interface TokenPrices {
 export const TemplePage: React.FC = () => {
   const { mode } = useThemeStore()
   const { lang } = useLangStore()
-  const { targetFlash } = useEffectsStore()
+  const { targetFlash, criticalFlash } = useEffectsStore()
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
   const TOP_BURNERS = isEN ? TOP_BURNERS_EN : TOP_BURNERS_CN
@@ -160,11 +160,7 @@ export const TemplePage: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
               data-skr-panel
-              className={`
-                hidden md:block p-4 rounded-xl transition-all duration-200
-                ${targetFlash ? 'ring-4 ring-yellow-400 animate-pulse' : ''}
-                ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}
-              `}
+              className={`hidden md:block p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
             >
               {/* 标题 */}
               <div className="mb-3">
@@ -240,13 +236,89 @@ export const TemplePage: React.FC = () => {
 
               {/* 24h 协议收入 */}
               <motion.div 
-                className={`mb-3 p-2.5 rounded-lg ${isDegen ? 'bg-degen-yellow/10' : 'bg-gray-800'}`}
+                data-revenue-target
+                className={`mb-3 p-2.5 rounded-lg ${isDegen ? 'bg-degen-yellow/10' : 'bg-gray-800'} relative overflow-hidden`}
                 animate={flashBoost ? { backgroundColor: isDegen ? ['rgba(250, 204, 21, 0.1)', 'rgba(250, 204, 21, 0.2)', 'rgba(250, 204, 21, 0.1)'] : ['#1f2937', '#374151', '#1f2937'] } : {}}
               >
-                <h4 className={`text-[10px] font-bold mb-1 ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
+                {/* 金色透明遮罩 - 普通受击效果 */}
+                <AnimatePresence>
+                  {targetFlash && !criticalFlash && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 0.6, 0.4, 0] }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8, times: [0, 0.2, 0.5, 1] }}
+                      className="absolute inset-0 bg-gradient-to-br from-yellow-400/60 via-amber-500/40 to-yellow-300/60 pointer-events-none z-10"
+                      style={{
+                        boxShadow: 'inset 0 0 30px rgba(255, 215, 0, 0.8)',
+                        backdropFilter: 'blur(2px)'
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
+                
+                {/* 暴击遮罩 - 更强烈更持久 */}
+                <AnimatePresence>
+                  {criticalFlash && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ 
+                        opacity: [0, 0.9, 0.7, 0.5, 0.3, 0],
+                        scale: [1, 1.05, 1.02, 1]
+                      }}
+                      exit={{ opacity: 0 }}
+                      transition={{ 
+                        duration: 2,
+                        times: [0, 0.1, 0.3, 0.6, 0.8, 1],
+                        scale: {
+                          duration: 0.5,
+                          times: [0, 0.3, 0.6, 1]
+                        }
+                      }}
+                      className="absolute inset-0 bg-gradient-to-br from-yellow-300/80 via-amber-400/60 to-yellow-200/80 pointer-events-none z-10"
+                      style={{
+                        boxShadow: 'inset 0 0 50px rgba(255, 215, 0, 1), 0 0 30px rgba(255, 215, 0, 0.8)',
+                        backdropFilter: 'blur(3px)'
+                      }}
+                    >
+                      {/* 暴击粒子效果 */}
+                      <motion.div
+                        animate={{
+                          rotate: [0, 360]
+                        }}
+                        transition={{
+                          duration: 2,
+                          ease: "linear"
+                        }}
+                        className="absolute inset-0"
+                      >
+                        {[...Array(8)].map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ 
+                              scale: [0, 1, 0],
+                              opacity: [0, 1, 0],
+                              x: [0, Math.cos(i * Math.PI / 4) * 40],
+                              y: [0, Math.sin(i * Math.PI / 4) * 40]
+                            }}
+                            transition={{
+                              duration: 1,
+                              delay: i * 0.1,
+                              repeat: 1
+                            }}
+                            className="absolute top-1/2 left-1/2 w-2 h-2 bg-yellow-300 rounded-full"
+                          />
+                        ))}
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                <h4 className={`text-[10px] font-bold mb-1 ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'} relative z-20`}>
                   {isEN ? '⚡ 24h Revenue' : '⚡ 24h 收入'}
                 </h4>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center relative z-20">
                   <div>
                     <div className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
                       +{simulator.dailySkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

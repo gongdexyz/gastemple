@@ -5,14 +5,16 @@ export interface ParticleEffect {
   startPos: { x: number; y: number }
   endPos: { x: number; y: number }
   timestamp: number
+  isCritical?: boolean // 是否暴击
 }
 
 interface EffectsState {
   particles: ParticleEffect[]
   targetFlash: boolean
+  criticalFlash: boolean // 暴击闪光
   
   // Actions
-  triggerBurnEffect: (startPos: { x: number; y: number }) => void
+  triggerBurnEffect: (startPos: { x: number; y: number }, isCritical?: boolean) => void
   removeParticle: (id: string) => void
   flashTarget: () => void
   clearFlash: () => void
@@ -21,28 +23,53 @@ interface EffectsState {
 export const useEffectsStore = create<EffectsState>((set, get) => ({
   particles: [],
   targetFlash: false,
+  criticalFlash: false,
   
-  triggerBurnEffect: (startPos) => {
-    const particle: ParticleEffect = {
-      id: `particle-${Date.now()}-${Math.random()}`,
-      startPos,
-      endPos: { x: 200, y: 300 }, // 左侧面板大致位置（会在组件中动态计算）
-      timestamp: Date.now()
+  triggerBurnEffect: (startPos, isCritical = false) => {
+    // 暴击时发射多个粒子
+    const particleCount = isCritical ? 5 : 1
+    const newParticles: ParticleEffect[] = []
+    
+    for (let i = 0; i < particleCount; i++) {
+      const particle: ParticleEffect = {
+        id: `particle-${Date.now()}-${Math.random()}`,
+        startPos,
+        endPos: { x: 200, y: 300 },
+        timestamp: Date.now(),
+        isCritical
+      }
+      newParticles.push(particle)
+      
+      // 暴击时粒子间隔发射
+      const delay = isCritical ? i * 100 : 0
+      
+      setTimeout(() => {
+        set((state) => ({
+          particles: [...state.particles, particle]
+        }))
+        
+        // 每个粒子到达后触发闪光
+        setTimeout(() => {
+          if (isCritical) {
+            set({ criticalFlash: true })
+          } else {
+            get().flashTarget()
+          }
+        }, 600)
+        
+        // 移除粒子
+        setTimeout(() => {
+          get().removeParticle(particle.id)
+        }, 800)
+      }, delay)
     }
     
-    set((state) => ({
-      particles: [...state.particles, particle]
-    }))
-    
-    // 600ms 后触发目标闪光
-    setTimeout(() => {
-      get().flashTarget()
-    }, 600)
-    
-    // 800ms 后移除粒子
-    setTimeout(() => {
-      get().removeParticle(particle.id)
-    }, 800)
+    // 暴击闪光持续更久
+    if (isCritical) {
+      setTimeout(() => {
+        set({ criticalFlash: false })
+      }, 2000) // 2秒
+    }
   },
   
   removeParticle: (id) => {
@@ -55,10 +82,10 @@ export const useEffectsStore = create<EffectsState>((set, get) => ({
     set({ targetFlash: true })
     setTimeout(() => {
       set({ targetFlash: false })
-    }, 200)
+    }, 800)
   },
   
   clearFlash: () => {
-    set({ targetFlash: false })
+    set({ targetFlash: false, criticalFlash: false })
   }
 }))

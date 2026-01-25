@@ -456,6 +456,14 @@ export const WoodenFish: React.FC = () => {
       let critType: 'normal' | 'rare' | 'epic' = 'normal'
       
       if (isCriticalHit) {
+        // 触发能量传输特效 - 暴击模式
+        if (fishButtonRef.current && shouldSpawnTarget) {
+          const rect = fishButtonRef.current.getBoundingClientRect()
+          const centerX = rect.left + rect.width / 2
+          const centerY = rect.top + rect.height / 2
+          triggerBurnEffect({ x: centerX, y: centerY }, true) // 传递 true 表示暴击
+        }
+        
         // 确定暴击等级
         const critRoll = Math.random()
         let gdReward = 0
