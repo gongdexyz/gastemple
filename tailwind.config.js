@@ -30,7 +30,7 @@ export default {
           trash: '#6b7280',      // 电子垃圾
           plate: '#3b82f6',      // 精装盘子
           schrodinger: '#8b5cf6', // 薛定谔的价值
-          casino: '#f59e0b',     // 赌场庄家
+          'high-risk': '#f59e0b',     // 高风险庄家
         },
       },
       fontFamily: {
@@ -93,7 +93,7 @@ export default {
         'neon-green': '0 0 20px rgba(57, 255, 20, 0.5)',
         'neon-pink': '0 0 20px rgba(255, 20, 147, 0.5)',
         'neon-gold': '0 0 20px rgba(255, 215, 0, 0.5)',
-        'casino': '0 0 40px rgba(245, 158, 11, 0.6), 0 0 80px rgba(245, 158, 11, 0.3)',
+        'high-risk': '0 0 40px rgba(245, 158, 11, 0.6), 0 0 80px rgba(245, 158, 11, 0.3)',
       },
     },
   },

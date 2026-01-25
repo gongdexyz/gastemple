@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
-import { Volume2, VolumeX } from 'lucide-react'
+import { Volume2, VolumeX, Music } from 'lucide-react'
 import { useSoundStore } from '../stores/soundStore'
 
 export const MusicToggle: React.FC = () => {
-  const { initBgm, isMuted, toggleMute, setupAutoPlay } = useSoundStore()
+  const { initBgm, isMuted, isBgmMuted, toggleMute, toggleBgmMute, setupAutoPlay } = useSoundStore()
 
   // 初始化背景音乐和自动播放（全局只执行一次）
   useEffect(() => {
@@ -12,12 +12,28 @@ export const MusicToggle: React.FC = () => {
   }, [initBgm, setupAutoPlay])
 
   return (
-    <button
-      onClick={toggleMute}
-      className="px-2 py-1 text-xs border border-gray-700 rounded hover:border-[#00ff41] hover:text-[#00ff41] transition-colors"
-      title={isMuted ? 'Unmute' : 'Mute'}
-    >
-      {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-    </button>
+    <div className="flex gap-1.5">
+      {/* 所有音效开关 */}
+      <button
+        onClick={toggleMute}
+        className="px-2 py-1 text-xs border border-gray-700 rounded hover:border-[#00ff41] hover:text-[#00ff41] transition-colors"
+        title={isMuted ? '开启所有音效' : '关闭所有音效'}
+      >
+        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+      </button>
+      
+      {/* 背景音乐单独开关 */}
+      <button
+        onClick={toggleBgmMute}
+        className={`px-2 py-1 text-xs border rounded transition-colors ${
+          isBgmMuted 
+            ? 'border-gray-700 text-gray-500 hover:border-red-500 hover:text-red-500' 
+            : 'border-gray-700 hover:border-[#00ff41] hover:text-[#00ff41]'
+        }`}
+        title={isBgmMuted ? '开启背景音乐' : '关闭背景音乐'}
+      >
+        <Music className={`w-4 h-4 ${isBgmMuted ? 'opacity-50' : ''}`} />
+      </button>
+    </div>
   )
 }

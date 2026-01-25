@@ -7,6 +7,8 @@ import TemplePage from './pages/TemplePage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import AboutPage from './pages/AboutPage'
 import GraveyardPage from './pages/GraveyardPage'
+import EconomicCalculator from './components/EconomicCalculator'
+import EconomyDashboard from './components/EconomyDashboard'
 
 function App() {
   const { mode, setMode } = useThemeStore()
@@ -34,6 +36,12 @@ function App() {
     <div className={`min-h-screen ${mode === 'goldman' ? 'mode-goldman' : 'mode-degen'}`}>
       {/* CRT 显示器滤镜 - 不在 Landing Page 显示 */}
       {!isLandingPage && <div className="crt-overlay" />}
+      
+      {/* 经济面板 - 只在 Temple 页面且管理员模式下显示 */}
+      {location.pathname === '/temple' && location.search.includes('admin=true') && <EconomyDashboard />}
+      
+      {/* 经济计算器 - 只在 Temple 页面且管理员模式下显示 */}
+      {location.pathname === '/temple' && location.search.includes('admin=true') && <EconomicCalculator />}
       
       <Routes>
         <Route path="/" element={<LandingPage />} />

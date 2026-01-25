@@ -1,0 +1,59 @@
+{
+  "packageId": "xyz.gongde.gastemple",
+  "host": "localhost:8080",
+  "name": "Gas Temple - 功德无量",
+  "launcherName": "Gas Temple",
+  "display": "standalone",
+  "themeColor": "#C9A962",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#0A0A0A",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "http://localhost:8080/temple.svg",
+  "maskableIconUrl": "http://localhost:8080/temple.svg",
+  "monochromeIconUrl": "http://localhost:8080/temple.svg",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "alias": "android",
+    "keyPassword": "android",
+    "storePassword": "android"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 2,
+  "shortcuts": [
+    {
+      "name": "开始抽卡",
+      "shortName": "抽卡",
+      "url": "/gacha",
+      "chosenIconUrl": "http://localhost:8080/temple.svg"
+    },
+    {
+      "name": "查看排行榜",
+      "shortName": "排行榜",
+      "url": "/leaderboard",
+      "chosenIconUrl": "http://localhost:8080/temple.svg"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "http://localhost:8080/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "http://localhost:8080/",
+  "minSdkVersion": 19,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "displayOverride": [],
+  "appVersion": "1.0.0"
+}

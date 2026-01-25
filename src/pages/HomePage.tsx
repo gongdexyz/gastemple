@@ -97,7 +97,7 @@ export const HomePage: React.FC = () => {
             <h1 className={`text-3xl font-bold mb-2 ${
               isDegen ? 'text-degen-green font-pixel text-2xl neon-text' : 'text-goldman-gold'
             }`}>
-              {isDegen ? 'CYBER MERIT ($GD)' : '赛博积德 ($GD)'}
+              {isDegen ? 'CYBER MERIT ($GONGDE)' : '赛博积德 ($GONGDE)'}
             </h1>
             <p className={`text-lg mb-4 ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
               {isDegen ? 'ON-CHAIN MOKUGYO, ONLINE BEGGING' : '链上木鱼，在线化缘'}

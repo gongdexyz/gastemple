@@ -3,12 +3,28 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Wallet, ChevronDown, X, Copy, Check } from 'lucide-react'
 import { useThemeStore } from '../stores/themeStore'
 import { useWalletStore, BNB_CHAIN_CONFIG } from '../stores/walletStore'
+import { Transaction } from '@solana/web3.js'
 
 declare global {
   interface Window {
-    ethereum?: any
-    solana?: any
-    phantom?: { solana?: any }
+    ethereum?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>
+      isMetaMask?: boolean
+    }
+    solana?: {
+      isPhantom?: boolean
+      connect: () => Promise<{ publicKey: { toString: () => string } }>
+      signTransaction: (transaction: Transaction) => Promise<Transaction>
+      signAllTransactions?: (transactions: Transaction[]) => Promise<Transaction[]>
+    }
+    phantom?: {
+      solana?: {
+        isPhantom?: boolean
+        connect: () => Promise<{ publicKey: { toString: () => string } }>
+        signTransaction: (transaction: Transaction) => Promise<Transaction>
+        signAllTransactions?: (transactions: Transaction[]) => Promise<Transaction[]>
+      }
+    }
   }
 }
 
@@ -58,9 +74,10 @@ export const WalletConnect: React.FC = () => {
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: BNB_CHAIN_CONFIG.chainId }],
         })
-      } catch (switchError: any) {
-        if (switchError.code === 4902) {
-          await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [BNB_CHAIN_CONFIG] })
+      } catch (switchError: unknown) {
+        const error = switchError as { code?: number }
+        if (error.code === 4902) {
+          await window.ethereum?.request({ method: 'wallet_addEthereumChain', params: [BNB_CHAIN_CONFIG] })
         }
       }
       setBnbWallet(accounts[0])
@@ -109,8 +126,8 @@ export const WalletConnect: React.FC = () => {
         {showChainSelector && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             className={`absolute top-full right-0 mt-2 p-2 rounded-lg shadow-xl z-50 ${isDegen ? 'bg-degen-bg border border-degen-green/30' : 'bg-gray-900 border border-goldman-border'}`}>
-            {['solana', 'bnb'].map((chain) => (
-              <button key={chain} onClick={() => { setSelectedChain(chain as any); setShowChainSelector(false) }}
+            {(['solana', 'bnb'] as const).map((chain) => (
+              <button key={chain} onClick={() => { setSelectedChain(chain); setShowChainSelector(false) }}
                 className={`w-full flex items-center gap-2 px-3 py-2 rounded text-sm ${selectedChain === chain ? isDegen ? 'bg-degen-green/20 text-degen-green' : 'bg-goldman-gold/20 text-goldman-gold' : 'text-gray-400 hover:text-white'}`}>
                 {chain === 'solana' ? '☀️ Solana' : '🟡 BNB Chain'}
               </button>

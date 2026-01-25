@@ -25,19 +25,19 @@ const BADGES_EN = [
 ]
 
 const MOCK_LEADERBOARD_CN = [
-  { rank: 1, name: '0x1234...5678', title: 'Gas费燃烧机', draws: 128, badge: '🔥' },
-  { rank: 2, name: '0xabcd...efgh', title: '命不由天·逆行者', draws: 95, badge: '💀' },
-  { rank: 3, name: '0x9876...5432', title: '深夜EMO党', draws: 72, badge: '🌙' },
-  { rank: 4, name: '0xdead...beef', title: '流动性贡献者', draws: 58, badge: '💧' },
-  { rank: 5, name: '0xcafe...babe', title: '山顶瞭望员', draws: 45, badge: '⛰️' },
+  { rank: 1, country: 'CN', flag: '🇨🇳', name: '功德之王', draws: 1288, badge: '🔥' },
+  { rank: 2, country: 'US', flag: '🇺🇸', name: '燃烧大师', draws: 956, badge: '💀' },
+  { rank: 3, country: 'JP', flag: '🇯🇵', name: '禅宗大师', draws: 742, badge: '🌙' },
+  { rank: 4, country: 'KR', flag: '🇰🇷', name: '速度恶魔', draws: 658, badge: '💧' },
+  { rank: 5, country: 'DE', flag: '🇩🇪', name: '精准燃烧', draws: 545, badge: '⛰️' },
 ]
 
 const MOCK_LEADERBOARD_EN = [
-  { rank: 1, name: '0x1234...5678', title: 'Gas Burner', draws: 128, badge: '🔥' },
-  { rank: 2, name: '0xabcd...efgh', title: 'Fate Defier', draws: 95, badge: '💀' },
-  { rank: 3, name: '0x9876...5432', title: 'Midnight EMO', draws: 72, badge: '🌙' },
-  { rank: 4, name: '0xdead...beef', title: 'Liquidity Provider', draws: 58, badge: '💧' },
-  { rank: 5, name: '0xcafe...babe', title: 'Bagholder Elite', draws: 45, badge: '⛰️' },
+  { rank: 1, country: 'CN', flag: '🇨🇳', name: 'Merit King', draws: 1288, badge: '🔥' },
+  { rank: 2, country: 'US', flag: '🇺🇸', name: 'Burn Master', draws: 956, badge: '💀' },
+  { rank: 3, country: 'JP', flag: '🇯🇵', name: 'Zen Master', draws: 742, badge: '🌙' },
+  { rank: 4, country: 'KR', flag: '🇰🇷', name: 'Speed Demon', draws: 658, badge: '💧' },
+  { rank: 5, country: 'DE', flag: '🇩🇪', name: 'Precision Burner', draws: 545, badge: '⛰️' },
 ]
 
 // NFT Relics
@@ -99,7 +99,7 @@ export const LeaderboardPage: React.FC = () => {
   const [mintingRelic, setMintingRelic] = useState<string | null>(null)
 
   const trashCount = history.filter(h => h.fortune.level === 'N').length
-  const casinoCount = history.filter(h => h.fortune.level === 'SSR').length
+  const ssrCount = history.filter(h => h.fortune.level === 'SSR').length
 
   const canMint = (relic: typeof RELICS[0]) => {
     if (mintedRelics.includes(relic.id)) return false
@@ -193,10 +193,10 @@ export const LeaderboardPage: React.FC = () => {
                     </div>
                     <div>
                       <div className={`text-2xl font-bold ${isDegen ? 'text-degen-cyan' : 'text-white'}`}>
-                        {casinoCount === 0 ? '—' : casinoCount}
+                        {ssrCount === 0 ? '—' : ssrCount}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {casinoCount === 0 ? (isEN ? 'No SSR' : '没中过') : (isEN ? 'SSR Wins' : 'SSR')}
+                        {ssrCount === 0 ? (isEN ? 'No SSR' : '没中过') : (isEN ? 'SSR Wins' : 'SSR')}
                       </div>
                     </div>
                   </div>
@@ -253,20 +253,30 @@ export const LeaderboardPage: React.FC = () => {
                         className={`flex items-center justify-between p-3 rounded-lg ${isDegen ? 'bg-black/20' : 'bg-black/10'}`}
                       >
                         <div className="flex items-center gap-3">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            item.rank <= 3 ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : 'bg-gray-700 text-gray-400'
+                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                            item.rank === 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-black' :
+                            item.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-black' :
+                            item.rank === 3 ? 'bg-gradient-to-r from-orange-400 to-orange-600 text-black' :
+                            'bg-gray-700 text-gray-400'
                           }`}>
                             {item.rank}
                           </span>
-                          <div>
-                            <p className="text-sm text-white font-mono">{item.name}</p>
-                            <p className="text-xs text-gray-500">{item.title}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{item.flag}</span>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${isDegen ? 'bg-degen-green/20 text-degen-green' : 'bg-goldman-gold/20 text-goldman-gold'}`}>
+                                  {item.country}
+                                </span>
+                                <p className="text-sm text-white font-medium">{item.name}</p>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{item.badge}</span>
-                          <span className={`text-sm font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>
-                            {item.draws}
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{item.badge}</span>
+                          <span className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>
+                            {item.draws.toLocaleString()}
                           </span>
                         </div>
                       </motion.div>

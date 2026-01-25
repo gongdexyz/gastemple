@@ -61,7 +61,7 @@ export const PoisonousReport: React.FC<PoisonousReportProps> = ({ project, onClo
         >
           <div className="text-4xl mb-3">🐸</div>
           <p className={`
-            text-lg font-bold italic
+            text-lg font-bold font-pixel
             ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}
           `}>
             "{buddhaQuote}"

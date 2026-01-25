@@ -99,7 +99,7 @@ const getDialogContent = (style: DialogStyle, drawCount: number, isEN: boolean, 
         message: isEN
           ? `Current gas fee could buy you a nice bowl of ramen.\nAre you sure you want to use it on a possibly corrupted research report?`
           : `现在的 Gas 费够你吃顿隆江猪脚饭了。\n你确定要用来抽一个可能全是乱码的研报？`,
-        confirmText: isEN ? '[ GAMBLING > FOOD ]' : '[ 猪脚饭哪有赌博香 ]',
+        confirmText: isEN ? '[ HIGH-RISK > FOOD ]' : '[ 猪脚饭哪有高风险香 ]',
         cancelText: isEN ? '[ TRUE, RETREAT ]' : '[ 也是，撤了 ]',
       }
     } else {
@@ -107,8 +107,8 @@ const getDialogContent = (style: DialogStyle, drawCount: number, isEN: boolean, 
         icon: <Heart className="w-8 h-8 text-pink-500" />,
         title: isEN ? '❤️ HONEST WORDS' : '❤️ 掏心窝子的话',
         message: isEN
-          ? `Look, we both know this is gambling.\nI'm here to take your money, you're here to test your luck.\nLet's be real with each other.\n\nBut hey, I appreciate your degeneracy.`
-          : `咱也不装了，这就是赌博。\n我是来割你的，你是来赌运气的。\n大家坦坦荡荡。\n\n但说真的，我喜欢你这股傻劲。`,
+          ? `Look, we both know this is high-risk.\nI'm here to take your money, you're here to test your luck.\nLet's be real with each other.\n\nBut hey, I appreciate your degeneracy.`
+          : `咱也不装了，这就是高风险。\n我是来割你的，你是来赌运气的。\n大家坦坦荡荡。\n\n但说真的，我喜欢你这股傻劲。`,
         confirmText: isEN ? '[ RESPECT, TAKE IT ]' : '[ 敬你是条汉子 ]',
         cancelText: isEN ? '[ TOO REAL, BYE ]' : '[ 太真实了，告辞 ]',
       }

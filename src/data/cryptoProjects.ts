@@ -1,5 +1,5 @@
 // 稀有度定义 - Gas Temple 专属
-export type Rarity = 'trash' | 'plate' | 'schrodinger' | 'casino'
+export type Rarity = 'trash' | 'plate' | 'schrodinger' | 'high-risk'
 
 export const RARITY_CONFIG: Record<Rarity, {
   label: string
@@ -33,9 +33,9 @@ export const RARITY_CONFIG: Record<Rarity, {
     probability: 0.15,
     ponziRange: [20, 50],
   },
-  casino: {
-    label: '赌场庄家',
-    labelEn: 'Casino Boss',
+  'high-risk': {
+    label: '高风险庄家',
+    labelEn: 'High-Risk Boss',
     color: '#f59e0b',
     bgGradient: 'from-amber-700 to-orange-900',
     probability: 0.05,
@@ -206,7 +206,7 @@ export const CRYPTO_PROJECTS: CryptoProject[] = [
     rarity: 'schrodinger',
   },
 
-  // 赌场庄家级别
+  // 高风险庄家级别
   {
     id: 'btc',
     name: 'Bitcoin',
@@ -220,7 +220,7 @@ export const CRYPTO_PROJECTS: CryptoProject[] = [
     risk: '能源消耗、监管风险',
     whitePaperBS: '"去中心化货币" = 矿池说了算',
     ponziIndex: 15,
-    rarity: 'casino',
+    rarity: 'high-risk',
   },
   {
     id: 'eth',
@@ -235,7 +235,7 @@ export const CRYPTO_PROJECTS: CryptoProject[] = [
     risk: '扩容永远在路上',
     whitePaperBS: '"可编程货币" = 智能合约漏洞提款机',
     ponziIndex: 20,
-    rarity: 'casino',
+    rarity: 'high-risk',
   },
   {
     id: 'bnb',
@@ -250,7 +250,7 @@ export const CRYPTO_PROJECTS: CryptoProject[] = [
     risk: '中心化风险、监管压力',
     whitePaperBS: '"BNB Chain生态" = 币安全家桶',
     ponziIndex: 25,
-    rarity: 'casino',
+    rarity: 'high-risk',
   },
 ]
 

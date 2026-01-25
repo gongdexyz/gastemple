@@ -84,6 +84,34 @@ const HALL_OF_SHAME = [
   { address: 'Degen_420x', draws: 69, title: '赛博乞丐', titleEN: 'CYBER BEGGAR' },
 ]
 
+// 🪷 Buddha 辣评池 - 零门槛展示用（10条精选）
+const BUDDHA_ROASTS = {
+  cn: [
+    "你不怕归零。你怕卖早了然后发现自己错了。",
+    "这个币可能会涨。但当它涨的时候，你还会拿着吗？",
+    "你不是来分析的。你是来寻求许可的。",
+    "佛祖看图表没问题。他看你的纪律有问题。",
+    "如果信念足够，你就不会一直刷新价格。",
+    "这不是个坏币。它只是被没耐心的人持有。",
+    "你说'长期持有'。佛祖听到的是'直到它变红'。",
+    "市场不是在测试这个币。它是在测试你。",
+    "你能活过这次交易。我不确定你能活过你的情绪。",
+    "佛祖不担心项目。他担心你的手。"
+  ],
+  en: [
+    "You don't fear the dump. You fear selling too early and being wrong.",
+    "This coin may go up. But will you still be holding when it does?",
+    "You're not here for analysis. You're here for permission.",
+    "Buddha sees no problem with the chart. He sees a problem with your discipline.",
+    "If conviction were enough, you wouldn't be refreshing the price.",
+    "This is not a bad coin. It's just held by impatient people.",
+    "You say 'long term'. Buddha hears 'until it goes red'.",
+    "The market isn't testing the coin. It's testing you.",
+    "You can survive this trade. I'm not sure you can survive your emotions.",
+    "Buddha worries not about the project. He worries about your hands."
+  ]
+}
+
 // 🪷 佛祖判词文案库
 const BUDDHA_VERDICTS = {
   // 高风险 (ponziLevel > 70)
@@ -339,6 +367,13 @@ export const GachaPage: React.FC = () => {
     setCurrentResult(null)
   }
 
+  // 获取随机Buddha辣评
+  const getRandomBuddhaRoast = () => {
+    const roasts = BUDDHA_ROASTS[isEN ? 'en' : 'cn']
+    const randomIndex = Math.floor(Math.random() * roasts.length)
+    return roasts[randomIndex]
+  }
+
   const getPonziLevel = () => {
     if (!currentResult) return 50
     const level = currentResult.fortune.level
@@ -423,7 +458,23 @@ export const GachaPage: React.FC = () => {
                 exit={{ opacity: 0 }}
                 className="flex flex-col items-center justify-center h-full gap-6 py-8"
               >
-                <motion.div 
+                {/* Buddha辣评标语 - 钱币上方，引流利器 */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="mb-4 p-3 bg-[#00ff41] border-4 border-[#00ff41] shadow-[4px_4px_0_0_rgba(0,0,0,0.8)] text-center w-full"
+                  style={{ outline: '2px solid #000', outlineOffset: '-6px' }}
+                >
+                  <p className="text-black text-base font-black" style={{ textShadow: '1px 1px 0 rgba(0,0,0,0.3)' }}>
+                    "{getRandomBuddhaRoast()}"
+                  </p>
+                  <p className="text-sm text-black font-black mt-1" style={{ textShadow: '1px 1px 0 rgba(0,0,0,0.3)' }}>
+                    {isEN ? '>> Want one meant specifically for you? Draw a lot.' : '>> 想要专属判词？抽签吧。'}
+                  </p>
+                </motion.div>
+                
+                <motion.div
                   className="relative"
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -442,7 +493,7 @@ export const GachaPage: React.FC = () => {
                       <div className="absolute top-1 left-2 w-3 h-3 rounded-full bg-yellow-200/60 blur-[1px]" />
                     </div>
                     {/* 故障效果 */}
-                    <motion.div 
+                    <motion.div
                       className="absolute inset-0 rounded-full bg-white mix-blend-overlay opacity-0"
                       animate={{ opacity: [0, 0.6, 0], x: [-2, 2, 0] }}
                       transition={{ duration: 0.1, repeat: Infinity, repeatDelay: 3 }}
@@ -462,7 +513,7 @@ export const GachaPage: React.FC = () => {
                 <p className="text-center text-lg">
                   {isEN ? "Today's Fortune • Test Your Luck" : '今日运势 • 测测你的财运'}
                 </p>
-                <button 
+                <button
                   onClick={handleStart}
                   className="w-full py-4 text-lg font-bold border-2 border-red-500 uppercase tracking-wider bg-gradient-to-b from-red-600 to-red-800 text-yellow-300 rounded-lg shadow-lg hover:from-red-500 hover:to-red-700 transition-all hover:scale-105 active:scale-95"
                   style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}

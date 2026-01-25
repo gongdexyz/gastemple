@@ -13,7 +13,7 @@ const RarityIcon: Record<Rarity, React.ReactNode> = {
   trash: <Skull className="w-5 h-5" />,
   plate: <Gem className="w-5 h-5" />,
   schrodinger: <HelpCircle className="w-5 h-5" />,
-  casino: <Crown className="w-5 h-5" />,
+  'high-risk': <Crown className="w-5 h-5" />,
 }
 
 export const CryptoCard: React.FC<CryptoCardProps> = ({ 
@@ -57,11 +57,11 @@ export const CryptoCard: React.FC<CryptoCardProps> = ({
         </div>
 
         {/* 卡牌正面 - 项目信息 */}
-        <div 
+        <div
           className={`card-back absolute inset-0 rounded-2xl overflow-hidden ${
-            result.rarity === 'casino' ? 'casino-glow' : ''
+            result.rarity === 'high-risk' ? 'high-risk-glow' : ''
           }`}
-          style={{ 
+          style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)'
           }}

@@ -6,6 +6,7 @@ import { useLangStore } from '../stores/langStore'
 import { useWalletStore } from '../stores/walletStore'
 import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js'
 import { createTransferInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
+import TokenExchange from './TokenExchange'
 
 // 扩展全局窗口接口以包含Phantom钱包的完整类型
 declare global {
@@ -157,10 +158,19 @@ export const WoodenFish: React.FC = () => {
   const [isPaying, setIsPaying] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
+  const [showExchange, setShowExchange] = useState(false) // 兑换弹窗
   
-  // 收款地址和SKR合约地址（需要用户提供）
-  const RECIPIENT_ADDRESS = '这里填你自己的Solana钱包地址' // 需要用户提供
-  const SKR_TOKEN_ADDRESS = '这里填 SKR 的 Token Address' // 需要用户提供
+  // 收款地址和SKR合约地址（从环境变量读取）
+  const RECIPIENT_ADDRESS = import.meta.env.VITE_RECIPIENT_ADDRESS || '这里填你自己的Solana钱包地址'
+  const SKR_TOKEN_ADDRESS = import.meta.env.VITE_SKR_TOKEN_ADDRESS || '这里填 SKR 的 Token Address'
+  
+  // 检查是否为 SKR 测试模式 - URL带 ?test=skr 或 ?test=demo 即可免费使用自动挂机
+  const isSKRTestMode = () => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(window.location.search)
+    const testParam = params.get('test')
+    return testParam === 'skr' || testParam === 'demo'
+  }
   
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
@@ -172,12 +182,33 @@ export const WoodenFish: React.FC = () => {
   const [autoClickEndTime, setAutoClickEndTime] = useState<number | null>(null) // 结束时间戳
   const [showAutoClickOptions, setShowAutoClickOptions] = useState(false) // 是否显示选项
   
-  // 自动挂机价格选项
-  const AUTO_CLICK_OPTIONS = [
-    { price: 33, multiplier: 1, label: '自动代敲', description: '小沙弥为你代劳', emoji: '🤖' },
-    { price: 58, multiplier: 3, label: '功德加持', description: '功德×3，效率提升', emoji: '✨' },
-    { price: 108, multiplier: 5, label: '方丈加持', description: '法力无边，功德×5', emoji: '👨‍🦲' }
-  ]
+  // 自动挂机价格选项（根据游戏模式不同）
+  const getAutoClickOptions = () => {
+    if (gameMode === 'merit') {
+      // 功德模式：价格 5 倍（因为有暴击奖励）
+      return [
+        { price: 100, multiplier: 1, label: '自动代敲', description: '小沙弥为你代劳', emoji: '🤖' },
+        { price: 250, multiplier: 3, label: '功德加持', description: '功德×3，效率提升', emoji: '✨' },
+        { price: 400, multiplier: 5, label: '方丈加持', description: '法力无边，功德×5', emoji: '👨‍🦲' }
+      ]
+    } else {
+      // 冥想模式：新定价策略（让玩家觉得能回本）
+      return [
+        { price: 20, multiplier: 1, label: '自动代敲', description: '小沙弥为你代劳', emoji: '🤖' },
+        { price: 50, multiplier: 3, label: '功德加持', description: '功德×3，效率提升', emoji: '✨' },
+        { price: 80, multiplier: 5, label: '方丈加持', description: '法力无边，功德×5', emoji: '👨‍🦲' }
+      ]
+    }
+  }
+  
+  const AUTO_CLICK_OPTIONS = getAutoClickOptions()
+  
+  // GD ↔ SKR 兑换比例（从环境变量读取）
+  const EXCHANGE_RATE = {
+    GD_TO_SKR: parseFloat(import.meta.env.VITE_GD_TO_SKR_RATE || '2000'),  // 2000 GD = 1 SKR
+    SKR_TO_GD: parseFloat(import.meta.env.VITE_SKR_TO_GD_RATE || '1500'),  // 1 SKR = 1500 GD
+    // 你的利润：每次兑换抽成 25%
+  }
   
   // 检查自动挂机是否有效
   const isAutoClickActive = autoClickMultiplier > 0 && autoClickEndTime && Date.now() < autoClickEndTime
@@ -208,9 +239,9 @@ export const WoodenFish: React.FC = () => {
     audioRef.current = new Audio('/muyu.mp3')
     audioRef.current.volume = 0.5
     
-    // 奖励音效 - 使用roll.mp3作为金币滚动音效
-    rewardAudioRef.current = new Audio('/sounds/roll.mp3')
-    rewardAudioRef.current.volume = 0.7
+    // 暴击音效 - 使用getcoin.mp3作为暴击金币音效
+    rewardAudioRef.current = new Audio('/sounds/getcoin.mp3')
+    rewardAudioRef.current.volume = 0.8
     
     // 预加载图片避免闪烁
     const preloadGif = new Image()
@@ -281,7 +312,8 @@ export const WoodenFish: React.FC = () => {
     if (gameMode === 'meditation') {
       setTotalMerits(prev => {
         const newTotal = prev + 1
-        // 第二次点击后才开始生成随机圈，且只有在点击中心木鱼时才生成
+        // 只有在手动点击且点击次数>1时才生成随机圈
+        // 自动挂机时不生成随机圈（shouldSpawnTarget === false）
         if (newTotal > 1 && shouldSpawnTarget) {
           spawnNewTarget()
         }
@@ -313,15 +345,44 @@ export const WoodenFish: React.FC = () => {
       setIsAnimating(true)
       setTimeout(() => setIsAnimating(false), 800)
 
-      // 冥想模式：10%几率获得小额GD奖励（1-10 GD）
+      // 冥想模式：GD奖励（根据是否自动挂机调整）
       let gdReward = 0
       let gdRewardText = ''
       const randomValue = Math.random()
       
-      if (randomValue < 0.1) {
-        gdReward = Math.floor(Math.random() * 10) + 1 // 1-10 GD
-        addGD(gdReward)
-        gdRewardText = isEN ? `💰 +${gdReward} $GD!` : `💰 +${gdReward} $GD！`
+      // 自动挂机时大幅降低奖励，避免产出过高
+      const isAutoMode = !shouldSpawnTarget
+      
+      // 从环境变量读取参数
+      const manualRate = parseFloat(import.meta.env.VITE_MEDITATION_MANUAL_RATE || '0.20')
+      const manualMin = parseInt(import.meta.env.VITE_MEDITATION_MANUAL_MIN || '5')
+      const manualMax = parseInt(import.meta.env.VITE_MEDITATION_MANUAL_MAX || '15')
+      const autoRate = parseFloat(import.meta.env.VITE_AUTO_CLICK_REWARD_RATE || '0.02')
+      const autoMin = parseInt(import.meta.env.VITE_AUTO_CLICK_REWARD_MIN || '1')
+      const autoMax = parseInt(import.meta.env.VITE_AUTO_CLICK_REWARD_MAX || '5')
+      
+      if (isAutoMode) {
+        // 自动挂机：15%几率获得 1-10 GD（提高波动性）
+        if (randomValue < autoRate) {
+          gdReward = Math.floor(Math.random() * (autoMax - autoMin + 1)) + autoMin
+          
+          // 随机福报：10% 概率双倍奖励
+          if (Math.random() < 0.10) {
+            gdReward *= 2
+            gdRewardText = isEN ? `💰 🎉 BLESSED! +${gdReward} $GONGDE!` : `💰 🎉 福报加持！+${gdReward} $GONGDE！`
+          } else {
+            gdRewardText = isEN ? `💰 +${gdReward} $GONGDE!` : `💰 +${gdReward} $GONGDE！`
+          }
+          
+          addGD(gdReward)
+        }
+      } else {
+        // 手动点击：20%几率获得 5-15 GD
+        if (randomValue < manualRate) {
+          gdReward = Math.floor(Math.random() * (manualMax - manualMin + 1)) + manualMin
+          addGD(gdReward)
+          gdRewardText = isEN ? `💰 +${gdReward} $GONGDE!` : `💰 +${gdReward} $GONGDE！`
+        }
       }
       
       const isGDReward = gdReward > 0
@@ -358,19 +419,19 @@ export const WoodenFish: React.FC = () => {
       spendGD(burnCost)
       
       // 伪随机保底系统 + 连击手感加权 + 三重暴击等级
-      // 基础暴击率 2.5%，每次未暴击增加 0.5%，连击额外加权
-      const baseCritRate = 0.025
-      const streakBonus = critStreak * 0.005 // 未暴击次数加成
-      const comboBonus = hiddenCombo * 0.006 // 连击手感加成
+      // 【拉新阶段配置】基础暴击率 4%，让新用户体验更爽
+      const baseCritRate = 0.04
+      const streakBonus = critStreak * 0.007 // 未暴击次数加成
+      const comboBonus = hiddenCombo * 0.008 // 连击手感加成
       
       // 今日第一次必爽：暴击概率翻倍
       const firstHitBonus = todayFirstHit ? baseCritRate : 0
       
-      // 计算实际暴击率（上限不超过 28%）
-      let actualCritRate = Math.min(baseCritRate + streakBonus + comboBonus + firstHitBonus, 0.28)
+      // 计算实际暴击率（上限不超过 35%）
+      let actualCritRate = Math.min(baseCritRate + streakBonus + comboBonus + firstHitBonus, 0.35)
       
-      // 节奏心理保底：连续18次未暴击且成功率≥70%时强制暴击
-      const shouldForceCrit = critStreak >= 18 && actualCritRate >= 0.7
+      // 节奏心理保底：连续12次未暴击且成功率≥70%时强制暴击
+      const shouldForceCrit = critStreak >= 12 && actualCritRate >= 0.7
       
       // 判断是否暴击
       const isCriticalHit = shouldForceCrit || Math.random() < actualCritRate
@@ -385,24 +446,29 @@ export const WoodenFish: React.FC = () => {
         let gdReward = 0
         
         // 三重暴击等级概率
-        if (hiddenCombo >= 5 && critRoll < 0.04) {
-          // 天启级暴击 (4%) - 需要combo≥5
+        if (hiddenCombo >= 5 && critRoll < 0.06) {
+          // 天启级暴击 (6%) - 需要combo≥5
           critType = 'epic'
           gdRewardMultiplier = 5
           gdReward = 5000
-          criticalText = isEN ? '✨ HEAVENLY REVELATION! 5000 $GD! ✨' : '✨ 天启降临！5000 $GD！ ✨'
-        } else if (hiddenCombo >= 3 && critRoll < 0.22) {
-          // 福报级暴击 (18%) - 需要combo≥3
+          criticalText = isEN ? '✨ HEAVENLY REVELATION! 5000 $GONGDE! ✨' : '✨ 天启降临！5000 $GONGDE！ ✨'
+        } else if (hiddenCombo >= 3 && critRoll < 0.28) {
+          // 福报级暴击 (22%) - 需要combo≥3
           critType = 'rare'
           gdRewardMultiplier = 2
           gdReward = 2000
-          criticalText = isEN ? '✨ KARMIC BLESSING! 2000 $GD! ✨' : '✨ 福报加持！2000 $GD！ ✨'
+          criticalText = isEN ? '✨ KARMIC BLESSING! 2000 $GONGDE! ✨' : '✨ 福报加持！2000 $GONGDE！ ✨'
         } else {
-          // 因果级暴击 (78%)
+          // 因果级暴击 (72%)
           critType = 'normal'
           gdRewardMultiplier = 1
-          gdReward = 1000
-          criticalText = isEN ? '✨ BUDDHA BLESS! 1000 $GD! ✨' : '✨ 佛祖显灵！1000 $GD！ ✨'
+          gdReward = 1200
+          criticalText = isEN ? '✨ BUDDHA BLESS! 1200 $GONGDE! ✨' : '✨ 佛祖显灵！1200 $GONGDE！ ✨'
+        }
+        
+        // 自动挂机时降低奖励 70%
+        if (!shouldSpawnTarget) {
+          gdReward = Math.floor(gdReward * 0.7)
         }
         
         // 设置暴击等级反馈
@@ -457,22 +523,38 @@ export const WoodenFish: React.FC = () => {
         return prev + 1 // Good点击
       })
       
-      // 非暴击时的小额GD奖励（避免与暴击GD重复）
+      // 非暴击时的小额GD奖励（按照 0.85 期望值设计）
       if (!isCriticalHit) {
         const randomValue = Math.random()
         let smallGdReward = 0
         
-        // 概率：150 GD (10%)
-        if (randomValue < 0.10) {
-          smallGdReward = 150
+        // 奖池分布（期望值 0.85）
+        // 50% 概率：0 GD（销毁）
+        // 30% 概率：80 GD（微损）
+        // 15% 概率：150 GD（小赚）
+        // 4% 概率：500 GD（大赚）
+        // 1% 概率：2000 GD（天选）
+        
+        if (randomValue < 0.50) {
+          smallGdReward = 0 // 50% 什么都没有
+        } else if (randomValue < 0.80) {
+          smallGdReward = 80 // 30% 回本
+        } else if (randomValue < 0.95) {
+          smallGdReward = 150 // 15% 小赚
+        } else if (randomValue < 0.99) {
+          smallGdReward = 500 // 4% 大赚
+        } else {
+          smallGdReward = 2000 // 1% 天选
+        }
+        
+        // 自动挂机时降低奖励 70%
+        if (!shouldSpawnTarget && smallGdReward > 0) {
+          smallGdReward = Math.floor(smallGdReward * 0.7)
+        }
+        
+        if (smallGdReward > 0) {
           addGD(smallGdReward)
         }
-        // 最大概率：50 GD (45%)
-        else if (randomValue < 0.55) {
-          smallGdReward = 50
-          addGD(smallGdReward)
-        }
-        // 小概率不给：45%
       }
       
       setTotalMerits(prev => {
@@ -591,7 +673,7 @@ export const WoodenFish: React.FC = () => {
         // 根据倍率多次调用addMerit
         const multiplier = autoClickMultiplier || 1
         for (let i = 0; i < multiplier; i++) {
-          addMerit()
+          addMerit(false) // 自动挂机时不生成随机圈
         }
       }, 1000) // 每1秒自动点击一次
       setAutoClickInterval(interval)
@@ -701,8 +783,56 @@ export const WoodenFish: React.FC = () => {
     setAutoClickEndTime(null)
   }
   
+  // GD 兑换 SKR（用户用 GD 购买 SKR）
+  const exchangeGDtoSKR = (skrAmount: number) => {
+    const gdCost = skrAmount * EXCHANGE_RATE.GD_TO_SKR
+    
+    if (gdBalance < gdCost) {
+      setPaymentError(isEN ? `Need ${gdCost} $GONGDE` : `需要 ${gdCost} $GONGDE`)
+      setTimeout(() => setPaymentError(null), 3000)
+      return false
+    }
+    
+    // 扣除 GD
+    spendGD(gdCost)
+    
+    // 这里应该给用户发送 SKR，但由于是链上操作，需要后端支持
+    // 暂时只显示成功消息
+    setPaymentSuccess(true)
+    setTimeout(() => setPaymentSuccess(false), 3000)
+    
+    return true
+  }
+  
+  // SKR 兑换 GD（用户用 SKR 购买 GD）
+  const exchangeSKRtoGD = async (skrAmount: number) => {
+    // 这需要用户从钱包转 SKR 给你
+    // 然后你给用户发 GD
+    const gdReward = skrAmount * EXCHANGE_RATE.SKR_TO_GD
+    
+    // TODO: 实现 SKR 转账逻辑（类似代敲支付）
+    // 成功后给用户发 GD
+    addGD(gdReward)
+    
+    return true
+  }
+  
   // 处理选择选项
   const handleSelectOption = async (option: typeof AUTO_CLICK_OPTIONS[0]) => {
+    // SKR 测试模式：直接启用自动挂机，无需支付
+    if (isSKRTestMode()) {
+      setAutoClickMultiplier(option.multiplier)
+      setAutoClickEndTime(Date.now() + 3 * 60 * 60 * 1000) // 3小时
+      setIsAutoClicking(true)
+      setPaymentSuccess(true)
+      setShowAutoClickOptions(false)
+      
+      // 3秒后隐藏成功提示
+      setTimeout(() => setPaymentSuccess(false), 3000)
+      return
+    }
+    
+    // 正常模式：需要钱包和配置
     if (!solanaAddress) {
       setPaymentError(isEN ? 'Please connect Phantom wallet first' : '请先连接Phantom钱包')
       return
@@ -860,7 +990,7 @@ export const WoodenFish: React.FC = () => {
                     className="px-6 py-3 rounded-xl bg-yellow-500/30 border-2 border-yellow-400 backdrop-blur-sm"
                   >
                     <div className="text-4xl font-bold text-yellow-200" style={{ textShadow: '0 0 15px rgba(255,255,0,0.8)' }}>
-                      +{criticalReward.amount} $GD
+                      +{criticalReward.amount} $GONGDE
                     </div>
                     <div className="text-sm text-yellow-100 mt-1">
                       {criticalReward.text}
@@ -909,7 +1039,7 @@ export const WoodenFish: React.FC = () => {
         <div className={`mt-0.5 text-xs ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {gameMode === 'meditation'
             ? (isEN ? 'Free play, no token consumption' : '免费游玩，不消耗代币')
-            : (isEN ? 'Burns $GD tokens, earns real merit' : '消耗$GD代币，积累真实功德')
+            : (isEN ? 'Burns $GONGDE tokens, earns real merit' : '消耗$GONGDE代币，积累真实功德')
           }
         </div>
         
@@ -1165,14 +1295,25 @@ export const WoodenFish: React.FC = () => {
         </p>
         <p className={`mt-1 text-lg ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {gameMode === 'meditation'
-            ? (isEN ? 'Cost: 0 $GD (Free)' : '每次消耗 0 $GD (免费)')
-            : (isEN ? `Cost: ${burnCost} $GD each` : `每次消耗 ${burnCost} $GD`)
+            ? (isEN ? 'Cost: 0 $GONGDE (Free)' : '每次消耗 0 $GONGDE (免费)')
+            : (isEN ? `Cost: ${burnCost} $GONGDE each` : `每次消耗 ${burnCost} $GONGDE`)
           }
         </p>
       </div>
 
       {/* 自动挂机系统 - 折叠式设计 */}
       <div className="mt-6 flex flex-col items-center w-full max-w-md">
+        {/* 测试模式提示 */}
+        {isSKRTestMode() && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-2 px-3 py-1.5 rounded-lg bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs"
+          >
+            🧪 {isEN ? 'Demo Mode: Free Auto-Click' : '演示模式：免费自动代敲'}
+          </motion.div>
+        )}
+        
         {/* 主折叠按钮 - 精简版 */}
         <motion.button
           onClick={() => setShowAutoClickOptions(!showAutoClickOptions)}
@@ -1224,25 +1365,35 @@ export const WoodenFish: React.FC = () => {
               transition={{ duration: 0.2 }}
               className="w-full overflow-hidden"
             >
+              {/* 模式提示 */}
+              {gameMode === 'merit' && (
+                <div className="mt-2 px-3 py-2 rounded-lg bg-yellow-900/20 border border-yellow-500/30 text-yellow-400 text-xs">
+                  ⚠️ {isEN ? 'Merit mode: Higher price, higher rewards' : '功德模式：价格更高，奖励更多'}
+                </div>
+              )}
+              
               <div className="mt-2 space-y-1.5">
-                {AUTO_CLICK_OPTIONS.map((option, index) => (
-                  <motion.button
-                    key={index}
-                    onClick={() => handleSelectOption(option)}
-                    disabled={isPaying || !solanaAddress}
-                    whileHover={{ scale: 1.005 }}
-                    whileTap={{ scale: 0.995 }}
-                    className={`
-                      flex items-center justify-between w-full px-3 py-2 rounded-lg
-                      transition-all duration-150 text-xs border
-                      ${isPaying || !solanaAddress
-                        ? 'bg-gray-800/30 text-gray-500 cursor-not-allowed border-gray-700'
-                        : isDegen
-                          ? 'bg-black/30 hover:bg-black/50 text-white border-degen-green/30 hover:border-degen-green'
-                          : 'bg-gray-900/30 hover:bg-gray-900/50 text-white border-gray-700 hover:border-yellow-500'
-                      }
-                    `}
-                  >
+                {AUTO_CLICK_OPTIONS.map((option, index) => {
+                  const isDisabled = isPaying || (!solanaAddress && !isSKRTestMode());
+                  
+                  return (
+                    <motion.button
+                      key={index}
+                      onClick={() => handleSelectOption(option)}
+                      disabled={isDisabled}
+                      whileHover={{ scale: 1.005 }}
+                      whileTap={{ scale: 0.995 }}
+                      className={`
+                        flex items-center justify-between w-full px-3 py-2 rounded-lg
+                        transition-all duration-150 text-xs border
+                        ${isDisabled
+                          ? 'bg-gray-800/30 text-gray-500 cursor-not-allowed border-gray-700'
+                          : isDegen
+                            ? 'bg-black/30 hover:bg-black/50 text-white border-degen-green/30 hover:border-degen-green'
+                            : 'bg-gray-900/30 hover:bg-gray-900/50 text-white border-gray-700 hover:border-yellow-500'
+                        }
+                      `}
+                    >
                     <div className="flex items-center gap-2">
                       <span className="text-sm">{option.emoji}</span>
                       <div className="text-left">
@@ -1255,7 +1406,8 @@ export const WoodenFish: React.FC = () => {
                       <div className="text-[10px] text-gray-400">×{option.multiplier} · 3h</div>
                     </div>
                   </motion.button>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           )}
@@ -1313,7 +1465,7 @@ export const WoodenFish: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className={`mt-4 px-4 py-2 rounded-lg ${isDegen ? 'bg-red-900/50 text-degen-pink' : 'bg-red-900/30 text-red-400'}`}
         >
-          {isEN ? '💸 Insufficient $GD, go earn more!' : '💸 $GD不足，请先充值功德'}
+          {isEN ? '💸 Insufficient $GONGDE, go earn more!' : '💸 $GONGDE不足，请先充值功德'}
         </motion.div>
       )}
 
@@ -1325,9 +1477,30 @@ export const WoodenFish: React.FC = () => {
       >
         {isDegen 
           ? (isEN ? '"V ME 50, BUDDHA BLESS U"' : '"V我50，佛祖保佑"')
-          : (isEN ? '"Burn $GD, Fix Karma"' : '"燃烧$GD，消除业障"')
+          : (isEN ? '"Burn $GONGDE, Fix Karma"' : '"燃烧$GONGDE，消除业障"')
         }
       </motion.p>
+
+      {/* 兑换入口按钮 */}
+      <button
+        onClick={() => setShowExchange(true)}
+        className={`
+          mt-4 px-6 py-2 rounded-lg font-bold text-sm transition-all
+          ${isDegen
+            ? 'bg-degen-purple/20 text-degen-purple border-2 border-degen-purple hover:bg-degen-purple/30'
+            : 'bg-purple-900/20 text-purple-400 border-2 border-purple-500 hover:bg-purple-900/30'
+          }
+        `}
+      >
+        💱 {isEN ? 'Token Exchange' : '代币兑换'}
+      </button>
+
+      {/* 兑换弹窗 */}
+      <AnimatePresence>
+        {showExchange && (
+          <TokenExchange onClose={() => setShowExchange(false)} />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
