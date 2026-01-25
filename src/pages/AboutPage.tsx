@@ -15,27 +15,27 @@ export const AboutPage: React.FC = () => {
   // CN version (Goldman mode - homepage)
   const roadmapCN = [
     { phase: '阶段一：黑客松', items: ['参加 Solana Hackathon，做个能用的产品', '公平发射 $GD，无预售无老鼠仓', '开源代码，接受社区审计'] },
-    { phase: '阶段二：发射', items: ['Pump.fun 发射 $GD', '启动 SKR 回购机制（100% 收入）', '上线木鱼游戏，开始积累 TVL'] },
-    { phase: '阶段三：赋能', items: ['持续回购并销毁 $SKR', '扩展更多玩法（抽卡、排行榜）', '让 SKR 社区重新站起来'] },
+    { phase: '阶段二：发射', items: ['Pump.fun 发射 $GD', '启动 SKR 赋能机制（国库分配）', '上线木鱼游戏，开始积累 TVL'] },
+    { phase: '阶段三：赋能', items: ['持续支持 $SKR 流动性', '扩展更多玩法（抽卡、排行榜）', '增强 Seeker 生态共识'] },
   ]
 
   const roadmapEN = [
     { phase: 'Phase 1: HACKATHON', items: ['Build a working product for Solana Hackathon', 'Fair launch $GD via Pump.fun (no presale, no VC)', 'Open source everything'] },
-    { phase: 'Phase 2: LAUNCH', items: ['Deploy $GD on Pump.fun', 'Activate SKR buyback (100% revenue)', 'Launch wooden fish game, accumulate TVL'] },
-    { phase: 'Phase 3: EMPOWER', items: ['Keep buying & burning $SKR', 'Add more features (gacha, leaderboard)', 'Help SKR community recover'] },
+    { phase: 'Phase 2: LAUNCH', items: ['Deploy $GD on Pump.fun', 'Activate SKR empowerment (treasury allocation)', 'Launch wooden fish game, accumulate TVL'] },
+    { phase: 'Phase 3: EMPOWER', items: ['Keep supporting $SKR liquidity', 'Add more features (gacha, leaderboard)', 'Strengthen Seeker ecosystem consensus'] },
   ]
 
   const faqsCN = [
-    { q: '为什么要救 $SKR？', a: '因为 SKR 社区被割了，但技术和社区还在。我们用实际行动（回购销毁）帮他们重建信心。' },
-    { q: '$GD 和 $SKR 什么关系？', a: '$GD 是游戏代币，你玩游戏赚 $GD。我们用 100% 收入回购 $SKR 并销毁，形成通缩飞轮。两个币独立但互相赋能。' },
-    { q: '这是黑客松项目？', a: '对，参加 Solana Hackathon。但我们是认真的，代码开源，逻辑透明，不是 PPT 项目。' },
+    { q: '为什么要为 $SKR 做这个？', a: '因为 Seeker 社区有技术、有共识，但缺少趣味性和流动性。我们用游戏化的方式增强社区粘性，同时用国库收入支持 SKR 生态建设。' },
+    { q: '$GD 和 $SKR 什么关系？', a: '$GD 是游戏代币，你玩游戏赚 $GD。玩家用 $SKR 购买代敲服务，这些 SKR 进入国库：50% 回购销毁 $GD，30% 支持 SKR 流动性（减少抛压），20% 用于开发。两个币独立但互相赋能。' },
+    { q: '这是黑客松项目？', a: '对，参加 Solana Hackathon。代码开源，逻辑透明，不是 PPT 项目。主打一个真诚。' },
     { q: 'Dev 会跑路吗？', a: 'Pump.fun 发射，LP 自动烧毁，合约开源。想跑也跑不了，链上透明自己查。' },
   ]
 
   const faqsEN = [
-    { q: 'Why save $SKR?', a: 'SKR community got rugged, but the tech & community are still solid. We use real action (buyback & burn) to rebuild trust.' },
-    { q: 'What\'s the relationship between $GD and $SKR?', a: '$GD is the game token. You play, earn $GD. We use 100% revenue to buyback & burn $SKR, creating a deflationary flywheel. Two tokens, one mission.' },
-    { q: 'Is this a hackathon project?', a: 'Yes, for Solana Hackathon. But we\'re serious. Code is open source, logic is transparent. Not a PPT project.' },
+    { q: 'Why build this for $SKR?', a: 'Seeker community has solid tech & consensus, but lacks fun & liquidity. We use gamification to boost engagement, while treasury revenue supports SKR ecosystem growth.' },
+    { q: 'What\'s the relationship between $GD and $SKR?', a: '$GD is the game token. You play, earn $GD. Players pay $SKR for auto-tap service → Treasury: 50% buyback & burn $GD, 30% support SKR liquidity (reduce sell pressure), 20% dev & ops. Two tokens, mutual empowerment.' },
+    { q: 'Is this a hackathon project?', a: 'Yes, for Solana Hackathon. Code is open source, logic is transparent. Not a PPT project. We keep it real.' },
     { q: 'Will dev rug?', a: 'Pump.fun launch, LP burned, contract open source. Can\'t rug even if I wanted to. Check on-chain yourself.' },
   ]
 
@@ -74,18 +74,19 @@ export const AboutPage: React.FC = () => {
             </h2>
             {isEN ? (
               <div className={`space-y-3 text-sm leading-relaxed ${isDegen ? 'text-gray-300' : 'text-gray-400'}`}>
-                <p>Listen, <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>anon</span>. This started as a <span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>Solana Hackathon project</span> to save the <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>$SKR community</span>.</p>
-                <p><span className={`font-bold text-lg ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>SKR holders got rugged. Hard.</span></p>
-                <p>So I built this: A <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold'}`}>Cyber Temple</span> where you tap wooden fish, earn $GD, and we use <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>100% of revenue to buyback $SKR</span>.</p>
-                <p className={`font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>Fair launch. No presale. No VC bags. Just pure degen redemption.</p>
-                <p className="italic opacity-70">Tap fish → Earn $GD → We burn $SKR → Everyone wins (maybe).</p>
+                <p>Listen, <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>anon</span>. This is <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>Seeker ecosystem's "Hyperbolic Time Chamber"</span>.</p>
+                <p>Tired of staring at charts? Feeling anxious? <span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>Come relax here.</span></p>
+                <p>We built this <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold'}`}>Cyber Monastery</span> for the <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>$SKR community</span>. You tap wooden fish, earn $GD, and we use game revenue to <span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-yellow-400'}`}>build the SKR ecosystem</span>.</p>
+                <p className={`font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>Not just a Meme. It's a consensus amplifier.</p>
+                <p className="italic opacity-70">Every tap is an on-chain blessing for Seeker. <span className="font-bold">Keep Building, Keep Believing.</span></p>
               </div>
             ) : (
               <div className={`space-y-3 text-sm leading-relaxed ${isDegen ? 'text-gray-300' : 'text-gray-400'}`}>
-                <p>别问，问就是<span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>为了拯救 $SKR 社区</span>做的<span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>黑客松项目</span>。</p>
-                <p>兄弟，<span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>$SKR</span> 持有者被割麻了。我看不下去了。<br/>所以搞了这个<span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>赛博寺庙</span>：你敲木鱼赚 $GD，我们用<span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>100% 收入回购并销毁 $SKR</span>。</p>
-                <p><span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>公平发射，无预售，无 VC，无老鼠仓。</span><br/>就是硬核技术 + 社区自救。</p>
-                <p className="italic opacity-70">敲木鱼 → 赚 $GD → 我们烧 $SKR → 大家都赢（也许）。</p>
+                <p>别问，问就是 <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>Seeker 生态的「精神时光屋」</span>。</p>
+                <p>兄弟，做交易累了吧？盯着 K 线容易焦虑？<span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>来这里放松一下。</span></p>
+                <p>我们为 <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>$SKR</span> 社区打造了这个<span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>赛博修道院</span>。你敲木鱼赚 $GD，我们负责把游戏收入用于<span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-yellow-400'}`}>建设 SKR 生态</span>。</p>
+                <p><span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>不仅仅是 Meme，更是共识放大器。</span></p>
+                <p className="italic opacity-70">在这里，每一次点击都是对 Seeker 的一次链上祈福。<span className="font-bold">Keep Building, Keep Believing.</span></p>
               </div>
             )}
           </motion.div>
@@ -135,15 +136,16 @@ export const AboutPage: React.FC = () => {
                 </div>
               </div>
               
-              {/* SKR Buyback */}
+              {/* SKR Empowerment */}
               <div className={`p-3 rounded ${isDegen ? 'bg-black/40 border-2 border-degen-yellow' : 'bg-goldman-gold/10 border-2 border-yellow-400'}`}>
                 <div className="flex justify-between items-start">
-                  <span className={isDegen ? 'text-degen-yellow' : 'text-yellow-400'}>{isEN ? '🔥 SKR BUYBACK:' : '🔥 SKR 回购:'}</span>
+                  <span className={isDegen ? 'text-degen-yellow' : 'text-yellow-400'}>{isEN ? '🔥 SKR EMPOWERMENT:' : '🔥 SKR 赋能机制:'}</span>
                   <div className="text-right">
-                    <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>100%</span>
-                    <p className={`text-xs ${isDegen ? 'text-degen-cyan' : 'text-gray-300'}`}>
-                      ({isEN ? 'All revenue → Buy & Burn $SKR' : '所有收入 → 回购并销毁 $SKR'})
-                    </p>
+                    <div className={`text-xs ${isDegen ? 'text-degen-cyan' : 'text-gray-300'} space-y-1`}>
+                      <p><span className="font-bold text-white">50%</span> {isEN ? '→ Buyback & Burn $GD' : '→ 回购销毁 $GD'}</p>
+                      <p><span className="font-bold text-white">30%</span> {isEN ? '→ $SKR Liquidity Support' : '→ $SKR 流动性支持'}</p>
+                      <p><span className="font-bold text-white">20%</span> {isEN ? '→ Dev & Operations' : '→ 开发与运营'}</p>
+                    </div>
                   </div>
                 </div>
               </div>
