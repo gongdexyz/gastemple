@@ -361,13 +361,14 @@ export const WoodenFish: React.FC = () => {
       // 自动挂机时大幅降低奖励，避免产出过高
       const isAutoMode = !shouldSpawnTarget
       
-      // 从环境变量读取参数
+      // 从环境变量读取参数（创世期配置）
+      const globalMultiplier = parseFloat(import.meta.env.VITE_GLOBAL_OUTPUT_MULTIPLIER || '1.2')
       const manualRate = parseFloat(import.meta.env.VITE_MEDITATION_MANUAL_RATE || '0.20')
-      const manualMin = parseInt(import.meta.env.VITE_MEDITATION_MANUAL_MIN || '5')
-      const manualMax = parseInt(import.meta.env.VITE_MEDITATION_MANUAL_MAX || '15')
-      const autoRate = parseFloat(import.meta.env.VITE_AUTO_CLICK_REWARD_RATE || '0.02')
+      const manualMin = parseInt(import.meta.env.VITE_MEDITATION_MANUAL_MIN || '6')
+      const manualMax = parseInt(import.meta.env.VITE_MEDITATION_MANUAL_MAX || '18')
+      const autoRate = parseFloat(import.meta.env.VITE_AUTO_CLICK_REWARD_RATE || '0.15')
       const autoMin = parseInt(import.meta.env.VITE_AUTO_CLICK_REWARD_MIN || '1')
-      const autoMax = parseInt(import.meta.env.VITE_AUTO_CLICK_REWARD_MAX || '5')
+      const autoMax = parseInt(import.meta.env.VITE_AUTO_CLICK_REWARD_MAX || '12')
       
       if (isAutoMode) {
         // 自动挂机：15%几率获得 1-10 GD（提高波动性）
@@ -430,8 +431,8 @@ export const WoodenFish: React.FC = () => {
       }
       
       // 伪随机保底系统 + 连击手感加权 + 三重暴击等级
-      // 【拉新阶段配置】基础暴击率 4%，让新用户体验更爽
-      const baseCritRate = 0.04
+      // 【创世期·拉新配置】基础暴击率 10%，让新用户体验更爽
+      const baseCritRate = parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.10')
       const streakBonus = critStreak * 0.007 // 未暴击次数加成
       const comboBonus = hiddenCombo * 0.008 // 连击手感加成
       
@@ -457,24 +458,28 @@ export const WoodenFish: React.FC = () => {
         let gdReward = 0
         
         // 三重暴击等级概率
+        // 三重暴击等级概率（创世期配置）
+        const maxReward = parseInt(import.meta.env.VITE_GONGDE_MAX_REWARD || '10000')
+        const bigWinMultiplier = parseInt(import.meta.env.VITE_GONGDE_BIG_WIN_MULTIPLIER || '10')
+        
         if (hiddenCombo >= 5 && critRoll < 0.06) {
           // 天启级暴击 (6%) - 需要combo≥5
           critType = 'epic'
-          gdRewardMultiplier = 5
-          gdReward = 5000
-          criticalText = isEN ? '✨ HEAVENLY REVELATION! 5000 $GONGDE! ✨' : '✨ 天启降临！5000 $GONGDE！ ✨'
+          gdRewardMultiplier = bigWinMultiplier
+          gdReward = maxReward
+          criticalText = isEN ? `✨ HEAVENLY REVELATION! ${maxReward} $GONGDE! ✨` : `✨ 天启降临！${maxReward} $GONGDE！ ✨`
         } else if (hiddenCombo >= 3 && critRoll < 0.28) {
           // 福报级暴击 (22%) - 需要combo≥3
           critType = 'rare'
-          gdRewardMultiplier = 2
-          gdReward = 2000
-          criticalText = isEN ? '✨ KARMIC BLESSING! 2000 $GONGDE! ✨' : '✨ 福报加持！2000 $GONGDE！ ✨'
+          gdRewardMultiplier = 3
+          gdReward = Math.floor(maxReward * 0.3) // 30% of max
+          criticalText = isEN ? `✨ KARMIC BLESSING! ${gdReward} $GONGDE! ✨` : `✨ 福报加持！${gdReward} $GONGDE！ ✨`
         } else {
           // 因果级暴击 (72%)
           critType = 'normal'
-          gdRewardMultiplier = 1
-          gdReward = 1200
-          criticalText = isEN ? '✨ BUDDHA BLESS! 1200 $GONGDE! ✨' : '✨ 佛祖显灵！1200 $GONGDE！ ✨'
+          gdRewardMultiplier = 1.5
+          gdReward = Math.floor(maxReward * 0.15) // 15% of max
+          criticalText = isEN ? `✨ BUDDHA BLESS! ${gdReward} $GONGDE! ✨` : `✨ 佛祖显灵！${gdReward} $GONGDE！ ✨`
         }
         
         // 自动挂机时降低奖励 70%
