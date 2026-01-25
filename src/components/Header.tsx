@@ -87,7 +87,9 @@ export const Header: React.FC = () => {
               ? 'bg-degen-yellow/20 text-degen-yellow' 
               : 'bg-goldman-gold/20 text-goldman-gold'
             }
-          `}>
+          `}
+          id="gd-balance-indicator"
+          >
             <span className="text-sm sm:text-base">🪙</span>
             <span className="hidden xs:inline">{gdBalance.toLocaleString()}</span>
             <span className="xs:hidden">{gdBalance > 999 ? `${(gdBalance/1000).toFixed(0)}K` : gdBalance}</span>

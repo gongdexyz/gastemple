@@ -26,6 +26,22 @@ export const useEffectsStore = create<EffectsState>((set, get) => ({
   criticalFlash: false,
   
   triggerBurnEffect: (startPos, isCritical = false) => {
+    // 动态获取目标位置（钱袋子或默认位置）
+    const getTargetPosition = () => {
+      const balanceIndicator = document.getElementById('gd-balance-indicator')
+      if (balanceIndicator) {
+        const rect = balanceIndicator.getBoundingClientRect()
+        return {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        }
+      }
+      // 默认位置（如果找不到钱袋子）
+      return { x: 200, y: 300 }
+    }
+    
+    const targetPos = getTargetPosition()
+    
     // 暴击时发射多个粒子
     const particleCount = isCritical ? 5 : 1
     const newParticles: ParticleEffect[] = []
@@ -34,7 +50,7 @@ export const useEffectsStore = create<EffectsState>((set, get) => ({
       const particle: ParticleEffect = {
         id: `particle-${Date.now()}-${Math.random()}`,
         startPos,
-        endPos: { x: 200, y: 300 },
+        endPos: targetPos,
         timestamp: Date.now(),
         isCritical
       }

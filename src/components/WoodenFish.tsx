@@ -134,7 +134,11 @@ export const WoodenFish: React.FC = () => {
   const [isFishPressed, setIsFishPressed] = useState(false)
   // gifKey removed - no longer needed
   const [isAnimating, setIsAnimating] = useState(false)
-  const [gameMode, setGameMode] = useState<'meditation' | 'merit'>('meditation') // 默认冥想模式
+  const [gameMode, setGameMode] = useState<'meditation' | 'merit'>(() => {
+    // 从 localStorage 恢复游戏模式
+    const saved = localStorage.getItem('gameMode')
+    return (saved === 'merit' || saved === 'meditation') ? saved : 'meditation'
+  })
   const [criticalReward, setCriticalReward] = useState<{ amount: number; text: string } | null>(null) // 暴击奖励显示
   const rewardAudioRef = useRef<HTMLAudioElement | null>(null) // 奖励音效
   const fishButtonRef = useRef<HTMLButtonElement | null>(null) // 木鱼按钮引用
@@ -187,26 +191,131 @@ export const WoodenFish: React.FC = () => {
   const burnCost = 100
   const { solanaAddress } = useWalletStore()
   
-  // 自动挂机系统状态
-  const [autoClickMultiplier, setAutoClickMultiplier] = useState(0) // 0=无, 1=33 SKR, 3=66 SKR, 5=108 SKR
-  const [autoClickEndTime, setAutoClickEndTime] = useState<number | null>(null) // 结束时间戳
+  // 自动挂机系统状态 - 从 localStorage 恢复
+  const [autoClickMultiplier, setAutoClickMultiplier] = useState(() => {
+    const saved = localStorage.getItem('autoClickMultiplier')
+    return saved ? parseInt(saved) : 0
+  })
+  const [autoClickEndTime, setAutoClickEndTime] = useState<number | null>(() => {
+    const saved = localStorage.getItem('autoClickEndTime')
+    return saved ? parseInt(saved) : null
+  })
   const [showAutoClickOptions, setShowAutoClickOptions] = useState(false) // 是否显示选项
+  const [showMeditationWarning, setShowMeditationWarning] = useState(false) // 冥想模式确认弹窗
+  const [pendingOption, setPendingOption] = useState<typeof AUTO_CLICK_OPTIONS[0] | null>(null) // 待确认的选项
+  
+  // 新手系统状态
+  const [newbieClickCount, setNewbieClickCount] = useState(() => {
+    const saved = localStorage.getItem('newbieClickCount')
+    return saved ? parseInt(saved) : 0
+  })
+  const [newbieCritTriggered, setNewbieCritTriggered] = useState(() => {
+    const saved = localStorage.getItem('newbieCritTriggered')
+    return saved ? parseInt(saved) : 0
+  })
+  
+  // 持久化游戏模式
+  useEffect(() => {
+    localStorage.setItem('gameMode', gameMode)
+  }, [gameMode])
+  
+  // 检查功德里程碑
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // @ts-ignore - checkMilestone 由 NewbieRewards 组件动态添加
+      if (window.checkMilestone) {
+        // @ts-ignore
+        window.checkMilestone(totalMerits)
+      }
+    }
+  }, [totalMerits])
+  
+  // 持久化自动挂机状态
+  useEffect(() => {
+    localStorage.setItem('autoClickMultiplier', autoClickMultiplier.toString())
+  }, [autoClickMultiplier])
+  
+  useEffect(() => {
+    if (autoClickEndTime) {
+      localStorage.setItem('autoClickEndTime', autoClickEndTime.toString())
+    } else {
+      localStorage.removeItem('autoClickEndTime')
+    }
+  }, [autoClickEndTime])
+  
+  // 页面加载时检查并恢复自动挂机状态
+  useEffect(() => {
+    const savedEndTime = localStorage.getItem('autoClickEndTime')
+    const savedMultiplier = localStorage.getItem('autoClickMultiplier')
+    
+    if (savedEndTime && savedMultiplier) {
+      const endTime = parseInt(savedEndTime)
+      const multiplier = parseInt(savedMultiplier)
+      
+      // 如果还在有效期内，自动恢复挂机状态
+      if (Date.now() < endTime && multiplier > 0) {
+        setIsAutoClicking(true)
+        setAutoClickMultiplier(multiplier)
+        setAutoClickEndTime(endTime)
+      } else {
+        // 已过期，清除状态
+        localStorage.removeItem('autoClickMultiplier')
+        localStorage.removeItem('autoClickEndTime')
+      }
+    }
+  }, []) // 只在组件挂载时执行一次
   
   // 自动挂机价格选项（根据游戏模式不同）
   const getAutoClickOptions = () => {
     if (gameMode === 'merit') {
       // 功德模式：价格 5 倍（因为有暴击奖励）
       return [
-        { price: 100, multiplier: 1, label: '自动代敲', description: '小沙弥为你代劳', emoji: '🤖' },
-        { price: 250, multiplier: 3, label: '功德加持', description: '功德×3，效率提升', emoji: '✨' },
-        { price: 400, multiplier: 5, label: '方丈加持', description: '法力无边，功德×5', emoji: '👨‍🦲' }
+        { 
+          price: 100, 
+          multiplier: 1, 
+          label: isEN ? 'Auto-Click' : '自动代敲', 
+          description: isEN ? 'Novice monk helps you' : '小沙弥为你代劳', 
+          emoji: '🤖' 
+        },
+        { 
+          price: 250, 
+          multiplier: 3, 
+          label: isEN ? 'Merit Boost' : '功德加持', 
+          description: isEN ? 'Merit ×3, efficiency up' : '功德×3，效率提升', 
+          emoji: '✨' 
+        },
+        { 
+          price: 400, 
+          multiplier: 5, 
+          label: isEN ? 'Abbot Blessing' : '方丈加持', 
+          description: isEN ? 'Boundless power, Merit ×5' : '法力无边，功德×5', 
+          emoji: '👨‍🦲' 
+        }
       ]
     } else {
       // 冥想模式：新定价策略（让玩家觉得能回本）
       return [
-        { price: 20, multiplier: 1, label: '自动代敲', description: '小沙弥为你代劳', emoji: '🤖' },
-        { price: 50, multiplier: 3, label: '功德加持', description: '功德×3，效率提升', emoji: '✨' },
-        { price: 80, multiplier: 5, label: '方丈加持', description: '法力无边，功德×5', emoji: '👨‍🦲' }
+        { 
+          price: 20, 
+          multiplier: 1, 
+          label: isEN ? 'Auto-Click' : '自动代敲', 
+          description: isEN ? 'Novice monk helps you' : '小沙弥为你代劳', 
+          emoji: '🤖' 
+        },
+        { 
+          price: 50, 
+          multiplier: 3, 
+          label: isEN ? 'Merit Boost' : '功德加持', 
+          description: isEN ? 'Merit ×3, efficiency up' : '功德×3，效率提升', 
+          emoji: '✨' 
+        },
+        { 
+          price: 80, 
+          multiplier: 5, 
+          label: isEN ? 'Abbot Blessing' : '方丈加持', 
+          description: isEN ? 'Boundless power, Merit ×5' : '法力无边，功德×5', 
+          emoji: '👨‍🦲' 
+        }
       ]
     }
   }
@@ -434,30 +543,61 @@ export const WoodenFish: React.FC = () => {
       }
       
       // 伪随机保底系统 + 连击手感加权 + 三重暴击等级
-      // 【创世期·拉新配置】基础暴击率 10%，让新用户体验更爽
-      const baseCritRate = parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.10')
-      const streakBonus = critStreak * 0.007 // 未暴击次数加成
-      const comboBonus = hiddenCombo * 0.008 // 连击手感加成
+      // 基础暴击率：新手 10%，老玩家 5%
+      const isNewbie = newbieClickCount < 10
+      const baseCritRate = isNewbie 
+        ? parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.10')  // 新手 10%
+        : parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.05')  // 老玩家 5%
       
-      // 今日第一次必爽：暴击概率翻倍
-      const firstHitBonus = todayFirstHit ? baseCritRate : 0
+      const streakBonus = critStreak * 0.005 // 未暴击次数加成（降低）
+      const comboBonus = hiddenCombo * 0.005 // 连击手感加成（降低）
       
-      // 计算实际暴击率（上限不超过 35%）
-      let actualCritRate = Math.min(baseCritRate + streakBonus + comboBonus + firstHitBonus, 0.35)
+      // 今日第一次必爽：暴击概率翻倍（仅新手）
+      const firstHitBonus = (todayFirstHit && isNewbie) ? baseCritRate : 0
       
-      // 节奏心理保底：连续12次未暴击且成功率≥70%时强制暴击
-      const shouldForceCrit = critStreak >= 12 && actualCritRate >= 0.7
+      // 计算实际暴击率（上限：新手 35%，老玩家 20%）
+      const maxCritRate = isNewbie ? 0.35 : 0.20
+      let actualCritRate = Math.min(baseCritRate + streakBonus + comboBonus + firstHitBonus, maxCritRate)
+      
+      // 自动挂机时暴击率减半
+      if (!shouldSpawnTarget) {
+        actualCritRate = actualCritRate * 0.5
+      }
+      
+      // 节奏心理保底：连续15次未暴击且成功率≥70%时强制暴击（提高门槛）
+      const shouldForceCrit = critStreak >= 15 && actualCritRate >= 0.7
+      
+      // 【新手强制暴击】前 10 次点击，第 3 次和第 7 次强制暴击
+      const shouldNewbieCrit = isNewbie && (
+        (newbieClickCount === 2 && newbieCritTriggered === 0) || // 第 3 次点击
+        (newbieClickCount === 6 && newbieCritTriggered === 1)    // 第 7 次点击
+      )
+      
+      // 更新新手点击计数
+      if (isNewbie) {
+        const newCount = newbieClickCount + 1
+        setNewbieClickCount(newCount)
+        localStorage.setItem('newbieClickCount', newCount.toString())
+      }
       
       // 判断是否暴击
-      const isCriticalHit = shouldForceCrit || Math.random() < actualCritRate
+      const isCriticalHit = shouldNewbieCrit || shouldForceCrit || Math.random() < actualCritRate
+      
+      // 更新新手暴击计数
+      if (shouldNewbieCrit && isCriticalHit) {
+        const newCritCount = newbieCritTriggered + 1
+        setNewbieCritTriggered(newCritCount)
+        localStorage.setItem('newbieCritTriggered', newCritCount.toString())
+      }
+      
       let meritBonus = 1
       let gdRewardMultiplier = 1
       let criticalText = ''
       let critType: 'normal' | 'rare' | 'epic' = 'normal'
       
       if (isCriticalHit) {
-        // 触发能量传输特效 - 暴击模式（只在功德模式下触发）
-        if (gameMode === 'merit' && fishButtonRef.current && shouldSpawnTarget) {
+        // 触发能量传输特效 - 暴击模式（功德模式下总是触发，包括自动挂机）
+        if (gameMode === 'merit' && fishButtonRef.current) {
           const rect = fishButtonRef.current.getBoundingClientRect()
           const centerX = rect.left + rect.width / 2
           const centerY = rect.top + rect.height / 2
@@ -581,6 +721,14 @@ export const WoodenFish: React.FC = () => {
         
         if (smallGdReward > 0) {
           addGD(smallGdReward)
+          
+          // 自动挂机时也触发普通入账特效
+          if (!shouldSpawnTarget && fishButtonRef.current) {
+            const rect = fishButtonRef.current.getBoundingClientRect()
+            const centerX = rect.left + rect.width / 2
+            const centerY = rect.top + rect.height / 2
+            triggerBurnEffect({ x: centerX, y: centerY }, false) // 普通入账
+          }
         }
       }
       
@@ -712,7 +860,7 @@ export const WoodenFish: React.FC = () => {
     return () => clearInterval(expiryInterval)
   }, [autoClickEndTime])
   
-  // 自动挂机定时器 - 真实人类速度（随机间隔 300-800ms）
+  // 自动挂机定时器 - 真实人类速度（随机间隔 1-2秒）
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
     let isActive = false
@@ -720,8 +868,8 @@ export const WoodenFish: React.FC = () => {
     const scheduleNextClick = () => {
       if (!isActive) return
       
-      // 随机延迟 300-800ms，模拟真实人类点击速度
-      const randomDelay = Math.floor(Math.random() * 500) + 300 // 300-800ms
+      // 随机延迟 1000-2000ms，模拟真实人类点击速度（不会太快吓人）
+      const randomDelay = Math.floor(Math.random() * 1000) + 1000 // 1-2秒
       
       timeoutId = setTimeout(() => {
         // 根据倍率多次调用addMerit
@@ -878,6 +1026,34 @@ export const WoodenFish: React.FC = () => {
   
   // 处理选择选项
   const handleSelectOption = async (option: typeof AUTO_CLICK_OPTIONS[0]) => {
+    // 冥想模式下需要确认
+    if (gameMode === 'meditation') {
+      setPendingOption(option)
+      setShowMeditationWarning(true)
+      return
+    }
+    
+    // 执行实际的支付逻辑
+    await executeAutoClickPayment(option)
+  }
+  
+  // 确认冥想模式代敲
+  const confirmMeditationAutoClick = async () => {
+    setShowMeditationWarning(false)
+    if (pendingOption) {
+      await executeAutoClickPayment(pendingOption)
+      setPendingOption(null)
+    }
+  }
+  
+  // 取消冥想模式代敲
+  const cancelMeditationAutoClick = () => {
+    setShowMeditationWarning(false)
+    setPendingOption(null)
+  }
+  
+  // 执行自动挂机支付逻辑
+  const executeAutoClickPayment = async (option: typeof AUTO_CLICK_OPTIONS[0]) => {
     // SKR 测试模式：直接启用自动挂机，无需支付
     if (isSKRTestMode()) {
       setAutoClickMultiplier(option.multiplier)
@@ -968,11 +1144,11 @@ export const WoodenFish: React.FC = () => {
   }
 
   const getTitle = () => {
-    if (totalMerits >= 10000) return '赛博活佛 Cyber Buddha'
-    if (totalMerits >= 5000) return '功德圆满 Merit Master'
-    if (totalMerits >= 1000) return '虔诚信徒 Devoted One'
-    if (totalMerits >= 100) return '善良韭菜 Kind Leek'
-    return '迷途羔羊 Lost Soul'
+    if (totalMerits >= 10000) return isEN ? 'Cyber Buddha' : '赛博活佛'
+    if (totalMerits >= 5000) return isEN ? 'Merit Master' : '功德圆满'
+    if (totalMerits >= 1000) return isEN ? 'Devoted One' : '虔诚信徒'
+    if (totalMerits >= 100) return isEN ? 'Kind Leek' : '善良韭菜'
+    return isEN ? 'Lost Soul' : '迷途羔羊'
   }
 
   return (
@@ -1072,10 +1248,16 @@ export const WoodenFish: React.FC = () => {
             {isEN ? '🧘 Meditation' : '🧘 冥想模式'}
           </span>
           <button
-            onClick={() => setGameMode(gameMode === 'meditation' ? 'merit' : 'meditation')}
+            onClick={() => {
+              if (!isAutoClickActive) {
+                setGameMode(gameMode === 'meditation' ? 'merit' : 'meditation')
+              }
+            }}
+            disabled={isAutoClickActive || false}
             className={`
               relative inline-flex h-7 w-14 items-center rounded-full
               transition-colors duration-300 focus:outline-none
+              ${isAutoClickActive ? 'opacity-50 cursor-not-allowed' : ''}
               ${gameMode === 'merit'
                 ? (isDegen ? 'bg-degen-purple' : 'bg-goldman-gold')
                 : (isDegen ? 'bg-degen-green' : 'bg-gray-600')
@@ -1095,6 +1277,18 @@ export const WoodenFish: React.FC = () => {
             {isEN ? '🔥 Merit Burn' : '🔥 功德模式'}
           </span>
         </div>
+        
+        {/* 挂机时的锁定提示 */}
+        {isAutoClickActive && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mt-1 text-xs ${isDegen ? 'text-degen-pink' : 'text-orange-400'}`}
+          >
+            🔒 {isEN ? 'Mode locked during auto-click' : '挂机期间模式已锁定'}
+          </motion.div>
+        )}
+        
         <div className={`mt-0.5 text-xs ${isDegen ? 'text-degen-pink' : 'text-gray-500'}`}>
           {gameMode === 'meditation'
             ? (isEN ? 'Free play, no token consumption' : '免费游玩，不消耗代币')
@@ -1554,6 +1748,100 @@ export const WoodenFish: React.FC = () => {
       >
         💰 {isEN ? 'Withdraw $GONGDE' : '提现 $GONGDE'}
       </button>
+
+      {/* 冥想模式确认弹窗 */}
+      <AnimatePresence>
+        {showMeditationWarning && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={cancelMeditationAutoClick}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className={`
+                relative max-w-md w-full mx-4 p-6 rounded-2xl border-2
+                ${isDegen
+                  ? 'bg-black/95 border-degen-green text-white'
+                  : 'bg-gray-900/95 border-green-500 text-white'
+                }
+              `}
+            >
+              {/* 标题 */}
+              <div className="text-center mb-4">
+                <div className="text-4xl mb-2">🧘</div>
+                <h2 className={`text-xl font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                  {isEN ? 'Meditation Mode Auto-Click' : '冥想模式自动代敲'}
+                </h2>
+              </div>
+
+              {/* 内容 */}
+              <div className="space-y-3 mb-6 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">⚠️</span>
+                  <p className="text-gray-300">
+                    {isEN 
+                      ? 'You are currently in Meditation Mode (free play, lower rewards)'
+                      : '您当前处于冥想模式（免费游玩，收益较低）'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">💡</span>
+                  <p className={isDegen ? 'text-degen-cyan' : 'text-yellow-300'}>
+                    {isEN 
+                      ? 'Tip: Switch to Merit Burn Mode for higher rewards (requires $GONGDE tokens)'
+                      : '建议：切换到功德模式可获得更高收益（需消耗 $GONGDE 代币）'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">✅</span>
+                  <p className="text-gray-300">
+                    {isEN 
+                      ? 'Continue with Meditation Mode auto-click?'
+                      : '确认在冥想模式下开启自动代敲？'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* 按钮 */}
+              <div className="flex gap-3">
+                <button
+                  onClick={confirmMeditationAutoClick}
+                  className={`
+                    flex-1 px-4 py-3 rounded-lg font-bold transition-all
+                    ${isDegen
+                      ? 'bg-degen-green text-black hover:bg-degen-green/80'
+                      : 'bg-green-500 text-white hover:bg-green-400'
+                    }
+                  `}
+                >
+                  {isEN ? '✓ Confirm' : '✓ 确认'}
+                </button>
+                <button
+                  onClick={cancelMeditationAutoClick}
+                  className={`
+                    flex-1 px-4 py-3 rounded-lg font-bold transition-all
+                    ${isDegen
+                      ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                      : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                    }
+                  `}
+                >
+                  {isEN ? '✕ Cancel' : '✕ 取消'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 提现弹窗 */}
       <AnimatePresence>

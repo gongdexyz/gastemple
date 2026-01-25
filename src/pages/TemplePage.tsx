@@ -5,9 +5,11 @@ import { Header } from '../components/Header'
 import { GlitchTransition } from '../components/GlitchTransition'
 import { WoodenFish } from '../components/WoodenFish'
 import { VisualEffectsOverlay } from '../components/VisualEffectsOverlay'
+import { NewbieRewards } from '../components/NewbieRewards'
 import { useThemeStore } from '../stores/themeStore'
 import { useLangStore } from '../stores/langStore'
 import { useEffectsStore } from '../stores/effectsStore'
+import { useGachaStore } from '../stores/gachaStore'
 import { priceService } from '../services/priceService'
 
 const TOP_BURNERS_CN = [
@@ -46,6 +48,7 @@ export const TemplePage: React.FC = () => {
   const { mode } = useThemeStore()
   const { lang } = useLangStore()
   const { targetFlash, criticalFlash } = useEffectsStore()
+  const { gdBalance } = useGachaStore()
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
   const TOP_BURNERS = isEN ? TOP_BURNERS_EN : TOP_BURNERS_CN
@@ -68,6 +71,9 @@ export const TemplePage: React.FC = () => {
     error: null,
   })
   
+  // 追踪上一次的余额，用于计算收入
+  const [lastGdBalance, setLastGdBalance] = useState(gdBalance)
+  
   // 心跳增长：每秒自动增加
   useEffect(() => {
     const heartbeat = setInterval(() => {
@@ -83,48 +89,57 @@ export const TemplePage: React.FC = () => {
     return () => clearInterval(heartbeat)
   }, [])
   
-  // 监听用户互动 - 根据实际消耗计算 SKR 回购
+  // 监听 GD 余额变化 - 追踪 24h 收入（玩家获得的 GONGDE）
   useEffect(() => {
-    const handleUserInteraction = (e: MouseEvent) => {
-      // 只监听木鱼区域的点击
-      const target = e.target as HTMLElement
-      const isWoodenFishClick = target.closest('[data-wooden-fish]') !== null
-      
-      if (!isWoodenFishClick) return
-      
-      // 根据游戏模式计算实际的 SKR 回购量
-      // 功德模式：每次消耗 100 GONGDE
-      // 假设 GONGDE 价格约为 $0.00029600
-      // SKR 价格约为 $0.029600
-      // 100 GONGDE = $0.0296
-      // 可以回购 $0.0296 / $0.029600 = 1 SKR
-      
-      const gongdePrice = prices.gongde || 0.00029600
-      const skrPrice = prices.skr || 0.029600
-      const burnCost = 100 // 每次消耗 100 GONGDE
-      
-      // 计算实际回购量
-      const usdValue = burnCost * gongdePrice
-      const skrBuyback = usdValue / skrPrice
-      
-      // 只有在功德模式下才增加（冥想模式不消耗代币）
-      // 这里简化处理，实际应该从 WoodenFish 组件传递事件
-      const boost = skrBuyback
+    // 当余额增加时，说明玩家获得了奖励
+    if (gdBalance > lastGdBalance) {
+      const earned = gdBalance - lastGdBalance
       
       setSimulator(prev => ({
         ...prev,
-        totalSkrBuyback: prev.totalSkrBuyback + boost,
-        dailySkrBuyback: prev.dailySkrBuyback + boost * 0.5,
-        deflationProgress: Math.min(99.99, prev.deflationProgress + 0.01),
-        lastInteractionBoost: boost
+        dailySkrBuyback: prev.dailySkrBuyback + earned, // 累计获得的 GONGDE
+        lastInteractionBoost: earned
       }))
       
       setFlashBoost(true)
       setTimeout(() => setFlashBoost(false), 500)
     }
     
-    window.addEventListener('click', handleUserInteraction as EventListener)
-    return () => window.removeEventListener('click', handleUserInteraction as EventListener)
+    setLastGdBalance(gdBalance)
+  }, [gdBalance, lastGdBalance])
+  
+  // 监听能量传输特效 - 计算 SKR 回购（基于消耗）
+  useEffect(() => {
+    let isCalculating = false
+    
+    // 订阅 effectsStore 的粒子变化
+    const unsubscribe = useEffectsStore.subscribe((state, prevState) => {
+      // 当有新粒子产生时，说明有消耗发生
+      if (state.particles.length > prevState.particles.length && !isCalculating) {
+        isCalculating = true
+        
+        const gongdePrice = prices.gongde || 0.00029600
+        const skrPrice = prices.skr || 0.029600
+        const burnCost = 100 // 每次消耗 100 GONGDE
+        
+        // 计算 SKR 回购量（用于预计 SKR 回购）
+        const usdValue = burnCost * gongdePrice
+        const skrBuyback = usdValue / skrPrice
+        
+        setSimulator(prev => ({
+          ...prev,
+          totalSkrBuyback: prev.totalSkrBuyback + skrBuyback,
+          deflationProgress: Math.min(99.99, prev.deflationProgress + 0.01)
+        }))
+        
+        // 200ms 后允许下一次计算（防止暴击的 5 个粒子重复计算）
+        setTimeout(() => {
+          isCalculating = false
+        }, 200)
+      }
+    })
+    
+    return () => unsubscribe()
   }, [prices])
   
   // 获取价格
@@ -159,6 +174,7 @@ export const TemplePage: React.FC = () => {
       <GlitchTransition />
       <Header />
       <VisualEffectsOverlay />
+      <NewbieRewards onClose={() => {}} />
       
       <main className="pt-20 pb-10 px-4">
         <div className="max-w-4xl mx-auto">
@@ -347,14 +363,14 @@ export const TemplePage: React.FC = () => {
                 <div className="flex justify-between items-center relative z-20">
                   <div>
                     <div className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
-                      +{simulator.dailySkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      +{simulator.dailySkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                     </div>
                     <div className="text-[9px] text-gray-400">
-                      ≈ ${(simulator.dailySkrBuyback * prices.skr).toFixed(2)}
+                      ≈ ${(simulator.dailySkrBuyback * prices.gongde).toFixed(2)}
                     </div>
                   </div>
                   <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isDegen ? 'bg-degen-green/20 text-degen-green' : 'bg-green-900/30 text-green-400'}`}>
-                    🔥 {isEN ? 'Buyback' : '回购'}
+                    🔥 {isEN ? 'Burned' : '已燃烧'}
                   </div>
                 </div>
               </motion.div>
