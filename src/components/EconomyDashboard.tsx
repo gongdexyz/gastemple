@@ -42,6 +42,15 @@ interface EconomyStats {
   }
 }
 
+// SKR 通缩模拟器状态
+interface SimulatorState {
+  totalSkrBuyback: number // 累计回购 SKR
+  dailySkrBuyback: number // 24h 回购
+  believers: number // 信徒数量
+  deflationProgress: number // 通缩进度
+  lastInteractionBoost: number // 上次互动增量
+}
+
 export const EconomyDashboard: React.FC = () => {
   const { gdBalance } = useGachaStore()
   const { lang } = useLangStore()
@@ -55,6 +64,17 @@ export const EconomyDashboard: React.FC = () => {
     loading: true,
     error: null,
   })
+  
+  // SKR 通缩模拟器状态
+  const [simulator, setSimulator] = useState<SimulatorState>({
+    totalSkrBuyback: 10240.56, // 基数：看起来已经有一些测试用户
+    dailySkrBuyback: 888.23,
+    believers: 4269,
+    deflationProgress: 87.66,
+    lastInteractionBoost: 0
+  })
+  
+  const [flashBoost, setFlashBoost] = useState(false) // 互动暴击闪烁效果
 
   // 从环境变量读取经济参数
   const stats: EconomyStats = {
@@ -85,6 +105,44 @@ export const EconomyDashboard: React.FC = () => {
   // 计算每小时产出
   stats.meditationManualHourly = Math.floor(300 * stats.meditationManualRate * stats.meditationManualAvg)
   stats.autoClickHourly = Math.floor(3600 * stats.autoClickRate * stats.autoClickAvg)
+  
+  // 心跳增长：每秒自动增加（模拟其他玩家）
+  useEffect(() => {
+    const heartbeat = setInterval(() => {
+      setSimulator(prev => ({
+        ...prev,
+        totalSkrBuyback: prev.totalSkrBuyback + 0.01,
+        dailySkrBuyback: prev.dailySkrBuyback + 0.005,
+        believers: prev.believers + (Math.random() < 0.1 ? 1 : 0), // 10% 概率增加信徒
+        deflationProgress: Math.min(99.99, prev.deflationProgress + 0.001)
+      }))
+    }, 1000)
+    
+    return () => clearInterval(heartbeat)
+  }, [])
+  
+  // 监听用户互动（点击木鱼或购买代敲）
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      // 互动暴击：数字猛增
+      const boost = Math.random() * 50 + 50 // 50-100 SKR
+      setSimulator(prev => ({
+        ...prev,
+        totalSkrBuyback: prev.totalSkrBuyback + boost,
+        dailySkrBuyback: prev.dailySkrBuyback + boost * 0.5,
+        deflationProgress: Math.min(99.99, prev.deflationProgress + 0.5),
+        lastInteractionBoost: boost
+      }))
+      
+      // 触发闪烁效果
+      setFlashBoost(true)
+      setTimeout(() => setFlashBoost(false), 500)
+    }
+    
+    // 监听点击事件（简化版，实际应该监听木鱼组件的事件）
+    window.addEventListener('click', handleUserInteraction)
+    return () => window.removeEventListener('click', handleUserInteraction)
+  }, [])
 
   // 获取价格
   useEffect(() => {
@@ -163,7 +221,7 @@ export const EconomyDashboard: React.FC = () => {
         whileTap={{ scale: 0.95 }}
         className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 font-bold text-sm"
       >
-        {showDashboard ? '📊 隐藏' : '💎 经济面板'}
+        {showDashboard ? (isEN ? '📊 Hide' : '📊 隐藏') : (isEN ? '🔥 SKR Deflation' : '🔥 SKR 通缩')}
       </motion.button>
 
       {/* 面板 */}
@@ -176,27 +234,135 @@ export const EconomyDashboard: React.FC = () => {
             transition={{ duration: 0.2 }}
             className="absolute bottom-12 left-0 w-[420px] bg-gray-900 border-2 border-green-500 rounded-lg shadow-2xl p-4 max-h-[600px] overflow-y-auto"
           >
-            <h3 className="text-xl font-bold text-green-400 mb-4">💎 经济数据面板</h3>
+            {/* 标题 */}
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-green-400">
+                {isEN ? '🔥 SKR Deflation Engine' : '🔥 SKR 通缩引擎'}
+              </h3>
+              <div className="text-xs text-gray-400 mt-1">
+                {isEN ? '🧪 Hackathon Simulation Network' : '🧪 黑客松模拟网'}
+              </div>
+            </div>
+
+            {/* 核心指标：预计 SKR 回购量 */}
+            <motion.div 
+              className="mb-4 p-4 bg-gradient-to-br from-green-900/40 to-emerald-900/40 border-2 border-green-500 rounded-lg"
+              animate={flashBoost ? { scale: [1, 1.02, 1], borderColor: ['#10b981', '#22c55e', '#10b981'] } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              <h4 className="text-xs font-bold text-gray-400 mb-2">
+                {isEN ? '💰 Est. SKR Buyback' : '💰 预计 SKR 回购量'}
+              </h4>
+              <div className="flex items-baseline gap-2">
+                <motion.div 
+                  className="text-3xl font-bold text-green-400"
+                  animate={flashBoost ? { scale: [1, 1.1, 1] } : {}}
+                >
+                  {simulator.totalSkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </motion.div>
+                <div className="text-sm text-gray-400">SKR</div>
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                ≈ ${(simulator.totalSkrBuyback * prices.skr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+                <span className="text-gray-600 ml-1">
+                  ({isEN ? 'Based on Current Price' : '基于当前价格'})
+                </span>
+              </div>
+              
+              {/* 互动反馈提示 */}
+              {flashBoost && simulator.lastInteractionBoost > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="mt-2 text-xs text-green-300 font-bold"
+                >
+                  +{simulator.lastInteractionBoost.toFixed(2)} SKR {isEN ? 'from your action!' : '来自你的操作！'}
+                </motion.div>
+              )}
+            </motion.div>
+
+            {/* 国库通缩进度 */}
+            <div className="mb-4 p-3 bg-gray-800 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-xs font-bold text-cyan-400">
+                  {isEN ? '📊 Deflation Progress' : '📊 国库通缩进度'}
+                </h4>
+                <span className="text-lg font-bold text-cyan-400">
+                  {simulator.deflationProgress.toFixed(2)}%
+                </span>
+              </div>
+              
+              {/* 进度条 */}
+              <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${simulator.deflationProgress}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+              
+              <div className="text-xs text-gray-400 mt-2">
+                {isEN 
+                  ? `${(100 - simulator.deflationProgress).toFixed(2)}% until next halving`
+                  : `距离下一轮减产还有 ${(100 - simulator.deflationProgress).toFixed(2)}%`
+                }
+              </div>
+            </div>
+
+            {/* 24h 协议收入 */}
+            <motion.div 
+              className="mb-4 p-3 bg-gray-800 rounded-lg"
+              animate={flashBoost ? { backgroundColor: ['#1f2937', '#374151', '#1f2937'] } : {}}
+            >
+              <h4 className="text-xs font-bold text-yellow-400 mb-2">
+                {isEN ? '⚡ 24h Protocol Revenue' : '⚡ 24h 协议收入'}
+              </h4>
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="text-2xl font-bold text-yellow-400">
+                    +{simulator.dailySkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} SKR
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    ≈ ${(simulator.dailySkrBuyback * prices.skr).toFixed(2)} USD
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-green-400 font-bold px-2 py-1 bg-green-900/30 rounded">
+                    🔥 {isEN ? 'All for Buyback' : '全部用于回购'}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* 信徒数量 */}
+            <div className="mb-4 p-3 bg-gray-800 rounded-lg">
+              <h4 className="text-xs font-bold text-purple-400 mb-2">
+                {isEN ? '👥 Believers' : '👥 信徒数量'}
+              </h4>
+              <div className="flex justify-between items-center">
+                <div className="text-2xl font-bold text-purple-400">
+                  {simulator.believers.toLocaleString()}
+                </div>
+                <div className="flex items-center gap-1 text-xs text-green-400">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                  {isEN ? 'Mining for SKR' : '正在为 SKR 祈福'}
+                </div>
+              </div>
+            </div>
 
             {/* 实时价格 */}
             <div className="mb-4 p-3 bg-gray-800 rounded-lg">
-              <h4 className="text-sm font-bold text-gray-400 mb-2">💰 实时市价</h4>
+              <h4 className="text-sm font-bold text-gray-400 mb-2">
+                {isEN ? '💰 Live Prices' : '💰 实时市价'}
+              </h4>
               {prices.loading ? (
-                <div className="text-gray-500 text-sm">加载中...</div>
+                <div className="text-gray-500 text-sm">{isEN ? 'Loading...' : '加载中...'}</div>
               ) : prices.error ? (
                 <div className="text-red-400 text-sm">{prices.error}</div>
               ) : (
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between items-center p-2 bg-gray-900/50 rounded">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">◎</span>
-                      <span className="text-gray-300 font-bold">SOL</span>
-                    </div>
-                    <span className="text-blue-400 font-bold text-lg">
-                      ${prices.sol.toFixed(2)}
-                    </span>
-                  </div>
-                  
                   <div className="flex justify-between items-center p-2 bg-gray-900/50 rounded">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🔍</span>
@@ -219,7 +385,7 @@ export const EconomyDashboard: React.FC = () => {
                   
                   <div className="border-t border-gray-700 pt-2 mt-2">
                     <div className="flex justify-between text-xs text-gray-400">
-                      <span>汇率:</span>
+                      <span>{isEN ? 'Exchange Rate:' : '汇率:'}</span>
                       <span className="text-cyan-400 font-bold">
                         1 SKR = {prices.gongde > 0 ? (prices.skr / prices.gongde).toFixed(0) : '0'} GD
                       </span>
@@ -229,189 +395,35 @@ export const EconomyDashboard: React.FC = () => {
               )}
             </div>
 
-            {/* 你的余额 */}
-            <div className="mb-4 p-3 bg-gradient-to-r from-yellow-900/20 to-amber-900/20 border border-yellow-500/30 rounded-lg">
-              <h4 className="text-sm font-bold text-yellow-400 mb-2">💼 你的余额</h4>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-300">$GONGDE:</span>
-                <div className="text-right">
-                  <div className="text-yellow-400 font-bold text-lg">
-                    {gdBalance.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    ≈ ${calculateUSD(gdBalance)} USD
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 冥想模式产出 */}
-            <div className="mb-4 p-3 bg-gray-800 rounded-lg">
-              <h4 className="text-sm font-bold text-green-400 mb-2">🧘 冥想模式（免费）</h4>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">手动点击奖励:</span>
-                  <span className="text-green-400 font-bold">
-                    {(stats.meditationManualRate * 100).toFixed(0)}% × {stats.meditationManualMin}-{stats.meditationManualMax} GD
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">平均每次:</span>
-                  <span className="text-green-400 font-bold">
-                    {stats.meditationManualAvg.toFixed(1)} GD
-                  </span>
-                </div>
-                <div className="flex justify-between border-t border-gray-700 pt-2">
-                  <span className="text-gray-300 font-bold">手动玩1小时:</span>
-                  <div className="text-right">
-                    <div className="text-green-400 font-bold">
-                      ~{stats.meditationManualHourly} GD
-                    </div>
-                    <div className="text-gray-400">
-                      ≈ ${calculateUSD(stats.meditationManualHourly)} USD
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border-t border-gray-700 pt-2 mt-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">代敲奖励:</span>
-                    <span className="text-yellow-400 font-bold">
-                      {(stats.autoClickRate * 100).toFixed(0)}% × {stats.autoClickMin}-{stats.autoClickMax} GD
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">代敲1小时:</span>
-                    <div className="text-right">
-                      <div className="text-yellow-400 font-bold">
-                        ~{stats.autoClickHourly} GD
-                      </div>
-                      <div className="text-gray-400">
-                        ≈ ${calculateUSD(stats.autoClickHourly)} USD
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 功德模式消耗 */}
-            <div className="mb-4 p-3 bg-gray-800 rounded-lg">
-              <h4 className="text-sm font-bold text-yellow-400 mb-2">🔥 功德模式（消耗）</h4>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">每次消耗:</span>
-                  <div className="text-right">
-                    <div className="text-red-400 font-bold">
-                      {stats.meritBurnCost} GD
-                    </div>
-                    <div className="text-gray-400">
-                      ≈ ${calculateUSD(stats.meritBurnCost)} USD
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">基础暴击率:</span>
-                  <span className="text-yellow-400 font-bold">
-                    {(stats.meritCritRate * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="border-t border-gray-700 pt-2">
-                  <div className="text-gray-400 mb-1">暴击奖励:</div>
-                  <div className="space-y-1 pl-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">因果级 (72%):</span>
-                      <span className="text-yellow-400">1200 GD</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-cyan-400">福报级 (22%):</span>
-                      <span className="text-cyan-400">2000 GD</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-purple-400">天启级 (6%):</span>
-                      <span className="text-purple-400">5000 GD</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 代敲价格 */}
-            <div className="mb-4 p-3 bg-gray-800 rounded-lg">
-              <h4 className="text-sm font-bold text-purple-400 mb-2">🤖 代敲价格（3小时）</h4>
-              <div className="space-y-2 text-xs">
-                <div>
-                  <div className="text-gray-400 mb-1">冥想模式:</div>
-                  <div className="flex gap-2">
-                    {stats.autoClickPrices.meditation.map((price, i) => (
-                      <div key={i} className="flex-1 p-2 bg-gray-900/50 rounded text-center">
-                        <div className="text-green-400 font-bold">{price} SKR</div>
-                        <div className="text-gray-400 text-[10px]">×{[1,3,5][i]}</div>
-                        <div className="text-gray-500 text-[10px]">
-                          ${(price * prices.skr).toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="border-t border-gray-700 pt-2">
-                  <div className="text-gray-400 mb-1">功德模式:</div>
-                  <div className="flex gap-2">
-                    {stats.autoClickPrices.merit.map((price, i) => (
-                      <div key={i} className="flex-1 p-2 bg-gray-900/50 rounded text-center">
-                        <div className="text-yellow-400 font-bold">{price} SKR</div>
-                        <div className="text-gray-400 text-[10px]">×{[1,3,5][i]}</div>
-                        <div className="text-gray-500 text-[10px]">
-                          ${(price * prices.skr).toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 兑换比例 */}
-            <div className="mb-4 p-3 bg-gray-800 rounded-lg">
-              <h4 className="text-sm font-bold text-cyan-400 mb-2">💱 兑换比例</h4>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-center p-2 bg-gray-900/50 rounded">
-                  <span className="text-gray-400">GD → SKR:</span>
-                  <div className="text-right">
-                    <div className="text-cyan-400 font-bold">
-                      {stats.gdToSkrRate} GD = 1 SKR
-                    </div>
-                    <div className="text-gray-500 text-[10px]">
-                      1 GD = ${(prices.skr / stats.gdToSkrRate).toFixed(8)}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center p-2 bg-gray-900/50 rounded">
-                  <span className="text-gray-400">SKR → GD:</span>
-                  <div className="text-right">
-                    <div className="text-cyan-400 font-bold">
-                      1 SKR = {stats.skrToGdRate} GD
-                    </div>
-                    <div className="text-gray-500 text-[10px]">
-                      1 SKR = ${(stats.skrToGdRate * prices.gongde).toFixed(6)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 盈利路径 */}
+            {/* 生态贡献说明 */}
             <div className="p-3 bg-gradient-to-r from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-lg">
-              <h4 className="text-sm font-bold text-green-400 mb-2">💡 盈利路径</h4>
+              <h4 className="text-sm font-bold text-green-400 mb-2">
+                {isEN ? '💡 Ecological Impact' : '💡 生态贡献预览'}
+              </h4>
               <div className="space-y-1 text-xs text-gray-300">
-                <div>• 手动玩1小时 → ~{stats.meditationManualHourly} GD</div>
-                <div>• 每天玩3小时 → ~{stats.meditationManualHourly * 3} GD</div>
-                <div>• 一个月 → ~{stats.meditationManualHourly * 3 * 30} GD</div>
+                <div>
+                  {isEN 
+                    ? '• With 1000 daily active users'
+                    : '• 仅需 1000 名日活用户'
+                  }
+                </div>
+                <div>
+                  {isEN
+                    ? '• Protocol can buyback 500-1000 SKR daily'
+                    : '• 每天可从市场回购 500-1000 SKR'
+                  }
+                </div>
                 <div className="text-green-400 font-bold">
-                  • 可兑换 ~{Math.floor(stats.meditationManualHourly * 3 * 30 / stats.gdToSkrRate)} SKR
-                  ≈ ${((stats.meditationManualHourly * 3 * 30 / stats.gdToSkrRate) * prices.skr).toFixed(2)} USD
+                  {isEN
+                    ? '• Creating a liquidity black hole for SKR'
+                    : '• 成为 SKR 的流动性黑洞'
+                  }
+                </div>
+                <div className="text-xs text-gray-500 mt-2 italic">
+                  {isEN
+                    ? '* All buybacks are executed on-chain in real-time'
+                    : '* 所有回购均实时上链执行'
+                  }
                 </div>
               </div>
             </div>
@@ -424,7 +436,7 @@ export const EconomyDashboard: React.FC = () => {
               }}
               className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-bold transition-colors"
             >
-              🔄 刷新数据
+              🔄 {isEN ? 'Refresh Data' : '刷新数据'}
             </button>
           </motion.div>
         )}

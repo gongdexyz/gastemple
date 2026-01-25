@@ -1,11 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Flame, TrendingUp, Users, Globe, Trophy } from 'lucide-react'
+import { Flame, Users, Globe, Trophy } from 'lucide-react'
 import { Header } from '../components/Header'
 import { GlitchTransition } from '../components/GlitchTransition'
 import { WoodenFish } from '../components/WoodenFish'
 import { useThemeStore } from '../stores/themeStore'
 import { useLangStore } from '../stores/langStore'
+import { priceService } from '../services/priceService'
 
 const TOP_BURNERS_CN = [
   { rank: 1, address: '7xKXt...4mNq', merits: 88888, title: '赛博活佛' },
@@ -23,6 +24,22 @@ const TOP_BURNERS_EN = [
   { rank: 5, address: 'Cope...ngMi', merits: 12345, title: 'LOST SOUL' },
 ]
 
+// SKR 通缩模拟器状态接口
+interface SimulatorState {
+  totalSkrBuyback: number
+  dailySkrBuyback: number
+  believers: number
+  deflationProgress: number
+  lastInteractionBoost: number
+}
+
+interface TokenPrices {
+  skr: number
+  gongde: number
+  loading: boolean
+  error: string | null
+}
+
 export const TemplePage: React.FC = () => {
   const { mode } = useThemeStore()
   const { lang } = useLangStore()
@@ -30,6 +47,85 @@ export const TemplePage: React.FC = () => {
   const isEN = lang === 'en'
   const TOP_BURNERS = isEN ? TOP_BURNERS_EN : TOP_BURNERS_CN
   const [activeTab, setActiveTab] = useState<'global' | 'players'>('global')
+  
+  // SKR 通缩模拟器状态
+  const [simulator, setSimulator] = useState<SimulatorState>({
+    totalSkrBuyback: 10240.56,
+    dailySkrBuyback: 888.23,
+    believers: 4269,
+    deflationProgress: 87.66,
+    lastInteractionBoost: 0
+  })
+  
+  const [flashBoost, setFlashBoost] = useState(false)
+  const [prices, setPrices] = useState<TokenPrices>({
+    skr: 0,
+    gongde: 0,
+    loading: true,
+    error: null,
+  })
+  
+  // 心跳增长：每秒自动增加
+  useEffect(() => {
+    const heartbeat = setInterval(() => {
+      setSimulator(prev => ({
+        ...prev,
+        totalSkrBuyback: prev.totalSkrBuyback + 0.01,
+        dailySkrBuyback: prev.dailySkrBuyback + 0.005,
+        believers: prev.believers + (Math.random() < 0.1 ? 1 : 0),
+        deflationProgress: Math.min(99.99, prev.deflationProgress + 0.001)
+      }))
+    }, 1000)
+    
+    return () => clearInterval(heartbeat)
+  }, [])
+  
+  // 监听用户互动
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      const boost = Math.random() * 50 + 50
+      setSimulator(prev => ({
+        ...prev,
+        totalSkrBuyback: prev.totalSkrBuyback + boost,
+        dailySkrBuyback: prev.dailySkrBuyback + boost * 0.5,
+        deflationProgress: Math.min(99.99, prev.deflationProgress + 0.5),
+        lastInteractionBoost: boost
+      }))
+      
+      setFlashBoost(true)
+      setTimeout(() => setFlashBoost(false), 500)
+    }
+    
+    window.addEventListener('click', handleUserInteraction)
+    return () => window.removeEventListener('click', handleUserInteraction)
+  }, [])
+  
+  // 获取价格
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        setPrices(prev => ({ ...prev, loading: true, error: null }))
+        const tokenPrices = await priceService.getBothPrices()
+        
+        setPrices({
+          skr: tokenPrices.skr,
+          gongde: tokenPrices.gongde,
+          loading: false,
+          error: null,
+        })
+      } catch (error) {
+        setPrices(prev => ({
+          ...prev,
+          loading: false,
+          error: error instanceof Error ? error.message : '获取价格失败',
+        }))
+      }
+    }
+
+    fetchPrices()
+    const interval = setInterval(fetchPrices, 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className={`min-h-screen ${isDegen ? 'bg-degen-bg' : 'bg-goldman-bg'}`}>
@@ -54,105 +150,150 @@ export const TemplePage: React.FC = () => {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {/* 左侧：统计 - 手机端隐藏 */}
+            {/* 左侧：SKR 通缩统计 - 手机端隐藏 */}
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
               className={`hidden md:block p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className={`w-4 h-4 ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`} />
-                <h3 className={`font-bold ${isDegen ? 'text-degen-green font-pixel text-xs' : 'text-goldman-gold text-sm'}`}>
-                  {isEN ? 'BURN STATS' : '燃烧统计'}
+              {/* 标题 */}
+              <div className="mb-3">
+                <h3 className={`text-sm font-bold ${isDegen ? 'text-degen-green font-pixel' : 'text-green-400'}`}>
+                  {isEN ? '🔥 SKR DEFLATION' : '🔥 SKR 通缩'}
                 </h3>
-                <span className={`ml-auto text-[10px] px-2 py-0.5 rounded ${isDegen ? 'bg-degen-yellow/20 text-degen-yellow' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                  {isEN ? 'DEMO DATA' : '测试数据'}
-                </span>
+                <div className={`text-[10px] mt-1 ${isDegen ? 'text-degen-cyan' : 'text-gray-400'}`}>
+                  {isEN ? '🧪 Hackathon Sim' : '🧪 黑客松模拟'}
+                </div>
               </div>
-              
-              <div className="space-y-3">
-                {/* 1. 核心区：全网已燃烧（大卡片） */}
-                <div className={`p-4 rounded-lg ${isDegen ? 'bg-degen-green/10' : 'bg-goldman-gold/10'}`}>
-                  <p className="text-xs text-gray-500">{isEN ? 'TOTAL BURNT' : '全网已燃烧'}</p>
-                  <p className={`text-2xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-white'}`}>
-                    1,234,567 <span className="text-sm">$GONGDE</span>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    ≈ $15,432 {isEN ? 'USD' : '美元'}
-                  </p>
+
+              {/* 核心指标：预计 SKR 回购量 */}
+              <motion.div 
+                className={`mb-3 p-3 rounded-lg ${isDegen ? 'bg-degen-green/10 border border-degen-green/30' : 'bg-green-900/40 border border-green-500/30'}`}
+                animate={flashBoost ? { scale: [1, 1.02, 1] } : {}}
+                transition={{ duration: 0.3 }}
+              >
+                <h4 className="text-[10px] font-bold text-gray-400 mb-1">
+                  {isEN ? '💰 Est. SKR Buyback' : '💰 预计 SKR 回购'}
+                </h4>
+                <div className="flex items-baseline gap-1">
+                  <motion.div 
+                    className={`text-xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-green-400'}`}
+                    animate={flashBoost ? { scale: [1, 1.1, 1] } : {}}
+                  >
+                    {simulator.totalSkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </motion.div>
+                  <div className="text-xs text-gray-400">SKR</div>
                 </div>
-
-                {/* 2. 视觉区：流通量剩余 + 进度条 */}
-                <div className={`p-3 rounded-lg ${isDegen ? 'bg-degen-purple/10' : 'bg-blue-900/10'}`}>
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-xs text-gray-500">{isEN ? 'SUPPLY REMAINING' : '流通量剩余'}</p>
-                    <p className={`text-lg font-bold ${isDegen ? 'text-degen-cyan' : 'text-blue-400'}`}>
-                      87.66%
-                    </p>
-                  </div>
-                  {/* 进度条 */}
-                  <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${isDegen ? 'bg-gradient-to-r from-degen-green to-degen-cyan' : 'bg-gradient-to-r from-goldman-gold to-yellow-500'}`}
-                      style={{ width: '12.34%' }}
-                    />
-                  </div>
-                  <p className="text-[10px] text-gray-500 mt-1">
-                    {isEN ? '12.34% burnt forever 🔥' : '已永久销毁 12.34% 🔥'}
-                  </p>
+                <div className="text-[9px] text-gray-500 mt-1">
+                  ≈ ${(simulator.totalSkrBuyback * prices.skr).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
                 </div>
+                
+                {flashBoost && simulator.lastInteractionBoost > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className={`mt-1 text-[9px] font-bold ${isDegen ? 'text-degen-green' : 'text-green-300'}`}
+                  >
+                    +{simulator.lastInteractionBoost.toFixed(2)} SKR!
+                  </motion.div>
+                )}
+              </motion.div>
 
-                {/* 3. 次要数据区：2x2 网格 */}
-                <div className="grid grid-cols-2 gap-2">
-                  {/* 左上：今日燃烧 */}
-                  <div className={`p-2.5 rounded-lg ${isDegen ? 'bg-degen-pink/10' : 'bg-red-900/10'}`}>
-                    <p className="text-[10px] text-gray-500">{isEN ? 'TODAY' : '今日燃烧'}</p>
-                    <p className={`text-lg font-bold ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>
-                      88,888
-                    </p>
-                    <p className="text-[9px] text-gray-400 mt-0.5">
-                      🔥 <span className="text-green-400">+15%</span>
-                    </p>
+              {/* 国库通缩进度 */}
+              <div className={`mb-3 p-2.5 rounded-lg ${isDegen ? 'bg-degen-cyan/10' : 'bg-gray-800'}`}>
+                <div className="flex justify-between items-center mb-1">
+                  <h4 className={`text-[10px] font-bold ${isDegen ? 'text-degen-cyan' : 'text-cyan-400'}`}>
+                    {isEN ? '📊 Deflation' : '📊 通缩进度'}
+                  </h4>
+                  <span className={`text-sm font-bold ${isDegen ? 'text-degen-cyan' : 'text-cyan-400'}`}>
+                    {simulator.deflationProgress.toFixed(2)}%
+                  </span>
+                </div>
+                
+                <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    className={`h-full rounded-full ${isDegen ? 'bg-gradient-to-r from-degen-cyan to-degen-green' : 'bg-gradient-to-r from-cyan-500 to-blue-500'}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${simulator.deflationProgress}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
+                
+                <div className="text-[9px] text-gray-400 mt-1">
+                  {isEN 
+                    ? `${(100 - simulator.deflationProgress).toFixed(2)}% to halving`
+                    : `距减产 ${(100 - simulator.deflationProgress).toFixed(2)}%`
+                  }
+                </div>
+              </div>
+
+              {/* 24h 协议收入 */}
+              <motion.div 
+                className={`mb-3 p-2.5 rounded-lg ${isDegen ? 'bg-degen-yellow/10' : 'bg-gray-800'}`}
+                animate={flashBoost ? { backgroundColor: isDegen ? ['rgba(250, 204, 21, 0.1)', 'rgba(250, 204, 21, 0.2)', 'rgba(250, 204, 21, 0.1)'] : ['#1f2937', '#374151', '#1f2937'] } : {}}
+              >
+                <h4 className={`text-[10px] font-bold mb-1 ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
+                  {isEN ? '⚡ 24h Revenue' : '⚡ 24h 收入'}
+                </h4>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
+                      +{simulator.dailySkrBuyback.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-[9px] text-gray-400">
+                      ≈ ${(simulator.dailySkrBuyback * prices.skr).toFixed(2)}
+                    </div>
                   </div>
-
-                  {/* 右上：全网点击 */}
-                  <div className={`p-2.5 rounded-lg ${isDegen ? 'bg-degen-yellow/10' : 'bg-orange-900/10'}`}>
-                    <p className="text-[10px] text-gray-500">{isEN ? 'TOTAL TAPS' : '全网点击'}</p>
-                    <p className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-orange-400'}`}>
-                      98.7M
-                    </p>
-                    <p className="text-[9px] text-gray-400 mt-0.5">
-                      🙏 {isEN ? 'Strikes' : '敲击'}
-                    </p>
-                  </div>
-
-                  {/* 左下：参与人数 */}
-                  <div className={`p-2.5 rounded-lg ${isDegen ? 'bg-degen-green/10' : 'bg-green-900/10'}`}>
-                    <p className="text-[10px] text-gray-500">{isEN ? 'BURNERS' : '参与人数'}</p>
-                    <p className={`text-lg font-bold ${isDegen ? 'text-degen-cyan' : 'text-green-400'}`}>
-                      4,269
-                    </p>
-                    <p className="text-[9px] text-gray-400 mt-0.5 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                      <span>128 {isEN ? 'online' : '在线'}</span>
-                    </p>
-                  </div>
-
-                  {/* 右下：单笔燃烧王 */}
-                  <div className={`p-2.5 rounded-lg ${isDegen ? 'bg-degen-yellow/10' : 'bg-yellow-900/10'}`}>
-                    <p className="text-[10px] text-gray-500 flex items-center gap-0.5">
-                      <span>👑</span>
-                      <span>{isEN ? 'TOP BURN' : '燃烧王'}</span>
-                    </p>
-                    <p className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
-                      10,000
-                    </p>
-                    <p className="text-[9px] text-gray-400 mt-0.5">
-                      0x7a3f...9b2c
-                    </p>
+                  <div className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${isDegen ? 'bg-degen-green/20 text-degen-green' : 'bg-green-900/30 text-green-400'}`}>
+                    🔥 {isEN ? 'Buyback' : '回购'}
                   </div>
                 </div>
+              </motion.div>
+
+              {/* 信徒数量 */}
+              <div className={`mb-3 p-2.5 rounded-lg ${isDegen ? 'bg-degen-purple/10' : 'bg-gray-800'}`}>
+                <h4 className={`text-[10px] font-bold mb-1 ${isDegen ? 'text-degen-purple' : 'text-purple-400'}`}>
+                  {isEN ? '👥 Believers' : '👥 信徒'}
+                </h4>
+                <div className="flex justify-between items-center">
+                  <div className={`text-lg font-bold ${isDegen ? 'text-degen-purple' : 'text-purple-400'}`}>
+                    {simulator.believers.toLocaleString()}
+                  </div>
+                  <div className={`flex items-center gap-1 text-[9px] ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isDegen ? 'bg-degen-green' : 'bg-green-400'}`}></span>
+                    {isEN ? 'Mining' : '祈福中'}
+                  </div>
+                </div>
+              </div>
+
+              {/* 实时价格 */}
+              <div className={`p-2.5 rounded-lg ${isDegen ? 'bg-black/20' : 'bg-gray-800'}`}>
+                <h4 className="text-[10px] font-bold text-gray-400 mb-2">
+                  {isEN ? '💰 Live Prices' : '💰 实时价格'}
+                </h4>
+                {prices.loading ? (
+                  <div className="text-gray-500 text-[10px]">{isEN ? 'Loading...' : '加载中...'}</div>
+                ) : prices.error ? (
+                  <div className="text-red-400 text-[10px]">{prices.error}</div>
+                ) : (
+                  <div className="space-y-1.5 text-[10px]">
+                    <div className={`flex justify-between items-center p-1.5 rounded ${isDegen ? 'bg-black/30' : 'bg-gray-900/50'}`}>
+                      <span className="text-gray-300">🔍 SKR</span>
+                      <span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                        ${prices.skr.toFixed(6)}
+                      </span>
+                    </div>
+                    
+                    <div className={`flex justify-between items-center p-1.5 rounded ${isDegen ? 'bg-black/30' : 'bg-gray-900/50'}`}>
+                      <span className="text-gray-300">🙏 GD</span>
+                      <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
+                        ${prices.gongde.toFixed(8)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -288,25 +429,35 @@ export const TemplePage: React.FC = () => {
 
           {/* 手机端：折叠的统计和排行榜 */}
           <div className="md:hidden mt-6 space-y-4">
-            {/* 简化统计 */}
+            {/* SKR 通缩统计 - 移动端 */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               className={`p-4 rounded-xl ${isDegen ? 'bg-black/30 border border-degen-green/30' : 'bg-gray-900/50 border border-goldman-border'}`}
             >
+              <h3 className={`text-sm font-bold mb-3 ${isDegen ? 'text-degen-green font-pixel' : 'text-green-400'}`}>
+                {isEN ? '🔥 SKR DEFLATION' : '🔥 SKR 通缩'}
+              </h3>
+              
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <p className="text-xs text-gray-500">{isEN ? 'TOTAL' : '全网'}</p>
-                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-white'}`}>1.2M</p>
+                  <p className="text-xs text-gray-500">{isEN ? 'BUYBACK' : '回购'}</p>
+                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-green-400'}`}>
+                    {(simulator.totalSkrBuyback / 1000).toFixed(1)}K
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">{isEN ? 'TODAY' : '今日'}</p>
-                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-pink' : 'text-white'}`}>88K</p>
+                  <p className="text-xs text-gray-500">{isEN ? '24H' : '24小时'}</p>
+                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
+                    {simulator.dailySkrBuyback.toFixed(0)}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500">{isEN ? 'USERS' : '人数'}</p>
-                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-cyan' : 'text-white'}`}>4.2K</p>
+                  <p className="text-xs text-gray-500">{isEN ? 'USERS' : '信徒'}</p>
+                  <p className={`text-lg font-bold ${isDegen ? 'text-degen-purple' : 'text-purple-400'}`}>
+                    {(simulator.believers / 1000).toFixed(1)}K
+                  </p>
                 </div>
               </div>
             </motion.div>

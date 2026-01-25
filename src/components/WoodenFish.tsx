@@ -164,12 +164,20 @@ export const WoodenFish: React.FC = () => {
   const RECIPIENT_ADDRESS = import.meta.env.VITE_RECIPIENT_ADDRESS || '这里填你自己的Solana钱包地址'
   const SKR_TOKEN_ADDRESS = import.meta.env.VITE_SKR_TOKEN_ADDRESS || '这里填 SKR 的 Token Address'
   
-  // 检查是否为 SKR 测试模式 - URL带 ?test=skr 或 ?test=demo 即可免费使用自动挂机
+  // 检查是否为 SKR 测试模式 - URL带 ?test=skr 或 ?test=demo 或 ?test=all 即可免费使用自动挂机
   const isSKRTestMode = () => {
     if (typeof window === 'undefined') return false
     const params = new URLSearchParams(window.location.search)
     const testParam = params.get('test')
-    return testParam === 'skr' || testParam === 'demo'
+    return testParam === 'skr' || testParam === 'demo' || testParam === 'all'
+  }
+  
+  // 检查是否为 GONGDE 测试模式 - URL带 ?test=gongde 或 ?test=demo 或 ?test=all 即可无限余额
+  const isGongdeTestMode = () => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(window.location.search)
+    const testParam = params.get('test')
+    return testParam === 'gongde' || testParam === 'demo' || testParam === 'all'
   }
   
   const isDegen = mode === 'degen'
@@ -414,9 +422,12 @@ export const WoodenFish: React.FC = () => {
     }
     // 功德模式：消耗代币，有概率暴击和获得GD
     else if (gameMode === 'merit') {
-      if (gdBalance < burnCost) return false
+      // 测试模式跳过余额检查
+      if (!isGongdeTestMode() && gdBalance < burnCost) return false
       
-      spendGD(burnCost)
+      if (!isGongdeTestMode()) {
+        spendGD(burnCost)
+      }
       
       // 伪随机保底系统 + 连击手感加权 + 三重暴击等级
       // 【拉新阶段配置】基础暴击率 4%，让新用户体验更爽
@@ -1107,7 +1118,7 @@ export const WoodenFish: React.FC = () => {
         >
           <button
             onClick={handleCenterClick}
-            disabled={gameMode === 'merit' && gdBalance < burnCost}
+            disabled={gameMode === 'merit' && !isGongdeTestMode() && gdBalance < burnCost}
             style={{
               width: '100%',
               height: '100%',
@@ -1122,7 +1133,7 @@ export const WoodenFish: React.FC = () => {
             className={`
               rounded-full flex items-center justify-center
               cursor-pointer select-none
-              ${gameMode === 'merit' && gdBalance < burnCost ? 'cursor-default opacity-50' : ''}
+              ${gameMode === 'merit' && !isGongdeTestMode() && gdBalance < burnCost ? 'cursor-default opacity-50' : ''}
               ${gameMode === 'merit'
                 ? (isDegen
                    ? 'bg-gradient-to-br from-yellow-400/40 to-amber-600/40 border-4 border-yellow-400'
@@ -1206,7 +1217,7 @@ export const WoodenFish: React.FC = () => {
               animate={{ scale: 1, opacity: 0.7 }}
               exit={{ scale: 0, opacity: 0 }}
               onClick={(e) => handleTargetClick(target.id, e)}
-              disabled={gameMode === 'merit' && gdBalance < burnCost}
+              disabled={gameMode === 'merit' && !isGongdeTestMode() && gdBalance < burnCost}
               style={{
                 position: 'absolute',
                 left: `calc(50% + ${target.x}px)`,
@@ -1216,7 +1227,7 @@ export const WoodenFish: React.FC = () => {
               className={`
                 w-16 h-16 rounded-full flex items-center justify-center
                 cursor-pointer select-none pointer-events-auto
-                ${gameMode === 'merit' && gdBalance < burnCost ? 'opacity-50 cursor-not-allowed' : ''}
+                ${gameMode === 'merit' && !isGongdeTestMode() && gdBalance < burnCost ? 'opacity-50 cursor-not-allowed' : ''}
                 border-2 border-dashed
                 ${isDegen ? 'border-gray-400 bg-gray-800/30' : 'border-gray-500 bg-gray-700/20'}
               `}
@@ -1458,8 +1469,8 @@ export const WoodenFish: React.FC = () => {
         )}
       </div>
 
-      {/* 余额不足提示 - 只在功德模式下显示 */}
-      {gameMode === 'merit' && gdBalance < burnCost && (
+      {/* 余额不足提示 - 只在功德模式下显示，测试模式不显示 */}
+      {gameMode === 'merit' && !isGongdeTestMode() && gdBalance < burnCost && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

@@ -39,12 +39,12 @@ interface GachaState {
 const MAX_FREE_DRAWS = 1
 const DRAW_COST_GD = 100
 
-// 检查是否为测试模式 - URL带 ?test=gongde 或 ?test=demo 即可无限余额
+// 检查是否为测试模式 - URL带 ?test=gongde 或 ?test=demo 或 ?test=all 即可无限余额
 const isTestMode = () => {
   if (typeof window === 'undefined') return false
   const params = new URLSearchParams(window.location.search)
   const testParam = params.get('test')
-  return testParam === 'gongde' || testParam === 'demo'
+  return testParam === 'gongde' || testParam === 'demo' || testParam === 'all'
 }
 
 export const useGachaStore = create<GachaState>()(
