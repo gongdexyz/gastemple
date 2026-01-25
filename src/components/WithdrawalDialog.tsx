@@ -12,7 +12,9 @@ import {
   getNextTier,
   calculateUpgradeSavings,
   STAKING_TIERS,
-  type StakingTier
+  type StakingTier,
+  isDemoMode,
+  getDemoTierName
 } from '../services/stakingVerification'
 
 interface WithdrawalDialogProps {
@@ -201,6 +203,33 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
           {isEN ? '💰 Withdrawal' : '💰 提现'}
         </h2>
         
+        {/* Demo Mode 标识 */}
+        {isDemoMode() && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-4 px-4 py-2 rounded-lg border-2 ${
+              isDegen 
+                ? 'bg-degen-cyan/10 border-degen-cyan text-degen-cyan' 
+                : 'bg-blue-500/10 border-blue-400 text-blue-400'
+            }`}
+          >
+            <div className="flex items-center gap-2 justify-center">
+              <Sparkles className="w-4 h-4" />
+              <span className="font-bold text-sm">
+                {isEN ? '🎬 DEMO MODE' : '🎬 演示模式'}
+              </span>
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="text-xs text-center mt-1 opacity-80">
+              {isEN 
+                ? `Simulated as ${getDemoTierName()} tier for demonstration`
+                : `模拟 ${getDemoTierName()} 等级用于演示`
+              }
+            </div>
+          </motion.div>
+        )}
+        
         {/* 用户等级显示 */}
         <motion.div 
           className={`mb-6 p-4 rounded-xl ${isDegen ? 'bg-degen-purple/10 border border-degen-purple/30' : 'bg-gray-800 border border-gray-700'}`}
@@ -224,15 +253,24 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
                 transition={{ duration: 0.5 }}
               >
                 {userTier.emoji} {isEN ? userTier.nameEN : userTier.name}
+                {isDemoMode() && (
+                  <span className={`ml-2 text-xs px-2 py-0.5 rounded ${
+                    isDegen ? 'bg-degen-cyan/20 text-degen-cyan' : 'bg-blue-500/20 text-blue-400'
+                  }`}>
+                    DEMO
+                  </span>
+                )}
               </motion.div>
             </div>
             <button
               onClick={handleRefresh}
-              disabled={checking}
+              disabled={checking || isDemoMode()}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-                isDegen 
-                  ? 'bg-degen-cyan/20 text-degen-cyan hover:bg-degen-cyan/30' 
-                  : 'bg-blue-900/20 text-blue-400 hover:bg-blue-900/30'
+                isDemoMode() 
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : isDegen 
+                    ? 'bg-degen-cyan/20 text-degen-cyan hover:bg-degen-cyan/30' 
+                    : 'bg-blue-900/20 text-blue-400 hover:bg-blue-900/30'
               }`}
             >
               {checking ? '...' : (isEN ? 'Refresh' : '刷新')}
@@ -410,13 +448,41 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
           </motion.div>
         )}
         
+        {/* Demo Mode 免责声明 */}
+        {isDemoMode() && withdrawalAmount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mb-4 p-3 rounded-lg text-xs ${
+              isDegen 
+                ? 'bg-degen-pink/10 border border-degen-pink/30 text-degen-pink' 
+                : 'bg-orange-900/20 border border-orange-500/30 text-orange-400'
+            }`}
+          >
+            <div className="flex items-start gap-2">
+              <span className="text-base">⚠️</span>
+              <div>
+                <div className="font-bold mb-1">
+                  {isEN ? 'Demo Simulation Notice' : '演示模拟提示'}
+                </div>
+                <div className="opacity-90">
+                  {isEN 
+                    ? 'This is a simulated demonstration. No real blockchain transactions will occur. Actual withdrawal requires real SKR staking verification.'
+                    : '这是模拟演示，不会发生真实的区块链交易。实际提现需要真实的 SKR 质押验证。'
+                  }
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        
         {/* 提现按钮 */}
         <button
           onClick={handleWithdraw}
-          disabled={loading || !solanaAddress || withdrawalAmount <= 0 || withdrawalAmount > gdBalance}
+          disabled={loading || !solanaAddress || withdrawalAmount <= 0 || withdrawalAmount > gdBalance || isDemoMode()}
           className={`
             w-full py-4 rounded-xl font-bold text-lg transition-all
-            ${loading || !solanaAddress || withdrawalAmount <= 0 || withdrawalAmount > gdBalance
+            ${loading || !solanaAddress || withdrawalAmount <= 0 || withdrawalAmount > gdBalance || isDemoMode()
               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
               : isDegen
                 ? 'bg-degen-green text-black hover:bg-degen-green/80'
@@ -424,13 +490,15 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
             }
           `}
         >
-          {loading 
-            ? (isEN ? 'Processing...' : '处理中...')
-            : !solanaAddress
-              ? (isEN ? 'Connect Wallet' : '连接钱包')
-              : withdrawalAmount > gdBalance
-                ? (isEN ? 'Insufficient Balance' : '余额不足')
-                : (isEN ? 'Confirm Withdrawal' : '确认提现')
+          {isDemoMode()
+            ? (isEN ? '🎬 Demo Mode (View Only)' : '🎬 演示模式（仅查看）')
+            : loading 
+              ? (isEN ? 'Processing...' : '处理中...')
+              : !solanaAddress
+                ? (isEN ? 'Connect Wallet' : '连接钱包')
+                : withdrawalAmount > gdBalance
+                  ? (isEN ? 'Insufficient Balance' : '余额不足')
+                  : (isEN ? 'Confirm Withdrawal' : '确认提现')
           }
         </button>
         

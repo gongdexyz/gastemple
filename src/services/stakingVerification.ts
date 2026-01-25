@@ -58,8 +58,40 @@ export const STAKING_TIERS: StakingTier[] = [
 
 /**
  * 获取用户的 SKR 持仓（包括钱包余额和质押凭证）
+ * 
+ * 🎬 Demo Mode: 使用 URL 参数 ?demo=vip 可以模拟不同等级
+ * - ?demo=tourist (路人)
+ * - ?demo=pilgrim (香客)
+ * - ?demo=monk (居士)
+ * - ?demo=abbot (方丈)
  */
 export async function getUserSKRBalance(walletAddress: string): Promise<number> {
+  // 🎬 Demo Mode: 检查 URL 参数
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search)
+    const demoMode = params.get('demo')
+    
+    if (demoMode) {
+      // 模拟延迟（让验证看起来更真实）
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      switch (demoMode.toLowerCase()) {
+        case 'tourist':
+          return 0 // 路人
+        case 'pilgrim':
+          return 100 // 香客
+        case 'monk':
+          return 1000 // 居士
+        case 'abbot':
+          return 5000 // 方丈
+        case 'vip':
+          return 5000 // VIP（方丈）
+        default:
+          return 0
+      }
+    }
+  }
+  
   try {
     const connection = new Connection('https://api.mainnet-beta.solana.com')
     const userPublicKey = new PublicKey(walletAddress)
@@ -95,6 +127,41 @@ export async function getUserSKRBalance(walletAddress: string): Promise<number> 
     console.error('Error fetching SKR balance:', error)
     return 0
   }
+}
+
+/**
+ * 检查是否处于 Demo 模式
+ */
+export function isDemoMode(): boolean {
+  if (typeof window === 'undefined') return false
+  const params = new URLSearchParams(window.location.search)
+  return params.has('demo')
+}
+
+/**
+ * 获取 Demo 模式的等级名称
+ */
+export function getDemoTierName(): string | null {
+  if (typeof window === 'undefined') return null
+  const params = new URLSearchParams(window.location.search)
+  const demoMode = params.get('demo')
+  
+  if (demoMode) {
+    switch (demoMode.toLowerCase()) {
+      case 'tourist':
+        return 'Tourist'
+      case 'pilgrim':
+        return 'Pilgrim'
+      case 'monk':
+        return 'Monk'
+      case 'abbot':
+      case 'vip':
+        return 'Abbot'
+      default:
+        return null
+    }
+  }
+  return null
 }
 
 /**
