@@ -1333,16 +1333,6 @@ export const WoodenFish: React.FC = () => {
           <div className={`text-3xl font-bold ${isDegen ? 'text-degen-green' : 'text-green-500'}`}>
             {totalMerits.toLocaleString()}
           </div>
-          <div className={`text-xs mt-0.5 ${isDegen ? 'text-degen-cyan' : 'text-gray-500'}`}>
-            {isEN ? 'Your clicks this session' : '您本次的敲击数'}
-          </div>
-          
-          {/* 调试信息：显示自动挂机状态 */}
-          {isAutoClickActive && (
-            <div className="mt-2 px-3 py-1 rounded-lg bg-orange-500/20 border border-orange-500/50 text-orange-400 text-xs">
-              ⚠️ {isEN ? `Auto-clicking active (×${autoClickMultiplier})` : `自动挂机中 (×${autoClickMultiplier})`}
-            </div>
-          )}
         </div>
         
         {/* 称号和COMBO */}
@@ -1548,6 +1538,13 @@ export const WoodenFish: React.FC = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* 自动挂机状态提示 - 显示在木鱼下方 */}
+      {isAutoClickActive && (
+        <div className="mt-3 mb-2 px-3 py-1.5 rounded-lg bg-orange-500/20 border border-orange-500/50 text-orange-400 text-sm font-bold">
+          ⚠️ {isEN ? `Auto-clicking active (×${autoClickMultiplier})` : `自动挂机中 (×${autoClickMultiplier})`}
+        </div>
+      )}
 
       {/* 操作提示 - 紧跟木鱼下方 */}
       <div className={`text-center ${isDegen ? 'font-pixel text-base' : 'text-lg'}`}>
