@@ -27,15 +27,15 @@ export const LandingPage: React.FC = () => {
   }
 
   const features = isEN ? [
-    { icon: Shield, title: 'Institutional Grade', desc: 'Battle-tested smart contracts' },
-    { icon: TrendingUp, title: 'Sustainable Yields', desc: 'Algorithmic reward distribution' },
-    { icon: Users, title: '100K+ Users', desc: 'Growing community of believers' },
-    { icon: Zap, title: 'Lightning Fast', desc: 'Sub-second transaction finality' },
+    { icon: Shield, title: 'Wooden Fish Tap', desc: 'Finger yoga - wallet gets lighter, karma gets heavier' },
+    { icon: TrendingUp, title: 'AI Roast Report', desc: 'Although AI\'s mouth is mean, but heart has you~' },
+    { icon: Users, title: 'Rug Museum', desc: 'Bury rugged coins here. Bye bye, next one will be better!' },
+    { icon: Zap, title: 'SKR Empowerment', desc: '50% buyback burn, 30% liquidity, 20% for my coffee ☕' },
   ] : [
-    { icon: Shield, title: '机构级安全', desc: '经过实战检验的智能合约' },
-    { icon: TrendingUp, title: '可持续收益', desc: '算法化收益分配机制' },
-    { icon: Users, title: '10万+用户', desc: '不断壮大的信仰者社区' },
-    { icon: Zap, title: '闪电速度', desc: '亚秒级交易确认' },
+    { icon: Shield, title: '木鱼 (Tap)', desc: '手指做瑜伽 - 钱包瘦一点，福报胖一点哦~ 💪' },
+    { icon: TrendingUp, title: '毒舌 AI (Roast)', desc: '虽然AI嘴巴坏，但它心里有你呀~ 🥺' },
+    { icon: Users, title: '墓碑 (Tombstone)', desc: '前任博物馆 - 拜拜就拜拜，下一个更乖！👋' },
+    { icon: Zap, title: 'SKR 赋能', desc: '50%回购销毁，30%流动性支持，20%给我买咖啡 ☕' },
   ]
 
   const partners = ['a]6z', 'Paradigm', 'Sequoia', 'Binance Labs', 'Coinbase Ventures']

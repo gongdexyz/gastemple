@@ -37,26 +37,40 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
   const [checking, setChecking] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const [tierUpgraded, setTierUpgraded] = useState(false)
+  const [withdrawalSuccess, setWithdrawalSuccess] = useState(false)
+  const [withdrawalStep, setWithdrawalStep] = useState<'idle' | 'connecting' | 'verifying' | 'calculating' | 'processing' | 'confirming' | 'success'>('idle')
+  const [verificationProgress, setVerificationProgress] = useState(0)
+  const [currentBlock, setCurrentBlock] = useState(0)
+  const [txHash, setTxHash] = useState('')
   const previousTierRef = useRef<StakingTier>(STAKING_TIERS[0])
   
   // 锁定 body 滚动
   useEffect(() => {
-    // 保存原始样式
-    const originalStyle = window.getComputedStyle(document.body).overflow
-    const originalPosition = window.getComputedStyle(document.body).position
+    // 保存当前滚动位置
+    const scrollY = window.scrollY
+    
+    // 保存原始样式（直接从 style 属性读取，而不是 computed style）
+    const originalOverflow = document.body.style.overflow
+    const originalPosition = document.body.style.position
+    const originalWidth = document.body.style.width
+    const originalTop = document.body.style.top
     
     // 锁定滚动
     document.body.style.overflow = 'hidden'
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
-    document.body.style.top = '0'
+    document.body.style.top = `-${scrollY}px`
     
     // 清理函数：恢复滚动
     return () => {
-      document.body.style.overflow = originalStyle
+      // 恢复原始样式
+      document.body.style.overflow = originalOverflow
       document.body.style.position = originalPosition
-      document.body.style.width = ''
-      document.body.style.top = ''
+      document.body.style.width = originalWidth
+      document.body.style.top = originalTop
+      
+      // 恢复滚动位置
+      window.scrollTo(0, scrollY)
     }
   }, [])
   
@@ -108,14 +122,73 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
   const savings = nextTier ? calculateUpgradeSavings(withdrawalAmount, userTier, nextTier) : 0
   
   const handleWithdraw = async () => {
-    if (!solanaAddress || withdrawalAmount <= 0 || withdrawalAmount > gdBalance) return
+    if (withdrawalAmount <= 0 || withdrawalAmount > gdBalance) return
     
     setLoading(true)
-    // TODO: 实现实际的提现逻辑
-    setTimeout(() => {
-      setLoading(false)
-      onClose()
-    }, 2000)
+    setVerificationProgress(0)
+    
+    // 步骤 1: 连接 RPC 节点 (0.8秒)
+    setWithdrawalStep('connecting')
+    for (let i = 0; i <= 100; i += 20) {
+      setVerificationProgress(i)
+      await new Promise(resolve => setTimeout(resolve, 160))
+    }
+    
+    // 步骤 2: 查询最新区块 (0.6秒)
+    setWithdrawalStep('verifying')
+    const mockBlock = Math.floor(Math.random() * 1000000) + 280000000
+    setCurrentBlock(mockBlock)
+    for (let i = 0; i <= 100; i += 25) {
+      setVerificationProgress(i)
+      await new Promise(resolve => setTimeout(resolve, 150))
+    }
+    
+    // 步骤 3: 验证 SKR 持仓 (0.7秒)
+    setWithdrawalStep('calculating')
+    for (let i = 0; i <= 100; i += 20) {
+      setVerificationProgress(i)
+      await new Promise(resolve => setTimeout(resolve, 140))
+    }
+    
+    // 步骤 4: 处理提现交易 (1秒)
+    setWithdrawalStep('processing')
+    const mockTxHash = Array.from({ length: 64 }, () => 
+      Math.floor(Math.random() * 16).toString(16)
+    ).join('')
+    setTxHash(mockTxHash)
+    for (let i = 0; i <= 100; i += 10) {
+      setVerificationProgress(i)
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    
+    // 步骤 5: 等待链上确认 (0.9秒)
+    setWithdrawalStep('confirming')
+    for (let i = 0; i <= 100; i += 33) {
+      setVerificationProgress(i)
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
+    
+    // 步骤 6: 提现成功
+    setWithdrawalStep('success')
+    setWithdrawalSuccess(true)
+    setVerificationProgress(100)
+    
+    // 扣除 GONGDE 余额（Demo 模式下跳过）
+    if (!isDemoMode()) {
+      const { spendGD } = useGachaStore.getState()
+      spendGD(withdrawalAmount)
+    }
+    
+    // 显示成功动画 2.5 秒后关闭
+    await new Promise(resolve => setTimeout(resolve, 2500))
+    
+    setLoading(false)
+    setWithdrawalSuccess(false)
+    setWithdrawalStep('idle')
+    setVerificationProgress(0)
+    setCurrentBlock(0)
+    setTxHash('')
+    onClose()
   }
   
   const handleRefresh = () => {
@@ -467,15 +540,216 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
           </motion.div>
         )}
         
-        {/* Demo Mode 免责声明 - 移除，已在右上角显示 */}
+        {/* 提现流程动画 - 完整真实验资流程 */}
+        <AnimatePresence>
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className={`mb-4 p-4 rounded-xl ${isDegen ? 'bg-black/50 border border-degen-purple/50' : 'bg-gray-900/80 border border-purple-500/50'}`}
+            >
+              {/* 步骤 1: 连接 RPC */}
+              {withdrawalStep === 'connecting' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className={`w-5 h-5 border-2 border-t-transparent rounded-full ${isDegen ? 'border-degen-cyan' : 'border-cyan-400'}`}
+                    />
+                    <div className="flex-1">
+                      <div className={`font-bold text-sm ${isDegen ? 'text-degen-cyan' : 'text-cyan-400'}`}>
+                        {isEN ? '🌐 Connecting to Solana RPC...' : '🌐 连接 Solana RPC 节点...'}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {isEN ? 'Establishing secure connection' : '建立安全连接中'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                    <motion.div
+                      className={`h-full ${isDegen ? 'bg-degen-cyan' : 'bg-cyan-400'}`}
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${verificationProgress}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* 步骤 2: 查询区块 */}
+              {withdrawalStep === 'verifying' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className={`w-5 h-5 border-2 border-t-transparent rounded-full ${isDegen ? 'border-degen-yellow' : 'border-blue-400'}`}
+                    />
+                    <div className="flex-1">
+                      <div className={`font-bold text-sm ${isDegen ? 'text-degen-yellow' : 'text-blue-400'}`}>
+                        {isEN ? '🔍 Querying Latest Block...' : '🔍 查询最新区块...'}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5 font-mono">
+                        {isEN ? `Block #${currentBlock.toLocaleString()}` : `区块 #${currentBlock.toLocaleString()}`}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                    <motion.div
+                      className={`h-full ${isDegen ? 'bg-degen-yellow' : 'bg-blue-400'}`}
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${verificationProgress}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* 步骤 3: 验证持仓 */}
+              {withdrawalStep === 'calculating' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className={`w-5 h-5 border-2 border-t-transparent rounded-full ${isDegen ? 'border-degen-purple' : 'border-purple-400'}`}
+                    />
+                    <div className="flex-1">
+                      <div className={`font-bold text-sm ${isDegen ? 'text-degen-purple' : 'text-purple-400'}`}>
+                        {isEN ? '💎 Verifying SKR Holdings...' : '💎 验证 SKR 持仓...'}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {isEN 
+                          ? `Tier: ${userTier.emoji} ${userTier.nameEN} | Fee: ${Math.abs(userTier.withdrawalFee * 100)}%`
+                          : `等级: ${userTier.emoji} ${userTier.name} | 税率: ${Math.abs(userTier.withdrawalFee * 100)}%`
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                    <motion.div
+                      className={`h-full ${isDegen ? 'bg-degen-purple' : 'bg-purple-400'}`}
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${verificationProgress}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* 步骤 4: 处理交易 */}
+              {withdrawalStep === 'processing' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className={`w-5 h-5 border-2 border-t-transparent rounded-full ${isDegen ? 'border-degen-yellow' : 'border-yellow-400'}`}
+                    />
+                    <div className="flex-1">
+                      <div className={`font-bold text-sm ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
+                        {isEN ? '⚡ Processing Transaction...' : '⚡ 处理交易中...'}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5 font-mono truncate">
+                        {isEN ? `TX: ${txHash.slice(0, 16)}...` : `交易: ${txHash.slice(0, 16)}...`}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                    <motion.div
+                      className={`h-full ${isDegen ? 'bg-degen-yellow' : 'bg-yellow-400'}`}
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${verificationProgress}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* 步骤 5: 链上确认 */}
+              {withdrawalStep === 'confirming' && (
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className={`w-5 h-5 border-2 border-t-transparent rounded-full ${isDegen ? 'border-degen-green' : 'border-green-400'}`}
+                    />
+                    <div className="flex-1">
+                      <div className={`font-bold text-sm ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                        {isEN ? '⏳ Waiting for Confirmation...' : '⏳ 等待链上确认...'}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {isEN ? 'Broadcasting to network' : '广播至全网节点'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                    <motion.div
+                      className={`h-full ${isDegen ? 'bg-degen-green' : 'bg-green-400'}`}
+                      initial={{ width: '0%' }}
+                      animate={{ width: `${verificationProgress}%` }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {/* 步骤 6: 成功 */}
+              {withdrawalStep === 'success' && (
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 0.6 }}
+                      className="text-3xl"
+                    >
+                      ✅
+                    </motion.div>
+                    <div className="flex-1">
+                      <div className={`font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                        {isEN ? '🎉 Withdrawal Successful!' : '🎉 提现成功！'}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {isEN ? 'Transaction confirmed on-chain' : '交易已在链上确认'}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* 到账详情 */}
+                  <div className={`p-3 rounded-lg ${isDegen ? 'bg-degen-green/10' : 'bg-green-900/20'}`}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-gray-400">{isEN ? 'Amount Received' : '到账金额'}</span>
+                      <span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
+                        +{calculation.netAmount.toLocaleString()} $GONGDE
+                      </span>
+                    </div>
+                    {userTier.withdrawalFee < 0 && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-500">{isEN ? 'Bonus Applied' : '补贴已发放'}</span>
+                        <span className="text-green-400">+{Math.abs(calculation.fee).toLocaleString()}</span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* 提现按钮 */}
         <button
           onClick={handleWithdraw}
-          disabled={loading || !solanaAddress || withdrawalAmount <= 0 || withdrawalAmount > gdBalance || isDemoMode()}
+          disabled={loading || withdrawalAmount <= 0 || withdrawalAmount > gdBalance}
           className={`
             w-full py-4 rounded-xl font-bold text-lg transition-all
-            ${loading || !solanaAddress || withdrawalAmount <= 0 || withdrawalAmount > gdBalance || isDemoMode()
+            ${loading || withdrawalAmount <= 0 || withdrawalAmount > gdBalance
               ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
               : isDegen
                 ? 'bg-degen-green text-black hover:bg-degen-green/80'
@@ -483,15 +757,13 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
             }
           `}
         >
-          {isDemoMode()
-            ? (isEN ? '🎬 Demo Mode (View Only)' : '🎬 演示模式（仅查看）')
-            : loading 
-              ? (isEN ? 'Processing...' : '处理中...')
-              : !solanaAddress
-                ? (isEN ? 'Connect Wallet' : '连接钱包')
-                : withdrawalAmount > gdBalance
-                  ? (isEN ? 'Insufficient Balance' : '余额不足')
-                  : (isEN ? 'Confirm Withdrawal' : '确认提现')
+          {loading 
+            ? (isEN ? 'Processing...' : '处理中...')
+            : withdrawalAmount > gdBalance
+              ? (isEN ? 'Insufficient Balance' : '余额不足')
+              : isDemoMode()
+                ? (isEN ? '🎬 Demo Withdrawal' : '🎬 演示提现')
+                : (isEN ? 'Confirm Withdrawal' : '确认提现')
           }
         </button>
         

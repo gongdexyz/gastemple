@@ -37,3 +37,4 @@ local.properties
 gradle.properties
 *.apk
 *.aab
+KEYSTORE_INFO.txt

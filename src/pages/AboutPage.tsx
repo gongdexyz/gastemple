@@ -74,19 +74,21 @@ export const AboutPage: React.FC = () => {
             </h2>
             {isEN ? (
               <div className={`space-y-3 text-sm leading-relaxed ${isDegen ? 'text-gray-300' : 'text-gray-400'}`}>
-                <p>Listen, <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>anon</span>. This is <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>Seeker ecosystem's "Hyperbolic Time Chamber"</span>.</p>
-                <p>Tired of staring at charts? Feeling anxious? <span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>Come relax here.</span></p>
-                <p>We built this <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-goldman-gold'}`}>Cyber Monastery</span> for the <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>$SKR community</span>. You tap wooden fish, earn $GONGDE, and we use game revenue to <span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-yellow-400'}`}>build the SKR ecosystem</span>.</p>
-                <p className={`font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>Not just a Meme. It's a consensus amplifier.</p>
-                <p className="italic opacity-70">Every tap is an on-chain blessing for Seeker. <span className="font-bold">Keep Building, Keep Believing.</span></p>
+                <p>Listen, <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>anon</span>. This is <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>Solana's "Cyber Sedative"</span>. 💊</p>
+                <p>Bro, tired of staring at charts? Stop making random trades, <span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>every transaction is just feeding the whales.</span> (cool)</p>
+                <p>Come chill here. In this <span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>weird cyber temple</span>, we'll keep your $SKR alive.</p>
+                <p><span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>One tap, +1 karma, -1 anxiety.</span> (warm)</p>
+                <p>In this crazy market, <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>I'll wait for the wind with you.</span></p>
+                <p className="italic opacity-70">Can't save your wallet, but at least I can make you smile~ 💕</p>
               </div>
             ) : (
               <div className={`space-y-3 text-sm leading-relaxed ${isDegen ? 'text-gray-300' : 'text-gray-400'}`}>
-                <p>别问，问就是 <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>Seeker 生态的「精神时光屋」</span>。</p>
-                <p>兄弟，做交易累了吧？盯着 K 线容易焦虑？<span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>来这里放松一下。</span></p>
-                <p>我们为 <span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>$SKR</span> 社区打造了这个<span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>赛博修道院</span>。你敲木鱼赚 $GONGDE，我们负责把游戏收入用于<span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-yellow-400'}`}>建设 SKR 生态</span>。</p>
-                <p><span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>不仅仅是 Meme，更是共识放大器。</span></p>
-                <p className="italic opacity-70">在这里，每一次点击都是对 Seeker 的一次链上祈福。<span className="font-bold">Keep Building, Keep Believing.</span></p>
+                <p>别问，问就是 <span className={`font-bold ${isDegen ? 'text-degen-cyan' : 'text-yellow-400'}`}>Solana 链上的「赛博镇静剂」</span>。💊</p>
+                <p>兄弟，K线看累了吧？别在那儿瞎操作了，<span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-red-400'}`}>你的每一次交易都是给庄家送钱。</span> (酷飒)</p>
+                <p>不如来这儿歇会儿。我们在这个 <span className={`font-bold ${isDegen ? 'text-degen-pink' : 'text-yellow-400'}`}>奇怪的赛博庙</span> 里，给你的 $SKR 续个命。</p>
+                <p><span className={`font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>敲一下，功德 +1，焦虑 -1。</span> (暖心)</p>
+                <p>在这个疯狂的市场里，<span className={`font-bold ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>我陪你一起等风来。</span></p>
+                <p className="italic opacity-70">虽然我救不了你的钱包，但至少能让你开心点~ 💕</p>
               </div>
             )}
           </motion.div>
@@ -123,15 +125,15 @@ export const AboutPage: React.FC = () => {
                 </div>
               </div>
               
-              {/* Tax */}
+              {/* Dev Fund */}
               <div className={`p-3 rounded ${isDegen ? 'bg-black/40' : 'bg-goldman-gold/10'}`}>
                 <div className="flex justify-between items-start">
-                  <span className={isDegen ? 'text-green-400' : 'text-goldman-gold'}>{isEN ? 'TAX:' : '税:'}</span>
+                  <span className={isDegen ? 'text-degen-yellow' : 'text-yellow-400'}>{isEN ? '☕ DEV FUND:' : '☕ 开发基金:'}</span>
                   <div className="text-right">
-                    <span className="text-white">0%</span>
-                    <span className={`ml-2 text-xs ${isDegen ? 'text-degen-green' : 'text-goldman-gold'}`}>
-                      {isEN ? '(Pump.fun standard)' : '(Pump.fun 标准)'}
-                    </span>
+                    <span className="text-white">20%</span>
+                    <p className={`text-xs ${isDegen ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
+                      {isEN ? 'Dev gotta eat, can\'t survive on air, right? 😂' : 'Dev也要吃饭，总不能让我去喝西北风吧？😂'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -155,10 +157,13 @@ export const AboutPage: React.FC = () => {
                 <div className="flex justify-between items-start">
                   <span className={isDegen ? 'text-green-400' : 'text-goldman-gold'}>{isEN ? 'LP STATUS:' : 'LP锁仓:'}</span>
                   <div className="text-right">
-                    <span className="line-through text-gray-500 mr-2">{isEN ? 'Locked' : '自动烧'}</span>
+                    <span className="line-through text-gray-500 mr-2">{isEN ? 'Locked' : '理论上可以跑'}</span>
                     <span className={`${isDegen ? 'text-orange-400' : 'text-white'}`}>
-                      {isEN ? '🔥 CREMATED' : '🔥 直接送进火葬场'}
+                      {isEN ? '🔥 That\'s chemistry, irreversible!' : '🔥 那是化学反应，不可逆'}
                     </span>
+                    <p className={`text-xs ${isDegen ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
+                      ({isEN ? 'Like your wallet, it\'s not coming back' : '就像你的钱包，回不去了'}) 😂
+                    </p>
                   </div>
                 </div>
               </div>
@@ -172,7 +177,7 @@ export const AboutPage: React.FC = () => {
                       {isEN ? 'Frontend Open Source' : '前端开源'}
                     </span>
                     <p className={`text-xs ${isDegen ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
-                      ({isEN ? 'Transparent logic on GitHub' : 'GitHub 逻辑透明'})
+                      ({isEN ? 'Although my code might be messy, but absolutely no backdoors!' : '虽然我写的代码可能有点乱，但绝对没有后门！'}) 😅
                     </p>
                   </div>
                 </div>
