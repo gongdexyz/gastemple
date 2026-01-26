@@ -64,6 +64,22 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
     }
   }, [solanaAddress])
   
+  // Demo 模式：监听 URL 参数变化
+  useEffect(() => {
+    if (isDemoMode()) {
+      // 在 Demo 模式下，即使没有钱包地址也要获取模拟数据
+      setChecking(true)
+      getUserSKRBalance(solanaAddress || 'demo-address')
+        .then(balance => {
+          setSkrBalance(balance)
+          const newTier = getUserTier(balance)
+          setUserTier(newTier)
+          previousTierRef.current = newTier
+        })
+        .finally(() => setChecking(false))
+    }
+  }, []) // 只在组件挂载时执行一次，因为 Demo 模式下 URL 不会在弹窗打开时变化
+  
   const withdrawalAmount = parseFloat(amount) || 0
   const calculation = calculateWithdrawalAmount(withdrawalAmount, userTier)
   const nextTier = getNextTier(userTier)
