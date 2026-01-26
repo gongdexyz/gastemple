@@ -39,6 +39,27 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
   const [tierUpgraded, setTierUpgraded] = useState(false)
   const previousTierRef = useRef<StakingTier>(STAKING_TIERS[0])
   
+  // 锁定 body 滚动
+  useEffect(() => {
+    // 保存原始样式
+    const originalStyle = window.getComputedStyle(document.body).overflow
+    const originalPosition = window.getComputedStyle(document.body).position
+    
+    // 锁定滚动
+    document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.width = '100%'
+    document.body.style.top = '0'
+    
+    // 清理函数：恢复滚动
+    return () => {
+      document.body.style.overflow = originalStyle
+      document.body.style.position = originalPosition
+      document.body.style.width = ''
+      document.body.style.top = ''
+    }
+  }, [])
+  
   // 获取用户 SKR 余额和等级
   useEffect(() => {
     if (solanaAddress) {
@@ -133,7 +154,7 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
       style={{ zIndex: 99999, touchAction: 'none' }}
       onClick={onClose}
       onTouchMove={preventScroll}
@@ -146,7 +167,7 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
         onClick={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         className={`
-          w-full max-w-md my-8 rounded-2xl p-6 relative overflow-y-auto
+          w-full max-w-md max-h-[90vh] rounded-2xl p-6 relative overflow-y-auto
           ${isDegen ? 'bg-black border-2 border-degen-green' : 'bg-gray-900 border border-goldman-border'}
         `}
         style={{ touchAction: 'pan-y' }}

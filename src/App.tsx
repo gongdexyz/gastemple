@@ -21,6 +21,26 @@ function App() {
   const [previousPath, setPreviousPath] = useState<string>('/temple')
   const isEN = lang === 'en'
 
+  // 锁定 body 滚动（当弹窗打开时）
+  useEffect(() => {
+    if (showAutoClickWarning) {
+      const originalStyle = window.getComputedStyle(document.body).overflow
+      const originalPosition = window.getComputedStyle(document.body).position
+      
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+      document.body.style.top = '0'
+      
+      return () => {
+        document.body.style.overflow = originalStyle
+        document.body.style.position = originalPosition
+        document.body.style.width = ''
+        document.body.style.top = ''
+      }
+    }
+  }, [showAutoClickWarning])
+
   // 检查自动挂机状态
   const checkAutoClickStatus = () => {
     const savedEndTime = localStorage.getItem('autoClickEndTime')
