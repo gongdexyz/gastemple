@@ -49,17 +49,22 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
     // 保存当前滚动位置
     const scrollY = window.scrollY
     
+    // 计算滚动条宽度（防止隐藏滚动条时页面左移）
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+    
     // 保存原始样式（直接从 style 属性读取，而不是 computed style）
     const originalOverflow = document.body.style.overflow
     const originalPosition = document.body.style.position
     const originalWidth = document.body.style.width
     const originalTop = document.body.style.top
+    const originalPaddingRight = document.body.style.paddingRight
     
-    // 锁定滚动
+    // 锁定滚动并补偿滚动条宽度
     document.body.style.overflow = 'hidden'
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
     document.body.style.top = `-${scrollY}px`
+    document.body.style.paddingRight = `${scrollbarWidth}px`
     
     // 清理函数：恢复滚动
     return () => {
@@ -68,6 +73,7 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
       document.body.style.position = originalPosition
       document.body.style.width = originalWidth
       document.body.style.top = originalTop
+      document.body.style.paddingRight = originalPaddingRight
       
       // 恢复滚动位置
       window.scrollTo(0, scrollY)
