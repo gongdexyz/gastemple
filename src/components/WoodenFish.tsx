@@ -190,20 +190,22 @@ export const WoodenFish: React.FC = () => {
   const RECIPIENT_ADDRESS = import.meta.env.VITE_RECIPIENT_ADDRESS || '这里填你自己的Solana钱包地址'
   const SKR_TOKEN_ADDRESS = import.meta.env.VITE_SKR_TOKEN_ADDRESS || '这里填 SKR 的 Token Address'
   
-  // 检查是否为 SKR 测试模式 - URL带 ?test=skr 或 ?test=demo 或 ?test=all 即可免费使用自动挂机
+  // 检查是否为 SKR 测试模式 - URL带 ?test=skr 或 ?test=demo 或 ?test=all 或 ?demo=xxx 即可免费使用自动挂机
   const isSKRTestMode = () => {
     if (typeof window === 'undefined') return false
     const params = new URLSearchParams(window.location.search)
     const testParam = params.get('test')
-    return testParam === 'skr' || testParam === 'demo' || testParam === 'all'
+    const demoParam = params.get('demo') // 支持 ?demo=vip 等提现演示模式
+    return testParam === 'skr' || testParam === 'demo' || testParam === 'all' || demoParam !== null
   }
   
-  // 检查是否为 GONGDE 测试模式 - URL带 ?test=gongde 或 ?test=demo 或 ?test=all 即可无限余额
+  // 检查是否为 GONGDE 测试模式 - URL带 ?test=gongde 或 ?test=demo 或 ?test=all 或 ?demo=xxx 即可无限余额
   const isGongdeTestMode = () => {
     if (typeof window === 'undefined') return false
     const params = new URLSearchParams(window.location.search)
     const testParam = params.get('test')
-    return testParam === 'gongde' || testParam === 'demo' || testParam === 'all'
+    const demoParam = params.get('demo') // 支持 ?demo=vip 等提现演示模式
+    return testParam === 'gongde' || testParam === 'demo' || testParam === 'all' || demoParam !== null
   }
   
   const isDegen = mode === 'degen'
