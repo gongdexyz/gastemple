@@ -122,6 +122,11 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
     }
   }
   
+  // 防止背景滚动和触摸滑动
+  const preventScroll = (e: React.TouchEvent | React.WheelEvent) => {
+    e.stopPropagation()
+  }
+  
   // 使用 Portal 渲染到 body，避免被 header 的 z-index 限制
   return createPortal(
     <motion.div
@@ -129,18 +134,22 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
-      style={{ zIndex: 99999 }}
+      style={{ zIndex: 99999, touchAction: 'none' }}
       onClick={onClose}
+      onTouchMove={preventScroll}
+      onWheel={preventScroll}
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
         className={`
-          w-full max-w-md my-8 rounded-2xl p-6 relative overflow-hidden
+          w-full max-w-md my-8 rounded-2xl p-6 relative overflow-y-auto
           ${isDegen ? 'bg-black border-2 border-degen-green' : 'bg-gray-900 border border-goldman-border'}
         `}
+        style={{ touchAction: 'pan-y' }}
       >
         {/* 庆祝彩带效果 */}
         <AnimatePresence>

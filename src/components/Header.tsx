@@ -18,6 +18,11 @@ export const Header: React.FC = () => {
   const [showBalanceMenu, setShowBalanceMenu] = useState(false)
   const [showWithdrawal, setShowWithdrawal] = useState(false)
 
+  // 防止触摸滑动
+  const preventTouchMove = (e: React.TouchEvent) => {
+    e.stopPropagation()
+  }
+
   const navItems = [
     { path: '/gacha', label: isEN ? 'GACHA' : '抽签', icon: Zap },
     { path: '/temple', label: isEN ? 'TEMPLE' : '功德殿', icon: Flame },
@@ -27,31 +32,34 @@ export const Header: React.FC = () => {
   ]
 
   return (
-    <header className={`
-      fixed top-0 left-0 right-0 z-40
-      ${isDegen ? 'bg-degen-bg/90' : 'bg-goldman-bg/90'}
-      backdrop-blur-md border-b
-      ${isDegen ? 'border-degen-green/30' : 'border-goldman-border'}
-    `}>
-      <div className="max-w-4xl mx-auto px-2 sm:px-4 h-16 flex items-center justify-between gap-2">
+    <header 
+      className={`
+        fixed top-0 left-0 right-0 z-40
+        ${isDegen ? 'bg-degen-bg/90' : 'bg-goldman-bg/90'}
+        backdrop-blur-md border-b
+        ${isDegen ? 'border-degen-green/30' : 'border-goldman-border'}
+      `}
+      onTouchMove={preventTouchMove}
+    >
+      <div className="max-w-4xl mx-auto px-1 sm:px-4 h-16 flex items-center justify-between gap-1">
         {/* Logo - 手机端缩小 */}
         <Link to="/" className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <motion.span 
-            className="text-xl sm:text-2xl"
+            className="text-lg sm:text-2xl"
             animate={isDegen ? { rotate: [0, -10, 10, 0] } : {}}
             transition={{ duration: 0.5, repeat: isDegen ? Infinity : 0, repeatDelay: 2 }}
           >
             ⛩️
           </motion.span>
-          <span className={`font-bold text-sm sm:text-lg ${
+          <span className={`font-bold text-xs sm:text-lg ${
             isDegen ? 'text-degen-green font-pixel' : 'text-goldman-gold'
           }`}>
             {isDegen ? 'GAS' : 'Gas'}
           </span>
         </Link>
 
-        {/* Navigation - 手机端增大按钮，正常间距 */}
-        <nav className="flex items-center gap-1">
+        {/* Navigation - 手机端紧凑布局 */}
+        <nav className="flex items-center gap-0.5 sm:gap-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
             return (
@@ -59,7 +67,7 @@ export const Header: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={`
-                  px-2 sm:px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                  px-1.5 sm:px-3 py-2 rounded-lg text-sm font-medium transition-colors
                   flex items-center gap-1
                   ${isActive 
                     ? isDegen 
@@ -71,15 +79,15 @@ export const Header: React.FC = () => {
                   }
                 `}
               >
-                <item.icon className="w-4 h-4 sm:w-4 sm:h-4" />
+                <item.icon className="w-4 h-4" />
                 <span className="hidden md:inline text-xs sm:text-sm">{item.label}</span>
               </Link>
             )
           })}
         </nav>
 
-        {/* Right section - 手机端增大按钮 */}
-        <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        {/* Right section - 手机端紧凑布局 */}
+        <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
           {/* 音乐开关 */}
           <MusicToggle />
           
@@ -88,7 +96,7 @@ export const Header: React.FC = () => {
             <button
               onClick={() => setShowBalanceMenu(!showBalanceMenu)}
               className={`
-                flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium
+                flex items-center gap-0.5 sm:gap-1.5 px-1.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium
                 transition-all cursor-pointer hover:scale-105
                 ${isDegen 
                   ? 'bg-degen-yellow/20 text-degen-yellow hover:bg-degen-yellow/30' 
@@ -98,10 +106,10 @@ export const Header: React.FC = () => {
               id="gd-balance-indicator"
             >
               <span className="text-sm sm:text-base">🪙</span>
-              <span className="hidden xs:inline">{gdBalance.toLocaleString()}</span>
-              <span className="xs:hidden">{gdBalance > 999 ? `${(gdBalance/1000).toFixed(0)}K` : gdBalance}</span>
+              <span className="hidden xs:inline text-xs">{gdBalance.toLocaleString()}</span>
+              <span className="xs:hidden text-xs">{gdBalance > 999 ? `${(gdBalance/1000).toFixed(0)}K` : gdBalance}</span>
               <span className="text-[10px] sm:text-xs opacity-70 hidden sm:inline">$GD</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showBalanceMenu ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform ${showBalanceMenu ? 'rotate-180' : ''}`} />
             </button>
 
             {/* 余额菜单下拉 */}
@@ -155,11 +163,11 @@ export const Header: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* 语言切换 - 手机端增大按钮 */}
+          {/* 语言切换 - 手机端紧凑按钮 */}
           <motion.button
             onClick={toggleLang}
             className={`
-              px-2 sm:px-3 py-1.5 sm:py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0
+              px-1.5 sm:px-3 py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0
               ${isDegen 
                 ? 'bg-degen-green/20 text-degen-green border border-degen-green/50 hover:bg-degen-green/30' 
                 : 'bg-goldman-gold/20 text-goldman-gold border border-goldman-gold/50 hover:bg-goldman-gold/30'
@@ -168,8 +176,7 @@ export const Header: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <span className="sm:hidden text-base">{isEN ? '🇺🇸' : '🇨🇳'}</span>
-            <span className="hidden sm:inline">{isEN ? '🇺🇸 EN' : '🇨🇳 中文'}</span>
+            <span className="text-sm sm:text-base">{isEN ? '🇺🇸' : '🇨🇳'}</span>
           </motion.button>
         </div>
       </div>
