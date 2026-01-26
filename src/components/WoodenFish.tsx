@@ -1486,21 +1486,21 @@ export const WoodenFish: React.FC = () => {
           ))}
         </AnimatePresence>
 
-        {/* 功德+1 弹出 - 完全居中 */}
+        {/* 功德+1 弹出 - 使用随机偏移避免重叠 */}
         <AnimatePresence>
           {merits.map((merit) => (
             <motion.div
               key={merit.id}
-              initial={{ opacity: 1, scale: 0.8 }}
-              animate={{ opacity: 0, y: -60, scale: 1.2 }}
+              initial={{ opacity: 1, scale: 0.8, x: merit.x, y: merit.y }}
+              animate={{ opacity: 0, y: merit.y - 60, x: merit.x, scale: 1.2 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 1.5, ease: 'easeOut' }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none z-10"
+              className="absolute left-1/2 top-1/2 pointer-events-none z-10"
+              style={{ transform: 'translate(-50%, -50%)' }}
             >
               <div 
                 className={`
-                  font-bold text-xl text-center
-                  w-[280px] px-2
+                  font-bold text-xl text-center whitespace-nowrap
                   ${isDegen ? `font-pixel text-lg ${merit.color}` : 'text-goldman-gold'}
                 `}
                 style={{ textShadow: '0 0 10px currentColor' }}
