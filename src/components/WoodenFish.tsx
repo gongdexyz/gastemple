@@ -426,7 +426,7 @@ export const WoodenFish: React.FC = () => {
     }, 2000)
   }, [lang])
 
-  const addMerit = useCallback((shouldSpawnTarget: boolean = true): boolean => {
+  const addMerit = useCallback((shouldSpawnTarget: boolean = true, applyMultiplier: boolean = false): boolean => {
     // 冥想模式：免费游玩，不消耗代币，有小几率获得GD奖励
     if (gameMode === 'meditation') {
       setTotalMerits(prev => {
@@ -733,7 +733,12 @@ export const WoodenFish: React.FC = () => {
       }
       
       setTotalMerits(prev => {
-        const newTotal = prev + meritBonus
+        // 如果是自动挂机且需要应用倍率，则乘以 multiplier（但只对非暴击应用）
+        let actualBonus = meritBonus
+        if (applyMultiplier && !isCriticalHit) {
+          actualBonus = meritBonus * (autoClickMultiplier || 1)
+        }
+        const newTotal = prev + actualBonus
         // 第二次点击后才开始生成随机圈，且只有在点击中心木鱼时才生成
         if (newTotal > 1 && shouldSpawnTarget) {
           spawnNewTarget()
@@ -860,7 +865,7 @@ export const WoodenFish: React.FC = () => {
     return () => clearInterval(expiryInterval)
   }, [autoClickEndTime])
   
-  // 自动挂机定时器 - 真实人类速度（随机间隔 1-2秒）
+  // 自动挂机定时器 - 真实人类速度（固定间隔 1-2秒）
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null
     let isActive = false
@@ -868,22 +873,17 @@ export const WoodenFish: React.FC = () => {
     const scheduleNextClick = () => {
       if (!isActive) return
       
-      // 根据倍率调整延迟：倍率越高，延迟越短
-      // multiplier = 1: 1000-2000ms (1-2秒)
-      // multiplier = 3: 333-666ms (0.3-0.7秒)
-      // multiplier = 5: 200-400ms (0.2-0.4秒)
-      const multiplier = autoClickMultiplier || 1
-      const baseDelay = 1000 // 基础延迟 1 秒
-      const randomFactor = Math.random() + 0.5 // 0.5-1.5 的随机因子
-      const delay = (baseDelay / multiplier) * randomFactor
+      // 固定延迟 1-2 秒，模拟真实人类点击速度
+      const randomDelay = Math.floor(Math.random() * 1000) + 1000 // 1-2秒
       
       timeoutId = setTimeout(() => {
-        // 每次只调用一次 addMerit，通过缩短间隔来实现倍率效果
-        addMerit(false) // 自动挂机时不生成随机圈
+        // 每次只调用一次 addMerit，通过 applyMultiplier 参数应用倍率
+        // 这样暴击不会被倍增，只有普通点击会×multiplier
+        addMerit(false, true) // 自动挂机时不生成随机圈，但应用倍率
         
         // 递归调度下一次点击
         scheduleNextClick()
-      }, delay)
+      }, randomDelay)
     }
     
     if (isAutoClicking) {
