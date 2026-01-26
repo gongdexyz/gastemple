@@ -160,6 +160,26 @@ export const WoodenFish: React.FC = () => {
   // 暴击等级反馈
   const [critLevel, setCritLevel] = useState<'normal' | 'rare' | 'epic' | null>(null)
   
+  // 锁定 body 滚动（当暴击特效显示时）
+  useEffect(() => {
+    if (critLevel) {
+      const originalStyle = window.getComputedStyle(document.body).overflow
+      const originalPosition = window.getComputedStyle(document.body).position
+      
+      document.body.style.overflow = 'hidden'
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+      document.body.style.top = '0'
+      
+      return () => {
+        document.body.style.overflow = originalStyle
+        document.body.style.position = originalPosition
+        document.body.style.width = ''
+        document.body.style.top = ''
+      }
+    }
+  }, [critLevel])
+  
   // 自动挂机相关状态
   const [isAutoClicking, setIsAutoClicking] = useState(false)
   const [isPaying, setIsPaying] = useState(false)
@@ -1194,6 +1214,8 @@ export const WoodenFish: React.FC = () => {
                 }
               }}
               className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9999]"
+              style={{ touchAction: 'none' }}
+              onTouchMove={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col items-center gap-4">
                 {/* 暴击等级文字 */}
