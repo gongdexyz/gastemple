@@ -868,19 +868,22 @@ export const WoodenFish: React.FC = () => {
     const scheduleNextClick = () => {
       if (!isActive) return
       
-      // 随机延迟 1000-2000ms，模拟真实人类点击速度（不会太快吓人）
-      const randomDelay = Math.floor(Math.random() * 1000) + 1000 // 1-2秒
+      // 根据倍率调整延迟：倍率越高，延迟越短
+      // multiplier = 1: 1000-2000ms (1-2秒)
+      // multiplier = 3: 333-666ms (0.3-0.7秒)
+      // multiplier = 5: 200-400ms (0.2-0.4秒)
+      const multiplier = autoClickMultiplier || 1
+      const baseDelay = 1000 // 基础延迟 1 秒
+      const randomFactor = Math.random() + 0.5 // 0.5-1.5 的随机因子
+      const delay = (baseDelay / multiplier) * randomFactor
       
       timeoutId = setTimeout(() => {
-        // 根据倍率多次调用addMerit
-        const multiplier = autoClickMultiplier || 1
-        for (let i = 0; i < multiplier; i++) {
-          addMerit(false) // 自动挂机时不生成随机圈
-        }
+        // 每次只调用一次 addMerit，通过缩短间隔来实现倍率效果
+        addMerit(false) // 自动挂机时不生成随机圈
         
         // 递归调度下一次点击
         scheduleNextClick()
-      }, randomDelay)
+      }, delay)
     }
     
     if (isAutoClicking) {
