@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Skull, TrendingDown, AlertTriangle, Users, DoorOpen, Share2, RotateCcw } from 'lucide-react'
+import { Heart, TrendingDown, AlertTriangle, Users, DoorOpen, Share2, RotateCcw, Sparkles, Skull } from 'lucide-react'
 import { useThemeStore } from '../stores/themeStore'
 import { useLangStore } from '../stores/langStore'
 import { CryptoProject, calculatePonziScore } from '../data/mockProjects'
@@ -180,24 +180,30 @@ export const PoisonousReport: React.FC<PoisonousReportProps> = ({ project, onClo
           </div>
         </motion.div>
 
-        {/* 毒舌分析 */}
+        {/* 佛祖的温柔提醒 - 软萌毒舌分析 */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
           className={`
-            p-4 rounded-xl mb-4
-            ${isDegen ? 'bg-red-900/20 border border-red-500/30' : 'bg-red-900/10 border border-red-900/30'}
+            p-4 rounded-3xl mb-4 relative overflow-hidden
+            ${isDegen ? 'bg-pink-100/10 border border-pink-300/40 shadow-lg shadow-pink-500/20' : 'bg-pink-50/5 border border-pink-200/30 shadow-lg shadow-pink-400/10'}
           `}
         >
-          <h3 className={`text-sm font-bold mb-3 flex items-center gap-2 ${isDegen ? 'text-degen-pink font-pixel' : 'text-red-400'}`}>
-            <Skull className="w-4 h-4" />
-            {isEN ? 'WHY YOU MIGHT LOSE' : '为什么你可能会亏'}
+          {/* 可爱装饰 - 星星闪烁 */}
+          <div className="absolute top-2 right-2 opacity-30">
+            <Sparkles className="w-4 h-4 text-pink-300 animate-pulse" />
+          </div>
+          
+          <h3 className={`text-sm font-bold mb-3 flex items-center gap-2 ${isDegen ? 'text-pink-400 font-pixel' : 'text-pink-400'}`}>
+            <Heart className="w-4 h-4 fill-current animate-pulse" />
+            {isEN ? "BUDDHA'S GENTLE REMINDER" : '佛祖的温柔提醒'}
+            <Heart className="w-4 h-4 fill-current animate-pulse" />
           </h3>
           <ul className="space-y-2">
             {(isEN ? project.roast_en : project.roast_cn).map((roast, i) => (
               <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
-                <span className="text-red-400">•</span>
+                <span className="text-pink-400">💕</span>
                 {roast}
               </li>
             ))}
@@ -222,17 +228,25 @@ export const PoisonousReport: React.FC<PoisonousReportProps> = ({ project, onClo
           </p>
         </motion.div>
 
-        {/* 迷途羔羊类型 */}
+        {/* 迷途羔羊类型 - 软萌版 */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
           className={`
-            p-4 rounded-xl mb-6 text-center
-            ${isDegen ? 'bg-degen-cyan/10 border border-degen-cyan/30' : 'bg-blue-900/10 border border-blue-900/30'}
+            p-4 rounded-3xl mb-6 text-center relative overflow-hidden
+            ${isDegen ? 'bg-purple-100/10 border border-purple-300/40 shadow-lg shadow-purple-500/20' : 'bg-purple-50/5 border border-purple-200/30 shadow-lg shadow-purple-400/10'}
           `}
         >
-          <h3 className={`text-sm font-bold mb-2 ${isDegen ? 'text-degen-cyan font-pixel' : 'text-blue-400'}`}>
+          {/* 可爱装饰 */}
+          <div className="absolute top-2 left-2 opacity-20">
+            <Sparkles className="w-3 h-3 text-purple-300" />
+          </div>
+          <div className="absolute bottom-2 right-2 opacity-20">
+            <Sparkles className="w-3 h-3 text-purple-300" />
+          </div>
+          
+          <h3 className={`text-sm font-bold mb-2 ${isDegen ? 'text-purple-400 font-pixel' : 'text-purple-400'}`}>
             {isEN ? 'YOU ARE A...' : '你是哪种迷途羔羊'}
           </h3>
           <p className={`text-2xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-white'}`}>

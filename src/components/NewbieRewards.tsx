@@ -30,13 +30,18 @@ export const NewbieRewards: React.FC<NewbieRewardsProps> = ({ onClose }) => {
     }
   }, [])
   
-  // 检查每日奖励
+  // 检查每日奖励 - 添加标志防止重复触发
   useEffect(() => {
     const today = new Date().toDateString()
     const lastRewardDate = localStorage.getItem('lastDailyReward')
+    const dailyRewardShown = sessionStorage.getItem('dailyRewardShown')
     
-    if (lastRewardDate !== today) {
-      // 延迟 2 秒显示每日奖励（避免和欢迎弹窗冲突）
+    // 如果今天还没领取过，且本次会话还没显示过
+    if (lastRewardDate !== today && !dailyRewardShown) {
+      // 标记本次会话已显示
+      sessionStorage.setItem('dailyRewardShown', 'true')
+      
+      // 延迟显示每日奖励（避免和欢迎弹窗冲突）
       setTimeout(() => {
         setShowDailyReward(true)
         localStorage.setItem('lastDailyReward', today)

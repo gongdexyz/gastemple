@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, TrendingUp, ExternalLink, Sparkles } from 'lucide-react'
 import { useWalletStore } from '../stores/walletStore'
@@ -121,12 +122,14 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
     }
   }
   
-  return (
+  // 使用 Portal 渲染到 body，避免被 header 的 z-index 限制
+  return createPortal(
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      style={{ zIndex: 99999 }}
       onClick={onClose}
     >
       <motion.div
@@ -135,7 +138,7 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
         className={`
-          w-full max-w-md rounded-2xl p-6 relative overflow-hidden
+          w-full max-w-md my-8 rounded-2xl p-6 relative overflow-hidden
           ${isDegen ? 'bg-black border-2 border-degen-green' : 'bg-gray-900 border border-goldman-border'}
         `}
       >
@@ -204,51 +207,33 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
             </>
           )}
         </AnimatePresence>
-        {/* 关闭按钮 */}
-        <button
-          onClick={onClose}
-          className={`absolute top-4 right-4 p-2 rounded-lg transition-colors ${
-            isDegen ? 'hover:bg-degen-green/20 text-degen-green' : 'hover:bg-gray-800 text-gray-400'
-          }`}
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* 关闭按钮 + Demo 标识 */}
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          {isDemoMode() && (
+            <span className={`px-2 py-1 rounded text-xs font-bold ${
+              isDegen ? 'bg-degen-cyan/20 text-degen-cyan' : 'bg-blue-500/20 text-blue-400'
+            }`}>
+              🎬 {isEN ? 'DEMO' : '演示'}
+            </span>
+          )}
+          <button
+            onClick={onClose}
+            className={`p-2 rounded-lg transition-colors ${
+              isDegen ? 'hover:bg-degen-green/20 text-degen-green' : 'hover:bg-gray-800 text-gray-400'
+            }`}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         
         {/* 标题 */}
-        <h2 className={`text-2xl font-bold mb-6 ${isDegen ? 'text-degen-green font-pixel' : 'text-goldman-gold'}`}>
+        <h2 className={`text-2xl font-bold mb-4 ${isDegen ? 'text-degen-green font-pixel' : 'text-goldman-gold'}`}>
           {isEN ? '💰 Withdrawal' : '💰 提现'}
         </h2>
         
-        {/* Demo Mode 标识 */}
-        {isDemoMode() && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`mb-4 px-4 py-2 rounded-lg border-2 ${
-              isDegen 
-                ? 'bg-degen-cyan/10 border-degen-cyan text-degen-cyan' 
-                : 'bg-blue-500/10 border-blue-400 text-blue-400'
-            }`}
-          >
-            <div className="flex items-center gap-2 justify-center">
-              <Sparkles className="w-4 h-4" />
-              <span className="font-bold text-sm">
-                {isEN ? '🎬 DEMO MODE' : '🎬 演示模式'}
-              </span>
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div className="text-xs text-center mt-1 opacity-80">
-              {isEN 
-                ? `Simulated as ${getDemoTierName()} tier for demonstration`
-                : `模拟 ${getDemoTierName()} 等级用于演示`
-              }
-            </div>
-          </motion.div>
-        )}
-        
-        {/* 用户等级显示 */}
+        {/* 用户等级显示 - 紧凑版 */}
         <motion.div 
-          className={`mb-6 p-4 rounded-xl ${isDegen ? 'bg-degen-purple/10 border border-degen-purple/30' : 'bg-gray-800 border border-gray-700'}`}
+          className={`mb-4 p-3 rounded-xl ${isDegen ? 'bg-degen-purple/10 border border-degen-purple/30' : 'bg-gray-800 border border-gray-700'}`}
           animate={tierUpgraded ? {
             boxShadow: [
               '0 0 0px rgba(255, 215, 0, 0)',
@@ -258,50 +243,41 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
           } : {}}
           transition={{ duration: 1, repeat: tierUpgraded ? 2 : 0 }}
         >
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div>
-              <div className="text-xs text-gray-400 mb-1">
-                {isEN ? 'Your Status' : '您的身份'}
-              </div>
+              <div className="text-xs text-gray-400">{isEN ? 'Status' : '身份'}</div>
               <motion.div 
-                className={`text-xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}
+                className={`text-lg font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}
                 animate={tierUpgraded ? { scale: [1, 1.2, 1] } : {}}
                 transition={{ duration: 0.5 }}
               >
                 {userTier.emoji} {isEN ? userTier.nameEN : userTier.name}
-                {isDemoMode() && (
-                  <span className={`ml-2 text-xs px-2 py-0.5 rounded ${
-                    isDegen ? 'bg-degen-cyan/20 text-degen-cyan' : 'bg-blue-500/20 text-blue-400'
-                  }`}>
-                    DEMO
-                  </span>
-                )}
               </motion.div>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={checking || isDemoMode()}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
-                isDemoMode() 
-                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                  : isDegen 
+            {!isDemoMode() && (
+              <button
+                onClick={handleRefresh}
+                disabled={checking}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+                  isDegen 
                     ? 'bg-degen-cyan/20 text-degen-cyan hover:bg-degen-cyan/30' 
                     : 'bg-blue-900/20 text-blue-400 hover:bg-blue-900/30'
-              }`}
-            >
-              {checking ? '...' : (isEN ? 'Refresh' : '刷新')}
-            </button>
+                }`}
+              >
+                {checking ? '...' : (isEN ? 'Refresh' : '刷新')}
+              </button>
+            )}
           </div>
           
-          <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <div className="text-gray-400">{isEN ? 'SKR Balance' : 'SKR 持仓'}</div>
+              <div className="text-gray-400">{isEN ? 'SKR' : 'SKR 持仓'}</div>
               <div className={`font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
-                {skrBalance.toLocaleString()} SKR
+                {skrBalance.toLocaleString()}
               </div>
             </div>
             <div>
-              <div className="text-gray-400">{isEN ? 'Fee Rate' : '税率'}</div>
+              <div className="text-gray-400">{isEN ? 'Fee' : '税率'}</div>
               <motion.div 
                 className={`font-bold ${
                   userTier.withdrawalFee < 0 
@@ -398,99 +374,70 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
           </motion.div>
         )}
         
-        {/* 升级提示 - 省钱计算器 */}
+        {/* 升级提示 - 紧凑版 */}
         {nextTier && withdrawalAmount > 0 && savings > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mb-4 p-4 rounded-xl ${isDegen ? 'bg-degen-yellow/10 border-2 border-degen-yellow' : 'bg-yellow-900/20 border-2 border-yellow-500'}`}
+            className={`mb-3 p-3 rounded-xl ${isDegen ? 'bg-degen-yellow/10 border border-degen-yellow' : 'bg-yellow-900/20 border border-yellow-500'}`}
           >
-            <div className="flex items-start gap-3">
-              <TrendingUp className={`w-5 h-5 mt-0.5 ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`} />
-              <div className="flex-1">
-                <div className={`font-bold mb-2 ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
-                  💡 {isEN ? 'Save Money!' : '省钱提示！'}
+            <div className="flex items-start gap-2">
+              <TrendingUp className={`w-4 h-4 mt-0.5 flex-shrink-0 ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`} />
+              <div className="flex-1 min-w-0">
+                <div className={`font-bold text-sm mb-1 ${isDegen ? 'text-degen-yellow' : 'text-yellow-400'}`}>
+                  💡 {isEN ? 'Save' : '立省'} {savings.toLocaleString()} $GD!
                 </div>
-                <div className="text-sm text-gray-300 mb-2">
+                <div className="text-xs text-gray-300 mb-2">
                   {isEN 
-                    ? `Hold ${nextTier.minStake.toLocaleString()} SKR to reduce fee to ${Math.abs(nextTier.withdrawalFee * 100)}%`
-                    : `持有 ${nextTier.minStake.toLocaleString()} SKR 可降低税率至 ${Math.abs(nextTier.withdrawalFee * 100)}%`
+                    ? `Hold ${nextTier.minStake.toLocaleString()} SKR → ${Math.abs(nextTier.withdrawalFee * 100)}% fee`
+                    : `持有 ${nextTier.minStake.toLocaleString()} SKR → ${Math.abs(nextTier.withdrawalFee * 100)}% 税率`
                   }
-                </div>
-                <div className={`text-lg font-bold ${isDegen ? 'text-degen-green' : 'text-green-400'}`}>
-                  {isEN ? 'Save' : '立省'} {savings.toLocaleString()} $GONGDE!
                 </div>
                 <a
                   href="https://seeker.io/stake"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`
-                    mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm
+                    inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-bold text-xs
                     transition-all hover:scale-105
                     ${isDegen 
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/30' 
-                      : 'bg-gradient-to-r from-cyan-600/20 to-blue-600/20 text-cyan-400 hover:from-cyan-600/30 hover:to-blue-600/30 border border-cyan-500/30'
+                      ? 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 border border-cyan-500/30' 
+                      : 'bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600/30 border border-cyan-500/30'
                     }
                   `}
                 >
-                  <Sparkles className="w-4 h-4" />
-                  {isEN ? 'Stake on Seeker Official' : '去 Seeker 官网质押'}
-                  <ExternalLink className="w-4 h-4" />
+                  <Sparkles className="w-3 h-3" />
+                  {isEN ? 'Stake Now' : '去质押'}
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
             </div>
           </motion.div>
         )}
         
-        {/* Seeker 官方质押提示 */}
+        {/* Seeker 官方质押提示 - 紧凑版 */}
         {skrBalance < 100 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`mb-4 p-4 rounded-xl ${isDegen ? 'bg-degen-cyan/10 border border-degen-cyan/30' : 'bg-blue-900/20 border border-blue-500/30'}`}
+            className={`mb-3 p-3 rounded-xl text-xs ${isDegen ? 'bg-degen-cyan/10 border border-degen-cyan/30' : 'bg-blue-900/20 border border-blue-500/30'}`}
           >
-            <div className="text-sm text-gray-300 mb-2">
+            <div className="text-gray-300 mb-1">
               {isEN 
-                ? '💎 Stake SKR on Seeker Official to enjoy double rewards!'
-                : '💎 去 Seeker 官方质押 SKR，享受双重收益！'
+                ? '💎 Stake SKR for double rewards!'
+                : '💎 质押 SKR 享双重收益！'
               }
             </div>
-            <div className="text-xs text-gray-400">
+            <div className="text-gray-400">
               {isEN 
-                ? '1. Official APY + 2. Tax-free withdrawal here'
-                : '1. 官方 APY 收益 + 2. 本站免税提现'
+                ? 'Official APY + Tax-free withdrawal'
+                : '官方 APY + 本站免税提现'
               }
             </div>
           </motion.div>
         )}
         
-        {/* Demo Mode 免责声明 */}
-        {isDemoMode() && withdrawalAmount > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`mb-4 p-3 rounded-lg text-xs ${
-              isDegen 
-                ? 'bg-degen-pink/10 border border-degen-pink/30 text-degen-pink' 
-                : 'bg-orange-900/20 border border-orange-500/30 text-orange-400'
-            }`}
-          >
-            <div className="flex items-start gap-2">
-              <span className="text-base">⚠️</span>
-              <div>
-                <div className="font-bold mb-1">
-                  {isEN ? 'Demo Simulation Notice' : '演示模拟提示'}
-                </div>
-                <div className="opacity-90">
-                  {isEN 
-                    ? 'This is a simulated demonstration. No real blockchain transactions will occur. Actual withdrawal requires real SKR staking verification.'
-                    : '这是模拟演示，不会发生真实的区块链交易。实际提现需要真实的 SKR 质押验证。'
-                  }
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {/* Demo Mode 免责声明 - 移除，已在右上角显示 */}
         
         {/* 提现按钮 */}
         <button
@@ -518,12 +465,12 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
           }
         </button>
         
-        {/* 等级表格 */}
-        <div className="mt-6 pt-6 border-t border-gray-700">
-          <div className="text-xs text-gray-400 mb-3">
+        {/* 等级表格 - 紧凑版 */}
+        <div className="mt-4 pt-4 border-t border-gray-700">
+          <div className="text-xs text-gray-400 mb-2">
             {isEN ? '📊 All Tiers' : '📊 全部等级'}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {STAKING_TIERS.map((tier, index) => (
               <div
                 key={index}
@@ -535,10 +482,10 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
                   }
                 `}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <span>{tier.emoji}</span>
                   <span className="font-bold">{isEN ? tier.nameEN : tier.name}</span>
-                  <span className="text-gray-500">({tier.minStake.toLocaleString()} SKR)</span>
+                  <span className="text-gray-500 text-[10px]">({tier.minStake.toLocaleString()})</span>
                 </div>
                 <div className={`font-bold ${
                   tier.withdrawalFee < 0 
@@ -554,6 +501,7 @@ export const WithdrawalDialog: React.FC<WithdrawalDialogProps> = ({ onClose }) =
           </div>
         </div>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body
   )
 }

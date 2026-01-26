@@ -55,17 +55,10 @@ export const useSoundStore = create<SoundStore>((set, get) => ({
   },
 
   toggleMute: () => {
-    const { isMuted, isBgmPlaying } = get()
+    const { isMuted } = get()
     const newMuted = !isMuted
     set({ isMuted: newMuted })
-    
-    if (bgmAudio) {
-      if (newMuted) {
-        bgmAudio.pause()
-      } else if (isBgmPlaying) {
-        bgmAudio.play().catch(() => {})
-      }
-    }
+    // 只控制音效，不影响背景音乐
   },
 
   // 新增：单独控制背景音乐

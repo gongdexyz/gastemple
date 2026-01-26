@@ -102,92 +102,93 @@ export interface FortuneResult {
   emoji: string
 }
 
-// 毒舌辣评文案库 - AI冷血分析风格（去掉"施主"，冷酷科技感）
+// 软萌毒舌辣评文案库 - Pepe 佛祖温柔暴击版 🐸✨
+// 用最可爱的语气，说最扎心的真话
 const ROAST_TEMPLATES = {
-  // 横盘专用 (变化 < 5%)
+  // 横盘专用 (变化 < 5%) - 哄孩子版
   sideways: {
     cn: [
-      "监测到横盘信号。这走势比木乃伊的心电图都平。庄家是死了还是把你忘了？",
-      "数据分析：此币已临床死亡。但你还舍不得拔管，对吧？",
-      "横盘检测：建议改名「稳定币」。至少听起来体面点。",
-      "K线扫描完成：比心电图还平。建议持有者去医院查查自己。",
-      "波动率：0。这币和你的感情生活一样，死水一潭。",
+      "这走势比佛祖的心跳还平呢~ 庄家是去度假了，还是忘记你了呀？😴",
+      "宝子，这币已经睡着了哦~ 要不要戳一下看看还活着吗？💤",
+      "横盘中...建议改名叫「稳定币」，至少听起来体面一点~ 😊",
+      "K线好平呀~ 比你的感情生活还平~ 但没关系，佛祖陪你~ 💕",
+      "波动率：0。这币和你一样，都在摆烂呢~ 加油哦！🌸",
     ],
     en: [
-      "Flatline detected. This chart is deader than the dev's promises.",
-      "Volatility scan: 0%. This coin moves less than your motivation.",
-      "Crab market confirmed. Even crabs are embarrassed.",
+      "This chart is flatter than Buddha's heartbeat~ Did the market maker go on vacation or forget about you? 😴",
+      "Sweetie, this coin fell asleep~ Wanna poke it to see if it's still alive? 💤",
+      "Sideways... Suggest renaming it 'stablecoin', at least sounds decent~ 😊",
     ]
   },
-  // 暴跌专用 (变化 < -10%)
+  // 暴跌专用 (变化 < -10%) - 温柔安慰版
   bigDump: {
     cn: [
-      "暴跌预警！没事，跌了90%还有90%可以跌，下跌空间充足。",
-      "建议：把App颜色反转一下，这样看起来像在涨。",
-      "价格已击穿成本线。建议留着当传家宝，传给孙子维权。",
-      "抄底成功！恭喜你精准抄在了半山腰。山脚还远着呢。",
-      "「价值投资」模式已激活。翻译：套牢了不想割。",
-      "跌幅分析：这不是回调，这是跳楼。RIP。",
+      "哎呀跌了好多呢~ 没事，跌了90%还有90%可以跌，空间很大哦~ 💫",
+      "宝子别难过~ 把App颜色反转一下，看起来就像在涨啦！心理安慰也是安慰~ 🌈",
+      "价格已经跌破成本线了呢~ 建议留着当传家宝，传给孙子维权~ 📜",
+      "抄底成功！恭喜你精准抄在了半山腰~ 山脚还远着呢，继续加油！⛰️",
+      "「价值投资」模式已激活~ 翻译：套牢了不想割~ 佛祖懂你~ 💕",
+      "跌幅分析：这不是回调哦，这是...跳楼~ 但没关系，佛祖接住你！🤗",
     ],
     en: [
-      "DUMP ALERT. Down bad? At least you can write it off on taxes.",
-      "Bottom detected! Just kidding. There's always a lower low.",
-      "This isn't a dip. It's a funeral. Press F.",
+      "Oh no it dumped so much~ Don't worry, down 90% still has 90% to go, plenty of space~ 💫",
+      "Sweetie don't be sad~ Invert your app colors, it'll look like it's pumping! Mental comfort counts~ 🌈",
+      "Price broke below cost~ Suggest keeping it as family heirloom, pass to grandkids for lawsuit~ 📜",
     ]
   },
-  // 暴涨专用 (变化 > 15%)
+  // 暴涨专用 (变化 > 15%) - 温柔提醒版
   bigPump: {
     cn: [
-      "拉盘检测！这就拿不住了？注定是送外卖的命。接着奏乐接着舞！",
-      "恭喜解锁成就：「纸面富贵」。记得及时落袋为安。",
-      "涨疯了！建议立即截图发朋友圈炫耀！",
-      "起飞了！但记住：没卖之前都是纸面富贵。",
-      "暴涨警报！你是天选之人还是最后的接盘侠？只有时间知道。",
+      "哇塞涨了好多！这就拿不住了吗？注定是送外卖的命呢~ 接着奏乐接着舞！🎉",
+      "恭喜解锁成就：「纸面富贵」~ 记得及时落袋为安哦，不然就飞走啦~ 🦋",
+      "涨疯了！建议立即截图发朋友圈炫耀！（5分钟后可能就没了，嘻嘻）📸",
+      "起飞了！但记住：没卖之前都是纸面富贵哦~ 佛祖提醒你~ ✨",
+      "暴涨警报！你是天选之人还是最后的接盘侠？只有时间知道呢~ ⏰",
     ],
     en: [
-      "PUMP DETECTED. Screenshot now before it disappears!",
-      "Moon mission activated! But remember: profit isn't real until you sell.",
-      "WAGMI energy! Take some profits, don't be greedy.",
+      "Wow pumped so much! Can't hold already? Destined for delivery job~ Keep dancing! 🎉",
+      "Congrats unlocked: 'Paper Wealth'~ Remember to take profits, or it'll fly away~ 🦋",
+      "Mooning! Quick screenshot for socials! (Might be gone in 5 mins, hehe) 📸",
     ]
   },
-  // 小涨专用 (变化 5% - 15%)
+  // 小涨专用 (变化 5% - 15%) - 鼓励版
   smallPump: {
     cn: [
-      "小涨不错！佛祖保佑，继续拿稳。",
-      "涨了一点，别急着卖，也别急着加仓。稳住。",
-      "绿色K线！虽然不多，但至少没亏。阿弥陀佛。",
-      "微涨检测。恭喜，你今天不是最惨的那个。",
-      "还行，至少比存银行强。继续观望。",
+      "小涨不错呢！佛祖保佑，继续拿稳~ 加油哦！💪",
+      "涨了一点，别急着卖，也别急着加仓~ 稳住就是胜利~ 🌸",
+      "绿色K线！虽然不多，但至少没亏呢~ 阿弥陀佛~ 🙏",
+      "微涨检测~ 恭喜，你今天不是最惨的那个啦！✨",
+      "还行，至少比存银行强~ 继续观望哦~ 😊",
     ],
     en: [
-      "Small gains! Buddha blesses your bags.",
-      "Green candle detected. Not much, but hey, you're not losing.",
-      "Modest pump. At least you're not the biggest loser today.",
+      "Small gains! Buddha blesses your bags~ Keep going! 💪",
+      "Green candle! Not much, but hey, you're not losing~ 🌸",
+      "Modest pump~ Congrats, you're not the biggest loser today! ✨",
     ]
   },
-  // 低市值专用 (< $10M)
+  // 低市值专用 (< $10M) - 善意警告版
   lowMcap: {
     cn: [
-      "流动性扫描：池子浅得连蝌蚪都养不活。跑路难度：地狱级。",
-      "市值过低警告！庄家打个喷嚏你就归零了。",
-      "深度分析：卖1000U就能砸穿。这不是投资，这是慈善。",
-      "微型市值检测。翻译：随时可能归零的垃圾。",
+      "流动性扫描：池子浅得连小鱼都养不活呢~ 跑路难度：地狱级~ 🐟",
+      "市值过低警告！庄家打个喷嚏你就归零了哦~ 小心点~ 🤧",
+      "深度分析：卖1000U就能砸穿~ 这不是投资，这是慈善呢~ 💝",
+      "微型市值检测~ 翻译：随时可能归零的小可怜~ 抱抱~ 🤗",
     ],
     en: [
-      "Liquidity scan: Pool shallower than your research before aping.",
-      "Micro-cap alert. One whale sneeze = instant zero.",
+      "Liquidity scan: Pool shallower than a puddle~ Exit difficulty: Hell mode~ 🐟",
+      "Micro-cap alert~ One whale sneeze = instant zero~ Be careful~ 🤧",
     ]
   },
-  // 低排名专用 (> 500)
+  // 低排名专用 (> 500) - 温柔吐槽版
   lowRank: {
     cn: [
-      "排名扫描：太后了，CoinGecko都准备把它删了。",
-      "数据显示：连山寨中的山寨都看不起这排名。狗都不买。",
-      "低排名警告！这种垃圾，狗路过都要撇过头去。",
+      "排名扫描：太后面了，CoinGecko都准备删它了呢~ 😅",
+      "数据显示：连山寨中的山寨都看不起这排名~ 但佛祖不嫌弃你~ 💕",
+      "低排名警告！这种垃圾，狗路过都要撇过头去呢~ 🐕",
     ],
     en: [
-      "Rank scan: So low even scammers forgot it exists.",
-      "Bottom-tier detected. Even rugs have standards.",
+      "Rank scan: So low even CoinGecko forgot it exists~ 😅",
+      "Bottom-tier detected~ Even scams have standards~ But Buddha doesn't judge~ 💕",
     ]
   }
 }

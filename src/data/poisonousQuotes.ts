@@ -1,90 +1,139 @@
-// 佛祖毒舌判词 - 用于结果页顶部 & 截图传播
-// GPT 版本：币圈人看了会流泪的毒舌签文
+// 佛祖立体姐姐判词 - 暖心酷飒搞笑卖萌混合版 🐸✨
+// 平时干练毒舌，看你亏钱会递纸巾，偶尔被自己蠢哭，但遇到正事绝不含糊
 export const BUDDHA_QUOTES_CN = [
-  // 上签 · 虚假繁荣
-  "今日诸事顺利，唯一不顺的是你买的那几个。市场没骗你，是你选择性失明。",
-  // 中签 · 重复犯错
-  "你不是没见过这种走势，你只是每次都觉得「这次不一样」。",
-  // 下签 · 情绪上头
-  "今日不宜交易，因为你并不是真的看懂了，你只是想把亏损赢回来。",
-  // 上签 · 错觉之喜
-  "币价上涨与你无关，只是庄家今天心情不错。别急着截图，回调还在路上。",
-  // 中下签 · 社群幻觉
-  "项目群很热闹，说明大家都没跑掉。至于为什么没跑，你心里有数。",
-  // 下签 · 认知税
-  "你今天学到的不是新知识，而是又交了一次学费。恭喜，你离「老韭菜」更近了一步。",
-  // 中签 · 信仰测试
-  "当你开始用「长期价值」安慰自己的时候，说明你已经被短期走势打服了。",
-  // 上签 · 幸存者偏差
-  "你看到的都是暴富故事，看不到的是已经删推的人。",
-  // 下下签 · 心魔
-  "你不是输在判断，是输在「我再加一把」。",
-  // 特别签 · 因果循环
-  "你今天抽到这签，并不是因为算法。而是因为你确实该停一停了。",
-  // 原有签文
-  "你不是没信仰，你是没止损。",
-  "技术无罪，故事有毒。",
-  "此项目专治不服现实。",
-  "看似创新，实则轮回。",
-  "佛不度梭哈之人。",
-  "你敲的是木鱼，不是 Alpha。",
-  "故事讲完了，你还没走。",
-  "白皮书很厚，用户很薄。",
-  "此乃信仰测试项目。",
-  "你抽到的不是机会，是教训。",
-  "叙事新，钱包旧。",
-  "庄家未明，信徒已满。",
-  "代码写得不错，可惜没人用。",
-  "这是给市场交学费用的。",
-  "佛祖看了都选择观望。",
-  "再看一眼，你就信了。",
-  "项目还在，你已轮回。",
-  "理性告诉你别碰，手已经点了。",
-  "这是情绪价值，不是价值投资。",
-  "你以为是早期，其实是第七波。",
-  "全是情绪没有价值。",
-  "别人恐惧我贪婪，别人贪婪我破产。",
-  "格局打开，钱包打空。",
-  "我不是在抄底，我是在垫底。",
+  // 暖心 + 酷飒 (50:50) - 姐姐陪你系列
+  "K线看累了吧？别在那儿瞎操作了，你的每一次交易都是给庄家送钱。来这儿歇会儿，我陪你一起等风来。💫",
+  "市场疯了，但我们还在。别哭了，妆都花了。深呼吸，咱们慢慢来。🌸",
+  
+  // 酷飒 + 搞笑 (60:40) - 大姐姐教训你
+  "又冲了？你这手速，庄家看了都想给你颁个「最佳韭菜」奖。简单粗暴地说：你就是在送钱。🎯",
+  "LP锁仓？烧了。别问能不能拿回来，那是化学反应，不可逆。就像你的钱包，回不去了。🔥",
+  
+  // 搞笑 + 卖萌 (70:30) - 自嘲式安慰
+  "虽然我写的代码可能有点乱，但绝对没有后门！就像你的持仓，乱是乱了点，但至少还在...吧？😅",
+  "每戳一下木鱼，你的钱包就瘦一点，但你的福报胖一点哦。这波不亏！（真的不亏吗？嘻嘻）💪",
+  
+  // 暖心 + 搞笑 (60:40) - 递纸巾系列
+  "看到你的持仓我都想哭了...来，姐姐给你递张纸巾。擦完继续，咱不能让庄家看笑话。🥺",
+  "亏了多少？别说了，我懂。来敲敲木鱼，至少这个不会让你亏钱...应该吧？😊",
+  
+  // 酷飒 + 暖心 (70:30) - 姐姐罩你
+  "市场是疯的，但我们不疯。你的每一个 $SKR 我都会安排得明明白白：50%回购销毁，30%锁仓，20%给我买咖啡。☕",
+  "别怕，姐姐在这儿。虽然我也救不了你的钱包，但至少能陪你一起等牛市。WAGMI！✨",
+  
+  // 搞笑 + 酷飒 (60:40) - 毒舌但有道理
+  "你的持仓就像我的代码，看起来很乱，但仔细一看...确实很乱。不过没关系，乱中有序嘛（真的吗）。🤔",
+  "Dev也要吃饭，总不能让我去喝西北风吧？所以20%归我，你懂的。至少我比庄家良心多了。😂",
+  
+  // 卖萌 + 暖心 (50:50) - 软萌安慰
+  "虽然AI嘴巴坏，但它心里有你呀~就像我，虽然说话直，但真的希望你能赚钱呢~🥺",
+  "那些归零币都埋这儿吧。拜拜就拜拜，下一个更乖！姐姐陪你找下一个机会~👋",
+  
+  // 酷飒 + 卖萌 (70:30) - 反差萌
+  "代码在GitHub，随便看。虽然注释少了点（懒得写），但绝对没坑。信我，我可是有底线的Dev！💻",
+  "你的每一次点击都在帮官方干活，也是帮你自己。这叫双赢，懂？（虽然你可能不太赢）😏",
+  
+  // 暖心 + 搞笑 + 卖萌 (40:40:20) - 三合一
+  "手指做瑜伽时间到！每敲一下，焦虑-1，福报+1。虽然钱包还是空的，但至少心情好了点？🧘",
+  "姐姐给你的建议：少看K线，多敲木鱼。至少木鱼不会让你血压升高...应该吧？💆",
+  
+  // 酷飒 + 暖心 + 搞笑 (50:30:20) - 立体姐姐完全体
+  "市场疯了，但咱们不能疯。深呼吸，喝口水，然后...继续亏钱？不不不，来敲木鱼！至少这个稳赚不赔（功德）。🎯",
+  "你问我为什么要做这个？因为看不下去你们天天被割了。虽然我也救不了你们，但至少能让你们开心点。这就够了。💝",
+  
+  // 终极混合 - 有血有肉的真实感
+  "别问我牛市什么时候来，我要是知道还会在这儿写代码？但我知道的是：你不孤单，我陪你等。🌟",
+  "LP烧了，代码开源了，我能做的都做了。剩下的就看你自己了。加油，我看好你（虽然你的持仓我不看好）。💪",
 ]
 
 export const BUDDHA_QUOTES_EN = [
-  // GPT's killer quotes
-  "Today everything's fine, except the coins you bought. Market didn't lie, you chose to be blind.",
-  "You've seen this chart before. You just thought 'this time is different'.",
-  "Don't trade today. You don't understand it, you just want to win back your losses.",
-  "Price pumped? Not for you. Whale's just in a good mood. Don't screenshot yet, pullback incoming.",
-  "Group chat's active? Means nobody escaped yet. You know why they're still there.",
-  "Today you didn't learn anything new. You just paid another tuition fee. Congrats, you're closer to being an 'OG leek'.",
-  "When you start saying 'long-term value', it means short-term already broke you.",
-  "You only see the 10x stories. You don't see the deleted tweets.",
-  "You didn't lose on judgment. You lost on 'just one more'.",
-  "You drew this fortune not by algorithm. But because you really need to stop.",
-  // Original quotes
-  "You don't lack faith, you lack a stop-loss.",
-  "Tech is innocent, narratives are toxic.",
-  "This project cures reality denial.",
-  "Looks innovative, actually reincarnation.",
-  "Buddha doesn't save all-in degens.",
-  "You're tapping a fish, not finding Alpha.",
-  "Story's over, you're still here.",
-  "Whitepaper thick, users thin.",
-  "This is a faith stress-test.",
-  "You didn't draw opportunity, you drew a lesson.",
-  "New narrative, old bags.",
-  "Whales unknown, believers full.",
-  "Code's decent, shame no one uses it.",
-  "This is tuition for the market.",
-  "Even Buddha chose to watch from sidelines.",
-  "One more look and you'll believe.",
-  "Project lives, you've reincarnated.",
-  "Brain says no, finger already clicked.",
-  "This is emotional value, not value investing.",
-  "You think you're early, you're wave seven.",
-  "All emotion, no value.",
-  "Be greedy when others fear, go broke when others greed.",
-  "Open your mind, empty your wallet.",
-  "I'm not buying the dip, I AM the dip.",
+  // Warm + Cool (50:50) - Big sis got your back
+  "Tired of watching charts? Stop panic trading, you're just feeding the whales. Take a break here, I'll wait with you. 💫",
+  "Market's crazy, but we're still here. Don't cry, your makeup's running. Deep breath, we got this. 🌸",
+  
+  // Cool + Funny (60:40) - Big sis teaching you
+  "FOMO'd again? Your speed, even whales are impressed. Simply put: you're donating money. 🎯",
+  "LP locked? Burned. Don't ask if we can get it back, that's chemistry, irreversible. Like your wallet. 🔥",
+  
+  // Funny + Cute (70:30) - Self-deprecating comfort
+  "My code might be messy, but no backdoors! Like your portfolio, messy but at least it's still...there? 😅",
+  "Every tap makes your wallet lighter but your karma heavier. Fair trade! (Is it though? Hehe) 💪",
+  
+  // Warm + Funny (60:40) - Tissue passing series
+  "Seeing your portfolio made me cry too...here, have a tissue. Wipe and continue, can't let whales laugh at us. 🥺",
+  "How much down? Don't tell me, I know. Tap the fish, at least this won't lose you money...probably? 😊",
+  
+  // Cool + Warm (70:30) - Big sis protecting you
+  "Market's insane, but we're not. Every $SKR you feed: 50% buyback burn, 30% locked, 20% for my coffee. ☕",
+  "Don't worry, I'm here. Can't save your wallet, but I can wait for the bull with you. WAGMI! ✨",
+  
+  // Funny + Cool (60:40) - Roast but real
+  "Your portfolio's like my code, looks messy, but look closer...yeah it's messy. But organized chaos, right? (Really?) 🤔",
+  "Dev gotta eat, can't survive on air. So 20% is mine, you get it. At least I'm more honest than whales. 😂",
+  
+  // Cute + Warm (50:50) - Soft comfort
+  "AI's mouth is mean but heart is kind~Like me, I'm direct but really want you to win~🥺",
+  "Bury those rugged coins here. Bye bye, next one will be better! I'll help you find it~👋",
+  
+  // Cool + Cute (70:30) - Gap moe
+  "Code's on GitHub, check it. Comments are sparse (lazy), but no traps. Trust me, I have standards! 💻",
+  "Every click helps the protocol, helps you too. Win-win, see? (Though you might not be winning much) 😏",
+  
+  // Warm + Funny + Cute (40:40:20) - Triple combo
+  "Finger yoga time! Each tap: anxiety-1, karma+1. Wallet's still empty but mood's better? 🧘",
+  "My advice: less charts, more fish. At least fish won't spike your blood pressure...right? 💆",
+  
+  // Cool + Warm + Funny (50:30:20) - Full package big sis
+  "Market's crazy, we can't be. Deep breath, drink water, then...keep losing? No no, tap fish! At least this profits (karma). 🎯",
+  "Why did I build this? Tired of watching you all get rekt. Can't save you, but can make you smile. That's enough. 💝",
+  
+  // Ultimate mix - Real human feel
+  "Don't ask when bull market comes, if I knew I wouldn't be coding here. But I know this: you're not alone, I'll wait with you. 🌟",
+  "LP burned, code open-sourced, I did what I could. Rest is up to you. Go get 'em, I believe in you (not your portfolio though). 💪",
+  
+  "Group chat so active~ Means nobody ran yet~ As for why they didn't run... you know right? 😅",
+  "So many people shouting 'diamond hands'~ Buddha secretly tells you, they wanna run too~ 🤫",
+  
+  "Congrats on paying another tuition fee~ One step closer to 'OG leek'! You got this~ 📚",
+  "Today you didn't learn new knowledge, just new ways to lose money~ But it's okay, Buddha's here~ 💕",
+  
+  "When you start saying 'long-term value', short-term already knocked you down~ Pat pat~ 🌈",
+  "Faith test in progress... Detected your faith being beaten by charts~ Want Buddha to call the police? 🚨",
+  
+  "You only see the 10x stories right? Can't see the deleted Twitter accounts~ 👻",
+  "Others flex their gains, losses get quietly deleted~ Guess which one you'll be? 😊",
+  
+  "You didn't lose on judgment, lost on 'just one more'~ Buddha suggests you stop now~ 🛑",
+  "Sweetie, are your hands out of control? Buddha will hold them! Stop clicking! 💪",
+  
+  "You got this fortune for a reason~ Buddha thinks you need a tea break~ ☕",
+  "Hehe, seems like you and Buddha have a special connection~ (Connection = lose less money) 💫",
+  
+  // Daily Gentle Roasts (Cute Contrast Edition)
+  "You have faith, your wallet just runs faster~ 😊",
+  "Great tech, great story, just... your money disappeared~ 💸",
+  "This project cures 'I don't believe in bad luck', super effective~ ✨",
+  "Looks innovative right? Actually just an old friend in disguise~ 🎭",
+  "Buddha wants to save you, but you YOLO faster than Buddha's light~ 🏃",
+  "You're hitting a wooden fish, not a wealth code~ Knock knock~ 🥁",
+  "Story's over, still waiting for post-credits? (There isn't one) 🎬",
+  "Whitepaper so thick~ User list so thin~ 📖",
+  "This is a faith test, you... didn't pass~ 💔",
+  "You didn't get opportunity, you got an expensive lesson~ 📚",
+  "New narrative, old wallet, that's life~ 🌈",
+  "Whales haven't shown up, believers already full house~ 🎪",
+  "Code is great! Just... nobody uses it~ 😅",
+  "This is for paying market tuition, remember to get receipt~ 🧾",
+  "Buddha looked and decided to wait and see~ 🔭",
+  "One more look and you'll believe, right? Buddha gets you~ 👀",
+  "Project still here, you've reincarnated several times~ 🔄",
+  "Logic says don't touch, but hand already clicked... Buddha understands~ 🤝",
+  "This is emotional value, not value investing~ Don't mix them up~ 💭",
+  "You think it's early, actually it's wave seven~ 🌊",
+  "All emotion, no value, but exciting right? 🎢",
+  "Others fear I'm greedy, others greedy I... bankrupt~ 💥",
+  "Vision expanded, wallet emptied, that's growth~ 🌱",
+  "I'm not buying the dip, I'm... being the dip~ You got this! 🏋️",
 ]
 
 // 迷途羔羊类型

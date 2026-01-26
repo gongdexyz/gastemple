@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Trophy, Info, Zap, Flame, Skull } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Trophy, Info, Zap, Flame, Skull, ChevronDown } from 'lucide-react'
 import { useThemeStore } from '../stores/themeStore'
 import { useGachaStore } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
 import { MusicToggle } from './MusicToggle'
+import { WithdrawalDialog } from './WithdrawalDialog'
 
 export const Header: React.FC = () => {
   const { mode } = useThemeStore()
@@ -14,6 +15,8 @@ export const Header: React.FC = () => {
   const location = useLocation()
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
+  const [showBalanceMenu, setShowBalanceMenu] = useState(false)
+  const [showWithdrawal, setShowWithdrawal] = useState(false)
 
   const navItems = [
     { path: '/gacha', label: isEN ? 'GACHA' : '抽签', icon: Zap },
@@ -47,8 +50,8 @@ export const Header: React.FC = () => {
           </span>
         </Link>
 
-        {/* Navigation - 手机端只显示图标 */}
-        <nav className="flex items-center gap-0.5 sm:gap-1">
+        {/* Navigation - 手机端增大按钮，正常间距 */}
+        <nav className="flex items-center gap-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path
             return (
@@ -57,7 +60,7 @@ export const Header: React.FC = () => {
                 to={item.path}
                 className={`
                   px-2 sm:px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                  flex items-center gap-1.5
+                  flex items-center gap-1
                   ${isActive 
                     ? isDegen 
                       ? 'bg-degen-green/20 text-degen-green' 
@@ -68,39 +71,95 @@ export const Header: React.FC = () => {
                   }
                 `}
               >
-                <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <item.icon className="w-4 h-4 sm:w-4 sm:h-4" />
                 <span className="hidden md:inline text-xs sm:text-sm">{item.label}</span>
               </Link>
             )
           })}
         </nav>
 
-        {/* Right section - 手机端简化 */}
+        {/* Right section - 手机端增大按钮 */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           {/* 音乐开关 */}
           <MusicToggle />
           
-          {/* 功德币余额 - 手机端缩小 */}
-          <div className={`
-            flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium
-            ${isDegen 
-              ? 'bg-degen-yellow/20 text-degen-yellow' 
-              : 'bg-goldman-gold/20 text-goldman-gold'
-            }
-          `}
-          id="gd-balance-indicator"
-          >
-            <span className="text-sm sm:text-base">🪙</span>
-            <span className="hidden xs:inline">{gdBalance.toLocaleString()}</span>
-            <span className="xs:hidden">{gdBalance > 999 ? `${(gdBalance/1000).toFixed(0)}K` : gdBalance}</span>
-            <span className="text-[10px] sm:text-xs opacity-70 hidden sm:inline">$GD</span>
+          {/* 功德币余额 - 可点击展开 */}
+          <div className="relative">
+            <button
+              onClick={() => setShowBalanceMenu(!showBalanceMenu)}
+              className={`
+                flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium
+                transition-all cursor-pointer hover:scale-105
+                ${isDegen 
+                  ? 'bg-degen-yellow/20 text-degen-yellow hover:bg-degen-yellow/30' 
+                  : 'bg-goldman-gold/20 text-goldman-gold hover:bg-goldman-gold/30'
+                }
+              `}
+              id="gd-balance-indicator"
+            >
+              <span className="text-sm sm:text-base">🪙</span>
+              <span className="hidden xs:inline">{gdBalance.toLocaleString()}</span>
+              <span className="xs:hidden">{gdBalance > 999 ? `${(gdBalance/1000).toFixed(0)}K` : gdBalance}</span>
+              <span className="text-[10px] sm:text-xs opacity-70 hidden sm:inline">$GD</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showBalanceMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* 余额菜单下拉 */}
+            <AnimatePresence>
+              {showBalanceMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className={`
+                    absolute top-full right-0 mt-2 w-48 rounded-lg shadow-xl border z-50
+                    ${isDegen 
+                      ? 'bg-black/95 border-degen-yellow/30' 
+                      : 'bg-gray-900/95 border-goldman-gold/30'
+                    }
+                  `}
+                  onMouseLeave={() => setShowBalanceMenu(false)}
+                >
+                  <div className="p-3 space-y-2">
+                    {/* 余额显示 */}
+                    <div className="text-center pb-2 border-b border-gray-700">
+                      <div className="text-xs text-gray-400 mb-1">
+                        {isEN ? 'Balance' : '余额'}
+                      </div>
+                      <div className={`text-xl font-bold ${isDegen ? 'text-degen-yellow' : 'text-goldman-gold'}`}>
+                        {gdBalance.toLocaleString()}
+                      </div>
+                      <div className="text-xs text-gray-500">$GONGDE</div>
+                    </div>
+
+                    {/* 提现按钮 */}
+                    <button
+                      onClick={() => {
+                        setShowWithdrawal(true)
+                        setShowBalanceMenu(false)
+                      }}
+                      className={`
+                        w-full px-4 py-2 rounded-lg font-bold text-sm transition-all
+                        ${isDegen
+                          ? 'bg-degen-purple/20 text-degen-purple border border-degen-purple hover:bg-degen-purple/30'
+                          : 'bg-purple-900/20 text-purple-400 border border-purple-500 hover:bg-purple-900/30'
+                        }
+                      `}
+                    >
+                      💰 {isEN ? 'Withdraw' : '提现'}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* 语言切换 - 手机端只显示旗帜 */}
+          {/* 语言切换 - 手机端增大按钮 */}
           <motion.button
             onClick={toggleLang}
             className={`
-              px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-bold transition-all
+              px-2 sm:px-3 py-1.5 sm:py-1.5 rounded-full text-xs font-bold transition-all flex-shrink-0
               ${isDegen 
                 ? 'bg-degen-green/20 text-degen-green border border-degen-green/50 hover:bg-degen-green/30' 
                 : 'bg-goldman-gold/20 text-goldman-gold border border-goldman-gold/50 hover:bg-goldman-gold/30'
@@ -109,11 +168,18 @@ export const Header: React.FC = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <span className="sm:hidden">{isEN ? '🇺🇸' : '🇨🇳'}</span>
+            <span className="sm:hidden text-base">{isEN ? '🇺🇸' : '🇨🇳'}</span>
             <span className="hidden sm:inline">{isEN ? '🇺🇸 EN' : '🇨🇳 中文'}</span>
           </motion.button>
         </div>
       </div>
+
+      {/* 提现弹窗 */}
+      <AnimatePresence>
+        {showWithdrawal && (
+          <WithdrawalDialog onClose={() => setShowWithdrawal(false)} />
+        )}
+      </AnimatePresence>
     </header>
   )
 }

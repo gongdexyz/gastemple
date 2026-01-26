@@ -5,9 +5,9 @@ import { useGachaStore } from '../stores/gachaStore'
 import { useLangStore } from '../stores/langStore'
 import { useWalletStore } from '../stores/walletStore'
 import { useEffectsStore } from '../stores/effectsStore'
+import { useSoundStore } from '../stores/soundStore'
 import { Connection, PublicKey, Transaction, SystemProgram } from '@solana/web3.js'
 import { createTransferInstruction, getAssociatedTokenAddress, getAccount } from '@solana/spl-token'
-import { WithdrawalDialog } from './WithdrawalDialog'
 
 // 扩展全局窗口接口以包含Phantom钱包的完整类型
 declare global {
@@ -122,6 +122,7 @@ export const WoodenFish: React.FC = () => {
   const { gdBalance, spendGD, addGD } = useGachaStore()
   const { lang } = useLangStore()
   const { triggerBurnEffect } = useEffectsStore()
+  const { isMuted } = useSoundStore()
   const [merits, setMerits] = useState<MeritPopup[]>([])
   const [totalMerits, setTotalMerits] = useState(0) // 本次修行功德
   const [combo, setCombo] = useState(0)
@@ -164,7 +165,6 @@ export const WoodenFish: React.FC = () => {
   const [isPaying, setIsPaying] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [paymentSuccess, setPaymentSuccess] = useState(false)
-  const [showWithdrawal, setShowWithdrawal] = useState(false) // 提现弹窗
   
   // 收款地址和SKR合约地址（从环境变量读取）
   const RECIPIENT_ADDRESS = import.meta.env.VITE_RECIPIENT_ADDRESS || '这里填你自己的Solana钱包地址'
@@ -444,7 +444,7 @@ export const WoodenFish: React.FC = () => {
       comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
 
       // Play sound with pitch variation based on combo
-      if (audioRef.current) {
+      if (audioRef.current && !isMuted) {
         audioRef.current.currentTime = 0
         // 根据combo调整播放速度（变调效果）
         if (combo >= 20) {
@@ -659,7 +659,7 @@ export const WoodenFish: React.FC = () => {
         setTimeout(() => setCriticalReward(null), 6000) // 延长到6秒
         
         // 播放奖励音效
-        if (rewardAudioRef.current) {
+        if (rewardAudioRef.current && !isMuted) {
           rewardAudioRef.current.currentTime = 0
           rewardAudioRef.current.playbackRate = 1.0
           rewardAudioRef.current.play().catch(() => {})
@@ -751,7 +751,7 @@ export const WoodenFish: React.FC = () => {
       comboTimeoutRef.current = setTimeout(() => setCombo(0), 1500)
 
       // Play sound with pitch variation based on combo
-      if (audioRef.current) {
+      if (audioRef.current && !isMuted) {
         audioRef.current.currentTime = 0
         // 暴击时使用特殊音效
         if (isCriticalHit) {
@@ -1742,20 +1742,6 @@ export const WoodenFish: React.FC = () => {
         }
       </motion.p>
 
-      {/* 提现入口按钮 */}
-      <button
-        onClick={() => setShowWithdrawal(true)}
-        className={`
-          mt-4 px-6 py-2 rounded-lg font-bold text-sm transition-all
-          ${isDegen
-            ? 'bg-degen-purple/20 text-degen-purple border-2 border-degen-purple hover:bg-degen-purple/30'
-            : 'bg-purple-900/20 text-purple-400 border-2 border-purple-500 hover:bg-purple-900/30'
-          }
-        `}
-      >
-        💰 {isEN ? 'Withdraw $GONGDE' : '提现 $GONGDE'}
-      </button>
-
       {/* 冥想模式确认弹窗 */}
       <AnimatePresence>
         {showMeditationWarning && (
@@ -1847,13 +1833,6 @@ export const WoodenFish: React.FC = () => {
               </div>
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 提现弹窗 */}
-      <AnimatePresence>
-        {showWithdrawal && (
-          <WithdrawalDialog onClose={() => setShowWithdrawal(false)} />
         )}
       </AnimatePresence>
     </div>
