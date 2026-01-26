@@ -1333,6 +1333,13 @@ export const WoodenFish: React.FC = () => {
           <div className={`text-xs mt-0.5 ${isDegen ? 'text-degen-cyan' : 'text-gray-500'}`}>
             {isEN ? 'Your clicks this session' : '您本次的敲击数'}
           </div>
+          
+          {/* 调试信息：显示自动挂机状态 */}
+          {isAutoClickActive && (
+            <div className="mt-2 px-3 py-1 rounded-lg bg-orange-500/20 border border-orange-500/50 text-orange-400 text-xs">
+              ⚠️ {isEN ? `Auto-clicking active (×${autoClickMultiplier})` : `自动挂机中 (×${autoClickMultiplier})`}
+            </div>
+          )}
         </div>
         
         {/* 称号和COMBO */}
