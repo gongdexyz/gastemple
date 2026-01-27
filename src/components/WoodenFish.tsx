@@ -565,24 +565,29 @@ export const WoodenFish: React.FC = () => {
       }
       
       // 伪随机保底系统 + 连击手感加权 + 三重暴击等级
-      // 基础暴击率：新手 10%，老玩家 5%
-      const isNewbie = newbieClickCount < 10
-      const baseCritRate = isNewbie 
-        ? parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.10')  // 新手 10%
-        : parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.05')  // 老玩家 5%
+      // Demo 模式：暴击率大幅提升，让评委体验更爽！
+      const isDemoMode = isSKRTestMode()
       
-      const streakBonus = critStreak * 0.005 // 未暴击次数加成（降低）
-      const comboBonus = hiddenCombo * 0.005 // 连击手感加成（降低）
+      // 基础暴击率：Demo 模式 35%，新手 10%，老玩家 5%
+      const isNewbie = newbieClickCount < 10
+      const baseCritRate = isDemoMode
+        ? 0.35  // Demo 模式：35% 基础暴击率
+        : isNewbie 
+          ? parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.10')  // 新手 10%
+          : parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.05')  // 老玩家 5%
+      
+      const streakBonus = critStreak * (isDemoMode ? 0.02 : 0.005) // Demo 模式加成更高
+      const comboBonus = hiddenCombo * (isDemoMode ? 0.03 : 0.005) // Demo 模式连击加成更高
       
       // 今日第一次必爽：暴击概率翻倍（仅新手）
       const firstHitBonus = (todayFirstHit && isNewbie) ? baseCritRate : 0
       
-      // 计算实际暴击率（上限：新手 35%，老玩家 20%）
-      const maxCritRate = isNewbie ? 0.35 : 0.20
+      // 计算实际暴击率（上限：Demo 模式 60%，新手 35%，老玩家 20%）
+      const maxCritRate = isDemoMode ? 0.60 : (isNewbie ? 0.35 : 0.20)
       let actualCritRate = Math.min(baseCritRate + streakBonus + comboBonus + firstHitBonus, maxCritRate)
       
-      // 自动挂机时暴击率减半
-      if (!shouldSpawnTarget) {
+      // 自动挂机时暴击率减半（Demo 模式不减半）
+      if (!shouldSpawnTarget && !isDemoMode) {
         actualCritRate = actualCritRate * 0.5
       }
       
@@ -632,31 +637,38 @@ export const WoodenFish: React.FC = () => {
         
         // 三重暴击等级概率
         // 三重暴击等级概率（创世期配置）
+        // Demo 模式：降低 combo 门槛，提高高级暴击几率
         const maxReward = parseInt(import.meta.env.VITE_GONGDE_MAX_REWARD || '10000')
         const bigWinMultiplier = parseInt(import.meta.env.VITE_GONGDE_BIG_WIN_MULTIPLIER || '10')
         
-        if (hiddenCombo >= 5 && critRoll < 0.06) {
-          // 天启级暴击 (6%) - 需要combo≥5
+        // Demo 模式：combo 门槛降低，暴击几率提高
+        const epicComboThreshold = isDemoMode ? 2 : 5  // Demo: 2连击即可触发天启
+        const rareComboThreshold = isDemoMode ? 1 : 3  // Demo: 1连击即可触发福报
+        const epicChance = isDemoMode ? 0.20 : 0.06   // Demo: 20% 天启几率
+        const rareChance = isDemoMode ? 0.50 : 0.28   // Demo: 50% 福报几率
+        
+        if (hiddenCombo >= epicComboThreshold && critRoll < epicChance) {
+          // 天启级暴击 - Demo 模式更容易触发
           critType = 'epic'
           gdRewardMultiplier = bigWinMultiplier
           gdReward = maxReward
           criticalText = isEN ? `✨ HEAVENLY REVELATION! ${maxReward} $GONGDE! ✨` : `✨ 天启降临！${maxReward} $GONGDE！ ✨`
-        } else if (hiddenCombo >= 3 && critRoll < 0.28) {
-          // 福报级暴击 (22%) - 需要combo≥3
+        } else if (hiddenCombo >= rareComboThreshold && critRoll < rareChance) {
+          // 福报级暴击 - Demo 模式更容易触发
           critType = 'rare'
           gdRewardMultiplier = 3
           gdReward = Math.floor(maxReward * 0.3) // 30% of max
           criticalText = isEN ? `✨ KARMIC BLESSING! ${gdReward} $GONGDE! ✨` : `✨ 福报加持！${gdReward} $GONGDE！ ✨`
         } else {
-          // 因果级暴击 (72%)
+          // 因果级暴击
           critType = 'normal'
           gdRewardMultiplier = 1.5
           gdReward = Math.floor(maxReward * 0.15) // 15% of max
           criticalText = isEN ? `✨ BUDDHA BLESS! ${gdReward} $GONGDE! ✨` : `✨ 佛祖显灵！${gdReward} $GONGDE！ ✨`
         }
         
-        // 自动挂机时降低奖励 70%
-        if (!shouldSpawnTarget) {
+        // 自动挂机时降低奖励 70%（Demo 模式不降低）
+        if (!shouldSpawnTarget && !isDemoMode) {
           gdReward = Math.floor(gdReward * 0.7)
         }
         
