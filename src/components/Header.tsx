@@ -24,16 +24,21 @@ export const Header: React.FC = () => {
     const header = headerRef.current
     if (!header) return
 
-    const preventTouchMove = (e: TouchEvent) => {
-      e.preventDefault()
+    const preventTouch = (e: TouchEvent) => {
+      // 只阻止滑动，不阻止点击
+      if (e.type === 'touchmove') {
+        e.preventDefault()
+      }
       e.stopPropagation()
     }
 
     // 添加非被动监听器（passive: false 允许 preventDefault）
-    header.addEventListener('touchmove', preventTouchMove, { passive: false })
+    header.addEventListener('touchmove', preventTouch, { passive: false })
+    header.addEventListener('touchstart', preventTouch, { passive: false })
 
     return () => {
-      header.removeEventListener('touchmove', preventTouchMove)
+      header.removeEventListener('touchmove', preventTouch)
+      header.removeEventListener('touchstart', preventTouch)
     }
   }, [])
 
@@ -54,6 +59,7 @@ export const Header: React.FC = () => {
         backdrop-blur-md border-b
         ${isDegen ? 'border-degen-green/30' : 'border-goldman-border'}
       `}
+      style={{ touchAction: 'none', overscrollBehavior: 'none' }}
     >
       <div className="max-w-4xl mx-auto px-1 sm:px-4 h-16 flex items-center justify-between gap-1">
         {/* Logo - 手机端缩小 */}
