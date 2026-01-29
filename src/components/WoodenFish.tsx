@@ -160,20 +160,28 @@ export const WoodenFish: React.FC = () => {
   // 暴击等级反馈
   const [critLevel, setCritLevel] = useState<'normal' | 'rare' | 'epic' | null>(null)
   
-  // 锁定 body 滚动（当暴击特效显示时）- 简化版，不影响fixed定位元素
+  // 锁定 body 滚动（当暴击特效显示时）- 补偿滚动条宽度防止页面右移
   useEffect(() => {
     if (critLevel) {
+      // 计算滚动条宽度
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      
       // 保存原始样式
       const originalOverflow = document.body.style.overflow
       const originalTouchAction = document.body.style.touchAction
+      const originalPaddingRight = document.body.style.paddingRight
       
-      // 仅禁用滚动，不改变position
+      // 禁用滚动并补偿滚动条宽度
       document.body.style.overflow = 'hidden'
       document.body.style.touchAction = 'none'
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`
+      }
       
       return () => {
         document.body.style.overflow = originalOverflow
         document.body.style.touchAction = originalTouchAction
+        document.body.style.paddingRight = originalPaddingRight
       }
     }
   }, [critLevel])
@@ -224,20 +232,28 @@ export const WoodenFish: React.FC = () => {
   const [showMeditationWarning, setShowMeditationWarning] = useState(false) // 冥想模式确认弹窗
   const [pendingOption, setPendingOption] = useState<typeof AUTO_CLICK_OPTIONS[0] | null>(null) // 待确认的选项
   
-  // 锁定 body 滚动（当冥想模式确认弹窗显示时）- 简化版，不影响fixed定位元素
+  // 锁定 body 滚动（当冥想模式确认弹窗显示时）- 补偿滚动条宽度防止页面右移
   useEffect(() => {
     if (showMeditationWarning) {
+      // 计算滚动条宽度
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      
       // 保存原始样式
       const originalOverflow = document.body.style.overflow
       const originalTouchAction = document.body.style.touchAction
+      const originalPaddingRight = document.body.style.paddingRight
       
-      // 仅禁用滚动，不改变position
+      // 禁用滚动并补偿滚动条宽度
       document.body.style.overflow = 'hidden'
       document.body.style.touchAction = 'none'
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`
+      }
       
       return () => {
         document.body.style.overflow = originalOverflow
         document.body.style.touchAction = originalTouchAction
+        document.body.style.paddingRight = originalPaddingRight
       }
     }
   }, [showMeditationWarning])

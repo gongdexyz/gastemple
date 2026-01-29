@@ -21,20 +21,28 @@ function App() {
   const [previousPath, setPreviousPath] = useState<string>('/temple')
   const isEN = lang === 'en'
 
-  // 锁定 body 滚动（当弹窗打开时）- 简化版，不影响fixed定位元素
+  // 锁定 body 滚动（当弹窗打开时）- 补偿滚动条宽度防止页面右移
   useEffect(() => {
     if (showAutoClickWarning) {
+      // 计算滚动条宽度
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      
       // 保存原始样式
       const originalOverflow = document.body.style.overflow
       const originalTouchAction = document.body.style.touchAction
+      const originalPaddingRight = document.body.style.paddingRight
       
-      // 仅禁用滚动，不改变position
+      // 禁用滚动并补偿滚动条宽度
       document.body.style.overflow = 'hidden'
       document.body.style.touchAction = 'none'
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`
+      }
       
       return () => {
         document.body.style.overflow = originalOverflow
         document.body.style.touchAction = originalTouchAction
+        document.body.style.paddingRight = originalPaddingRight
       }
     }
   }, [showAutoClickWarning])
