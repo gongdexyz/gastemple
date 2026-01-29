@@ -26,12 +26,6 @@ body {
   min-height: 100%;
 }
 
-/* 滚动锁定状态 - 通过JS添加class控制 */
-html.scroll-locked,
-html.scroll-locked body {
-  overflow: hidden !important;
-  overscroll-behavior: none !important;
-}
 
 /* 高端模式 Goldman风格 */
 .mode-goldman {

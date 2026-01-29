@@ -160,45 +160,8 @@ export const WoodenFish: React.FC = () => {
   // 暴击等级反馈
   const [critLevel, setCritLevel] = useState<'normal' | 'rare' | 'epic' | null>(null)
   
-  // 锁定页面滚动（当暴击特效显示时）- 使用CSS类 + 全局touchmove阻止
-  useEffect(() => {
-    if (critLevel) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      const html = document.documentElement
-      const header = document.querySelector('header')
-      
-      // 保存滚动位置
-      const scrollY = window.scrollY
-      
-      // 添加锁定类
-      html.classList.add('scroll-locked')
-      
-      // 补偿滚动条宽度（桌面端）
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-        if (header) {
-          header.style.paddingRight = `${scrollbarWidth}px`
-        }
-      }
-      
-      // 只阻止touchmove，不阻止touchstart（否则无法点击）
-      const preventTouchMove = (e: TouchEvent) => {
-        e.preventDefault()
-      }
-      
-      document.addEventListener('touchmove', preventTouchMove, { passive: false })
-      
-      return () => {
-        html.classList.remove('scroll-locked')
-        document.body.style.paddingRight = ''
-        if (header) {
-          header.style.paddingRight = ''
-        }
-        document.removeEventListener('touchmove', preventTouchMove)
-        window.scrollTo(0, scrollY)
-      }
-    }
-  }, [critLevel])
+  // 暴击特效时的滚动处理 - 简化版，不影响正常滚动
+  // 注意：滚动锁定移到特效遮罩层的CSS上处理
   
   // 自动挂机相关状态
   const [isAutoClicking, setIsAutoClicking] = useState(false)
@@ -246,40 +209,7 @@ export const WoodenFish: React.FC = () => {
   const [showMeditationWarning, setShowMeditationWarning] = useState(false) // 冥想模式确认弹窗
   const [pendingOption, setPendingOption] = useState<typeof AUTO_CLICK_OPTIONS[0] | null>(null) // 待确认的选项
   
-  // 锁定页面滚动（当冥想模式确认弹窗显示时）- 使用CSS类 + 全局touchmove阻止
-  useEffect(() => {
-    if (showMeditationWarning) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      const html = document.documentElement
-      const header = document.querySelector('header')
-      const scrollY = window.scrollY
-      
-      html.classList.add('scroll-locked')
-      
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-        if (header) {
-          header.style.paddingRight = `${scrollbarWidth}px`
-        }
-      }
-      
-      const preventTouchMove = (e: TouchEvent) => {
-        e.preventDefault()
-      }
-      
-      document.addEventListener('touchmove', preventTouchMove, { passive: false })
-      
-      return () => {
-        html.classList.remove('scroll-locked')
-        document.body.style.paddingRight = ''
-        if (header) {
-          header.style.paddingRight = ''
-        }
-        document.removeEventListener('touchmove', preventTouchMove)
-        window.scrollTo(0, scrollY)
-      }
-    }
-  }, [showMeditationWarning])
+  // 冥想弹窗的滚动锁定移到弹窗组件自身的CSS上处理
   
   // 新手系统状态
   const [newbieClickCount, setNewbieClickCount] = useState(() => {
@@ -1249,7 +1179,7 @@ export const WoodenFish: React.FC = () => {
       <AnimatePresence>
         {isScreenPaused && critLevel && (
           <>
-            {/* 满屏颜色闪光 */}
+            {/* 满屏颜色闪光 - 阻止触摸滑动 */}
             <motion.div
               key={`critical-flash-${critLevel}`}
               initial={{ opacity: 0 }}
@@ -1260,6 +1190,8 @@ export const WoodenFish: React.FC = () => {
                 ease: "easeInOut"
               }}
               className={`critical-flash ${critLevel === 'rare' ? 'rare' : ''} ${critLevel === 'epic' ? 'epic' : ''}`}
+              style={{ touchAction: 'none', pointerEvents: 'auto' }}
+              onTouchMove={(e) => e.preventDefault()}
             />
             
             {/* 居中文字 - 延迟放大 */}

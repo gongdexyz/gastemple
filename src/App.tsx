@@ -21,40 +21,7 @@ function App() {
   const [previousPath, setPreviousPath] = useState<string>('/temple')
   const isEN = lang === 'en'
 
-  // 锁定页面滚动（当弹窗打开时）- 使用CSS类 + 全局touchmove阻止
-  useEffect(() => {
-    if (showAutoClickWarning) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      const html = document.documentElement
-      const header = document.querySelector('header')
-      const scrollY = window.scrollY
-      
-      html.classList.add('scroll-locked')
-      
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-        if (header) {
-          header.style.paddingRight = `${scrollbarWidth}px`
-        }
-      }
-      
-      const preventTouchMove = (e: TouchEvent) => {
-        e.preventDefault()
-      }
-      
-      document.addEventListener('touchmove', preventTouchMove, { passive: false })
-      
-      return () => {
-        html.classList.remove('scroll-locked')
-        document.body.style.paddingRight = ''
-        if (header) {
-          header.style.paddingRight = ''
-        }
-        document.removeEventListener('touchmove', preventTouchMove)
-        window.scrollTo(0, scrollY)
-      }
-    }
-  }, [showAutoClickWarning])
+  // 弹窗的滚动锁定移到弹窗组件自身的CSS上处理
 
   // 检查自动挂机状态
   const checkAutoClickStatus = () => {
