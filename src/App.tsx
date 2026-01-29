@@ -21,26 +21,15 @@ function App() {
   const [previousPath, setPreviousPath] = useState<string>('/temple')
   const isEN = lang === 'en'
 
-  // 锁定页面滚动（当弹窗打开时）- 彻底锁定html和body
+  // 锁定页面滚动（当弹窗打开时）- 使用CSS类 + 全局touchmove阻止
   useEffect(() => {
     if (showAutoClickWarning) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       const html = document.documentElement
       const header = document.querySelector('header')
+      const scrollY = window.scrollY
       
-      // 保存原始样式
-      const originalHtmlOverflow = html.style.overflow
-      const originalHtmlTouchAction = html.style.touchAction
-      const originalBodyOverflow = document.body.style.overflow
-      const originalBodyTouchAction = document.body.style.touchAction
-      const originalBodyPaddingRight = document.body.style.paddingRight
-      const originalHeaderPaddingRight = header?.style.paddingRight || ''
-      
-      // 同时锁定 html 和 body 的滚动
-      html.style.overflow = 'hidden'
-      html.style.touchAction = 'none'
-      document.body.style.overflow = 'hidden'
-      document.body.style.touchAction = 'none'
+      html.classList.add('scroll-locked')
       
       if (scrollbarWidth > 0) {
         document.body.style.paddingRight = `${scrollbarWidth}px`
@@ -49,15 +38,23 @@ function App() {
         }
       }
       
+      const preventTouchMove = (e: TouchEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+      
+      document.addEventListener('touchmove', preventTouchMove, { passive: false })
+      document.addEventListener('touchstart', preventTouchMove, { passive: false })
+      
       return () => {
-        html.style.overflow = originalHtmlOverflow
-        html.style.touchAction = originalHtmlTouchAction
-        document.body.style.overflow = originalBodyOverflow
-        document.body.style.touchAction = originalBodyTouchAction
-        document.body.style.paddingRight = originalBodyPaddingRight
+        html.classList.remove('scroll-locked')
+        document.body.style.paddingRight = ''
         if (header) {
-          header.style.paddingRight = originalHeaderPaddingRight
+          header.style.paddingRight = ''
         }
+        document.removeEventListener('touchmove', preventTouchMove)
+        document.removeEventListener('touchstart', preventTouchMove)
+        window.scrollTo(0, scrollY)
       }
     }
   }, [showAutoClickWarning])

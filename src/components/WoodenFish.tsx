@@ -160,28 +160,20 @@ export const WoodenFish: React.FC = () => {
   // 暴击等级反馈
   const [critLevel, setCritLevel] = useState<'normal' | 'rare' | 'epic' | null>(null)
   
-  // 锁定页面滚动（当暴击特效显示时）- 彻底锁定html和body
+  // 锁定页面滚动（当暴击特效显示时）- 使用CSS类 + 全局touchmove阻止
   useEffect(() => {
     if (critLevel) {
-      // 计算滚动条宽度
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       const html = document.documentElement
       const header = document.querySelector('header')
       
-      // 保存原始样式
-      const originalHtmlOverflow = html.style.overflow
-      const originalHtmlTouchAction = html.style.touchAction
-      const originalBodyOverflow = document.body.style.overflow
-      const originalBodyTouchAction = document.body.style.touchAction
-      const originalBodyPaddingRight = document.body.style.paddingRight
-      const originalHeaderPaddingRight = header?.style.paddingRight || ''
+      // 保存滚动位置
+      const scrollY = window.scrollY
       
-      // 同时锁定 html 和 body 的滚动
-      html.style.overflow = 'hidden'
-      html.style.touchAction = 'none'
-      document.body.style.overflow = 'hidden'
-      document.body.style.touchAction = 'none'
+      // 添加锁定类
+      html.classList.add('scroll-locked')
       
+      // 补偿滚动条宽度（桌面端）
       if (scrollbarWidth > 0) {
         document.body.style.paddingRight = `${scrollbarWidth}px`
         if (header) {
@@ -189,15 +181,26 @@ export const WoodenFish: React.FC = () => {
         }
       }
       
+      // 全局阻止触摸滑动
+      const preventTouchMove = (e: TouchEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+      
+      document.addEventListener('touchmove', preventTouchMove, { passive: false })
+      document.addEventListener('touchstart', preventTouchMove, { passive: false })
+      
       return () => {
-        html.style.overflow = originalHtmlOverflow
-        html.style.touchAction = originalHtmlTouchAction
-        document.body.style.overflow = originalBodyOverflow
-        document.body.style.touchAction = originalBodyTouchAction
-        document.body.style.paddingRight = originalBodyPaddingRight
+        html.classList.remove('scroll-locked')
+        document.body.style.paddingRight = ''
         if (header) {
-          header.style.paddingRight = originalHeaderPaddingRight
+          header.style.paddingRight = ''
         }
+        document.removeEventListener('touchmove', preventTouchMove)
+        document.removeEventListener('touchstart', preventTouchMove)
+        
+        // 恢复滚动位置
+        window.scrollTo(0, scrollY)
       }
     }
   }, [critLevel])
@@ -248,26 +251,15 @@ export const WoodenFish: React.FC = () => {
   const [showMeditationWarning, setShowMeditationWarning] = useState(false) // 冥想模式确认弹窗
   const [pendingOption, setPendingOption] = useState<typeof AUTO_CLICK_OPTIONS[0] | null>(null) // 待确认的选项
   
-  // 锁定页面滚动（当冥想模式确认弹窗显示时）- 彻底锁定html和body
+  // 锁定页面滚动（当冥想模式确认弹窗显示时）- 使用CSS类 + 全局touchmove阻止
   useEffect(() => {
     if (showMeditationWarning) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       const html = document.documentElement
       const header = document.querySelector('header')
+      const scrollY = window.scrollY
       
-      // 保存原始样式
-      const originalHtmlOverflow = html.style.overflow
-      const originalHtmlTouchAction = html.style.touchAction
-      const originalBodyOverflow = document.body.style.overflow
-      const originalBodyTouchAction = document.body.style.touchAction
-      const originalBodyPaddingRight = document.body.style.paddingRight
-      const originalHeaderPaddingRight = header?.style.paddingRight || ''
-      
-      // 同时锁定 html 和 body 的滚动
-      html.style.overflow = 'hidden'
-      html.style.touchAction = 'none'
-      document.body.style.overflow = 'hidden'
-      document.body.style.touchAction = 'none'
+      html.classList.add('scroll-locked')
       
       if (scrollbarWidth > 0) {
         document.body.style.paddingRight = `${scrollbarWidth}px`
@@ -276,15 +268,23 @@ export const WoodenFish: React.FC = () => {
         }
       }
       
+      const preventTouchMove = (e: TouchEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+      
+      document.addEventListener('touchmove', preventTouchMove, { passive: false })
+      document.addEventListener('touchstart', preventTouchMove, { passive: false })
+      
       return () => {
-        html.style.overflow = originalHtmlOverflow
-        html.style.touchAction = originalHtmlTouchAction
-        document.body.style.overflow = originalBodyOverflow
-        document.body.style.touchAction = originalBodyTouchAction
-        document.body.style.paddingRight = originalBodyPaddingRight
+        html.classList.remove('scroll-locked')
+        document.body.style.paddingRight = ''
         if (header) {
-          header.style.paddingRight = originalHeaderPaddingRight
+          header.style.paddingRight = ''
         }
+        document.removeEventListener('touchmove', preventTouchMove)
+        document.removeEventListener('touchstart', preventTouchMove)
+        window.scrollTo(0, scrollY)
       }
     }
   }, [showMeditationWarning])
