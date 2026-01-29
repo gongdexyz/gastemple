@@ -89,16 +89,22 @@ export const TemplePage: React.FC = () => {
     return () => clearInterval(heartbeat)
   }, [])
   
-  // 监听 GD 余额变化 - 追踪 24h 收入（玩家获得的 GONGDE）
+  // 监听 GD 余额变化 - 追踪 24h 收入（玩家获得的 GONGDE，换算成 SKR）
   useEffect(() => {
     // 当余额增加时，说明玩家获得了奖励
     if (gdBalance > lastGdBalance) {
-      const earned = gdBalance - lastGdBalance
+      const earnedGongde = gdBalance - lastGdBalance
+      
+      // 将 GONGDE 换算成 SKR（用于显示通缩增加量）
+      const gongdePrice = prices.gongde || 0.00029600
+      const skrPrice = prices.skr || 0.029600
+      const usdValue = earnedGongde * gongdePrice
+      const earnedSkr = usdValue / skrPrice
       
       setSimulator(prev => ({
         ...prev,
-        dailySkrBuyback: prev.dailySkrBuyback + earned, // 累计获得的 GONGDE
-        lastInteractionBoost: earned
+        dailySkrBuyback: prev.dailySkrBuyback + earnedGongde, // 累计获得的 GONGDE（用于24h收入显示）
+        lastInteractionBoost: earnedSkr // 换算成 SKR 后的数量（用于通缩增加显示）
       }))
       
       setFlashBoost(true)
@@ -106,7 +112,7 @@ export const TemplePage: React.FC = () => {
     }
     
     setLastGdBalance(gdBalance)
-  }, [gdBalance, lastGdBalance])
+  }, [gdBalance, lastGdBalance, prices])
   
   // 监听能量传输特效 - 计算 SKR 回购（基于消耗）
   useEffect(() => {
