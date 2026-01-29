@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Trophy, Info, Zap, Flame, Skull, ChevronDown } from 'lucide-react'
@@ -17,30 +17,6 @@ export const Header: React.FC = () => {
   const isEN = lang === 'en'
   const [showBalanceMenu, setShowBalanceMenu] = useState(false)
   const [showWithdrawal, setShowWithdrawal] = useState(false)
-  const headerRef = useRef<HTMLElement>(null)
-
-  // 使用 useEffect 添加非被动的触摸事件监听器，真正阻止滑动
-  useEffect(() => {
-    const header = headerRef.current
-    if (!header) return
-
-    const preventTouch = (e: TouchEvent) => {
-      // 只阻止滑动，不阻止点击
-      if (e.type === 'touchmove') {
-        e.preventDefault()
-      }
-      e.stopPropagation()
-    }
-
-    // 添加非被动监听器（passive: false 允许 preventDefault）
-    header.addEventListener('touchmove', preventTouch, { passive: false })
-    header.addEventListener('touchstart', preventTouch, { passive: false })
-
-    return () => {
-      header.removeEventListener('touchmove', preventTouch)
-      header.removeEventListener('touchstart', preventTouch)
-    }
-  }, [])
 
   const navItems = [
     { path: '/gacha', label: isEN ? 'GACHA' : '抽签', icon: Zap },
@@ -52,14 +28,12 @@ export const Header: React.FC = () => {
 
   return (
     <header 
-      ref={headerRef}
       className={`
         fixed top-0 left-0 right-0 z-40
         ${isDegen ? 'bg-degen-bg/90' : 'bg-goldman-bg/90'}
         backdrop-blur-md border-b
         ${isDegen ? 'border-degen-green/30' : 'border-goldman-border'}
       `}
-      style={{ touchAction: 'none', overscrollBehavior: 'none' }}
     >
       <div className="max-w-4xl mx-auto px-1 sm:px-4 h-16 flex items-center justify-between gap-1">
         {/* Logo - 手机端缩小 */}
