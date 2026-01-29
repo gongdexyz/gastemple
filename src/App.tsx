@@ -21,28 +21,43 @@ function App() {
   const [previousPath, setPreviousPath] = useState<string>('/temple')
   const isEN = lang === 'en'
 
-  // 锁定 body 滚动（当弹窗打开时）- 补偿滚动条宽度防止页面右移
+  // 锁定页面滚动（当弹窗打开时）- 彻底锁定html和body
   useEffect(() => {
     if (showAutoClickWarning) {
-      // 计算滚动条宽度
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      const html = document.documentElement
+      const header = document.querySelector('header')
       
       // 保存原始样式
-      const originalOverflow = document.body.style.overflow
-      const originalTouchAction = document.body.style.touchAction
-      const originalPaddingRight = document.body.style.paddingRight
+      const originalHtmlOverflow = html.style.overflow
+      const originalHtmlTouchAction = html.style.touchAction
+      const originalBodyOverflow = document.body.style.overflow
+      const originalBodyTouchAction = document.body.style.touchAction
+      const originalBodyPaddingRight = document.body.style.paddingRight
+      const originalHeaderPaddingRight = header?.style.paddingRight || ''
       
-      // 禁用滚动并补偿滚动条宽度
+      // 同时锁定 html 和 body 的滚动
+      html.style.overflow = 'hidden'
+      html.style.touchAction = 'none'
       document.body.style.overflow = 'hidden'
       document.body.style.touchAction = 'none'
+      
       if (scrollbarWidth > 0) {
         document.body.style.paddingRight = `${scrollbarWidth}px`
+        if (header) {
+          header.style.paddingRight = `${scrollbarWidth}px`
+        }
       }
       
       return () => {
-        document.body.style.overflow = originalOverflow
-        document.body.style.touchAction = originalTouchAction
-        document.body.style.paddingRight = originalPaddingRight
+        html.style.overflow = originalHtmlOverflow
+        html.style.touchAction = originalHtmlTouchAction
+        document.body.style.overflow = originalBodyOverflow
+        document.body.style.touchAction = originalBodyTouchAction
+        document.body.style.paddingRight = originalBodyPaddingRight
+        if (header) {
+          header.style.paddingRight = originalHeaderPaddingRight
+        }
       }
     }
   }, [showAutoClickWarning])
