@@ -160,39 +160,20 @@ export const WoodenFish: React.FC = () => {
   // 暴击等级反馈
   const [critLevel, setCritLevel] = useState<'normal' | 'rare' | 'epic' | null>(null)
   
-  // 锁定 body 滚动（当暴击特效显示时）
+  // 锁定 body 滚动（当暴击特效显示时）- 简化版，不影响fixed定位元素
   useEffect(() => {
     if (critLevel) {
-      // 保存当前滚动位置
-      const scrollY = window.scrollY
-      
-      // 计算滚动条宽度（防止隐藏滚动条时页面左移）
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      
-      // 保存原始样式（直接从 style 属性读取）
+      // 保存原始样式
       const originalOverflow = document.body.style.overflow
-      const originalPosition = document.body.style.position
-      const originalWidth = document.body.style.width
-      const originalTop = document.body.style.top
-      const originalPaddingRight = document.body.style.paddingRight
+      const originalTouchAction = document.body.style.touchAction
       
-      // 锁定滚动并补偿滚动条宽度
+      // 仅禁用滚动，不改变position
       document.body.style.overflow = 'hidden'
-      document.body.style.position = 'fixed'
-      document.body.style.width = '100%'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.paddingRight = `${scrollbarWidth}px`
+      document.body.style.touchAction = 'none'
       
       return () => {
-        // 恢复原始样式
         document.body.style.overflow = originalOverflow
-        document.body.style.position = originalPosition
-        document.body.style.width = originalWidth
-        document.body.style.top = originalTop
-        document.body.style.paddingRight = originalPaddingRight
-        
-        // 恢复滚动位置
-        window.scrollTo(0, scrollY)
+        document.body.style.touchAction = originalTouchAction
       }
     }
   }, [critLevel])
@@ -243,39 +224,20 @@ export const WoodenFish: React.FC = () => {
   const [showMeditationWarning, setShowMeditationWarning] = useState(false) // 冥想模式确认弹窗
   const [pendingOption, setPendingOption] = useState<typeof AUTO_CLICK_OPTIONS[0] | null>(null) // 待确认的选项
   
-  // 锁定 body 滚动（当冥想模式确认弹窗显示时）
+  // 锁定 body 滚动（当冥想模式确认弹窗显示时）- 简化版，不影响fixed定位元素
   useEffect(() => {
     if (showMeditationWarning) {
-      // 保存当前滚动位置
-      const scrollY = window.scrollY
-      
-      // 计算滚动条宽度（防止隐藏滚动条时页面左移）
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-      
-      // 保存原始样式（直接从 style 属性读取）
+      // 保存原始样式
       const originalOverflow = document.body.style.overflow
-      const originalPosition = document.body.style.position
-      const originalWidth = document.body.style.width
-      const originalTop = document.body.style.top
-      const originalPaddingRight = document.body.style.paddingRight
+      const originalTouchAction = document.body.style.touchAction
       
-      // 锁定滚动并补偿滚动条宽度
+      // 仅禁用滚动，不改变position
       document.body.style.overflow = 'hidden'
-      document.body.style.position = 'fixed'
-      document.body.style.width = '100%'
-      document.body.style.top = `-${scrollY}px`
-      document.body.style.paddingRight = `${scrollbarWidth}px`
+      document.body.style.touchAction = 'none'
       
       return () => {
-        // 恢复原始样式
         document.body.style.overflow = originalOverflow
-        document.body.style.position = originalPosition
-        document.body.style.width = originalWidth
-        document.body.style.top = originalTop
-        document.body.style.paddingRight = originalPaddingRight
-        
-        // 恢复滚动位置
-        window.scrollTo(0, scrollY)
+        document.body.style.touchAction = originalTouchAction
       }
     }
   }, [showMeditationWarning])
