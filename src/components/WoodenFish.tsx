@@ -181,14 +181,12 @@ export const WoodenFish: React.FC = () => {
         }
       }
       
-      // 全局阻止触摸滑动
+      // 只阻止touchmove，不阻止touchstart（否则无法点击）
       const preventTouchMove = (e: TouchEvent) => {
         e.preventDefault()
-        e.stopPropagation()
       }
       
       document.addEventListener('touchmove', preventTouchMove, { passive: false })
-      document.addEventListener('touchstart', preventTouchMove, { passive: false })
       
       return () => {
         html.classList.remove('scroll-locked')
@@ -197,9 +195,6 @@ export const WoodenFish: React.FC = () => {
           header.style.paddingRight = ''
         }
         document.removeEventListener('touchmove', preventTouchMove)
-        document.removeEventListener('touchstart', preventTouchMove)
-        
-        // 恢复滚动位置
         window.scrollTo(0, scrollY)
       }
     }
@@ -270,11 +265,9 @@ export const WoodenFish: React.FC = () => {
       
       const preventTouchMove = (e: TouchEvent) => {
         e.preventDefault()
-        e.stopPropagation()
       }
       
       document.addEventListener('touchmove', preventTouchMove, { passive: false })
-      document.addEventListener('touchstart', preventTouchMove, { passive: false })
       
       return () => {
         html.classList.remove('scroll-locked')
@@ -283,7 +276,6 @@ export const WoodenFish: React.FC = () => {
           header.style.paddingRight = ''
         }
         document.removeEventListener('touchmove', preventTouchMove)
-        document.removeEventListener('touchstart', preventTouchMove)
         window.scrollTo(0, scrollY)
       }
     }

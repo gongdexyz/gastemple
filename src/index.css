@@ -30,11 +30,7 @@ body {
 html.scroll-locked,
 html.scroll-locked body {
   overflow: hidden !important;
-  touch-action: none !important;
   overscroll-behavior: none !important;
-  position: fixed !important;
-  width: 100% !important;
-  height: 100% !important;
 }
 
 /* 高端模式 Goldman风格 */

@@ -40,11 +40,9 @@ function App() {
       
       const preventTouchMove = (e: TouchEvent) => {
         e.preventDefault()
-        e.stopPropagation()
       }
       
       document.addEventListener('touchmove', preventTouchMove, { passive: false })
-      document.addEventListener('touchstart', preventTouchMove, { passive: false })
       
       return () => {
         html.classList.remove('scroll-locked')
@@ -53,7 +51,6 @@ function App() {
           header.style.paddingRight = ''
         }
         document.removeEventListener('touchmove', preventTouchMove)
-        document.removeEventListener('touchstart', preventTouchMove)
         window.scrollTo(0, scrollY)
       }
     }
