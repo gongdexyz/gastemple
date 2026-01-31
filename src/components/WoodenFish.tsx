@@ -275,24 +275,24 @@ export const WoodenFish: React.FC = () => {
   // 自动挂机价格选项（根据游戏模式不同）
   const getAutoClickOptions = () => {
     if (gameMode === 'merit') {
-      // 功德模式：价格 5 倍（因为有暴击奖励）
+      // 功德模式：追暴击大奖（价格降低50%，更亲民）
       return [
         { 
-          price: 100, 
+          price: 50, 
           multiplier: 1, 
           label: isEN ? 'Auto-Click' : '自动代敲', 
           description: isEN ? 'Novice monk helps you' : '小沙弥为你代劳', 
           emoji: '🤖' 
         },
         { 
-          price: 250, 
+          price: 120, 
           multiplier: 3, 
           label: isEN ? 'Merit Boost' : '功德加持', 
           description: isEN ? 'Merit ×3, efficiency up' : '功德×3，效率提升', 
           emoji: '✨' 
         },
         { 
-          price: 400, 
+          price: 200, 
           multiplier: 5, 
           label: isEN ? 'Abbot Blessing' : '方丈加持', 
           description: isEN ? 'Boundless power, Merit ×5' : '法力无边，功德×5', 
@@ -300,24 +300,24 @@ export const WoodenFish: React.FC = () => {
         }
       ]
     } else {
-      // 冥想模式：新定价策略（让玩家觉得能回本）
+      // 冥想模式：挂机赚GD（价格降低50%，更亲民）
       return [
         { 
-          price: 20, 
+          price: 10, 
           multiplier: 1, 
           label: isEN ? 'Auto-Click' : '自动代敲', 
           description: isEN ? 'Novice monk helps you' : '小沙弥为你代劳', 
           emoji: '🤖' 
         },
         { 
-          price: 50, 
+          price: 25, 
           multiplier: 3, 
           label: isEN ? 'Merit Boost' : '功德加持', 
           description: isEN ? 'Merit ×3, efficiency up' : '功德×3，效率提升', 
           emoji: '✨' 
         },
         { 
-          price: 80, 
+          price: 40, 
           multiplier: 5, 
           label: isEN ? 'Abbot Blessing' : '方丈加持', 
           description: isEN ? 'Boundless power, Merit ×5' : '法力无边，功德×5', 
@@ -553,13 +553,11 @@ export const WoodenFish: React.FC = () => {
       // Demo 模式：暴击率大幅提升，让评委体验更爽！
       const isDemoMode = isSKRTestMode()
       
-      // 基础暴击率：Demo 模式 35%，新手 10%，老玩家 5%
+      // 基础暴击率：Demo 模式 35%，新手 15.5%，老玩家 15.5%（优化玩家体验）
       const isNewbie = newbieClickCount < 10
       const baseCritRate = isDemoMode
         ? 0.35  // Demo 模式：35% 基础暴击率
-        : isNewbie 
-          ? parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.10')  // 新手 10%
-          : parseFloat(import.meta.env.VITE_GONGDE_CRIT_RATE || '0.05')  // 老玩家 5%
+        : 0.155 // 所有玩家：15.5% 暴击率（每6-7次触发一次）
       
       const streakBonus = critStreak * (isDemoMode ? 0.02 : 0.005) // Demo 模式加成更高
       const comboBonus = hiddenCombo * (isDemoMode ? 0.03 : 0.005) // Demo 模式连击加成更高
@@ -567,14 +565,12 @@ export const WoodenFish: React.FC = () => {
       // 今日第一次必爽：暴击概率翻倍（仅新手）
       const firstHitBonus = (todayFirstHit && isNewbie) ? baseCritRate : 0
       
-      // 计算实际暴击率（上限：Demo 模式 60%，新手 35%，老玩家 20%）
-      const maxCritRate = isDemoMode ? 0.60 : (isNewbie ? 0.35 : 0.20)
+      // 计算实际暴击率（上限：Demo 模式 60%，普通模式 25%）
+      const maxCritRate = isDemoMode ? 0.60 : 0.25
       let actualCritRate = Math.min(baseCritRate + streakBonus + comboBonus + firstHitBonus, maxCritRate)
       
-      // 自动挂机时暴击率减半（Demo 模式不减半）
-      if (!shouldSpawnTarget && !isDemoMode) {
-        actualCritRate = actualCritRate * 0.5
-      }
+      // 代敲模式暴击率不减半（优化玩家体验）
+      // 移除了之前的 0.5 惩罚
       
       // 节奏心理保底：连续15次未暴击且成功率≥70%时强制暴击（提高门槛）
       const shouldForceCrit = critStreak >= 15 && actualCritRate >= 0.7
@@ -626,36 +622,37 @@ export const WoodenFish: React.FC = () => {
         const maxReward = parseInt(import.meta.env.VITE_GONGDE_MAX_REWARD || '10000')
         const bigWinMultiplier = parseInt(import.meta.env.VITE_GONGDE_BIG_WIN_MULTIPLIER || '10')
         
-        // Demo 模式：combo 门槛降低，暴击几率提高
-        const epicComboThreshold = isDemoMode ? 2 : 5  // Demo: 2连击即可触发天启
-        const rareComboThreshold = isDemoMode ? 1 : 3  // Demo: 1连击即可触发福报
-        const epicChance = isDemoMode ? 0.20 : 0.06   // Demo: 20% 天启几率
-        const rareChance = isDemoMode ? 0.50 : 0.28   // Demo: 50% 福报几率
+        // 暴击等级分布（优化后：天启0.5% + 福抣3% + 因果12% = 15.5%）
+        // Demo 模式：combo 门槛降低
+        const epicComboThreshold = isDemoMode ? 2 : 3  // 3连击触发天启
+        const rareComboThreshold = isDemoMode ? 1 : 2  // 2连击触发福报
+        
+        // 暴击等级概率（在暴击内部分布）
+        // 天启: 0.5/15.5 ≈ 3.2%, 福报: 3/15.5 ≈ 19.4%, 因果: 12/15.5 ≈ 77.4%
+        const epicChance = isDemoMode ? 0.20 : 0.032   // 天启级
+        const rareChance = isDemoMode ? 0.50 : 0.226   // 天启+福报累计
         
         if (hiddenCombo >= epicComboThreshold && critRoll < epicChance) {
-          // 天启级暴击 - Demo 模式更容易触发
+          // 天启级暴击 - 稀有大奖（4000 GD）
           critType = 'epic'
           gdRewardMultiplier = bigWinMultiplier
-          gdReward = maxReward
-          criticalText = isEN ? `✨ HEAVENLY REVELATION! ${maxReward} $GONGDE! ✨` : `✨ 天启降临！${maxReward} $GONGDE！ ✨`
+          gdReward = 4000  // 固定 4000 GD
+          criticalText = isEN ? `✨ HEAVENLY REVELATION! 4000 $GONGDE! ✨` : `✨ 天启降临！4000 $GONGDE！ ✨`
         } else if (hiddenCombo >= rareComboThreshold && critRoll < rareChance) {
-          // 福报级暴击 - Demo 模式更容易触发
+          // 福报级暴击 - 偶尔惊喜（1000 GD）
           critType = 'rare'
           gdRewardMultiplier = 3
-          gdReward = Math.floor(maxReward * 0.3) // 30% of max
-          criticalText = isEN ? `✨ KARMIC BLESSING! ${gdReward} $GONGDE! ✨` : `✨ 福报加持！${gdReward} $GONGDE！ ✨`
+          gdReward = 1000  // 固定 1000 GD
+          criticalText = isEN ? `✨ KARMIC BLESSING! 1000 $GONGDE! ✨` : `✨ 福报加持！1000 $GONGDE！ ✨`
         } else {
-          // 因果级暴击
+          // 因果级暴击 - 高频触发（250 GD）
           critType = 'normal'
           gdRewardMultiplier = 1.5
-          gdReward = Math.floor(maxReward * 0.15) // 15% of max
-          criticalText = isEN ? `✨ BUDDHA BLESS! ${gdReward} $GONGDE! ✨` : `✨ 佛祖显灵！${gdReward} $GONGDE！ ✨`
+          gdReward = 250  // 固定 250 GD
+          criticalText = isEN ? `✨ BUDDHA BLESS! 250 $GONGDE! ✨` : `✨ 佛祖显灵！250 $GONGDE！ ✨`
         }
         
-        // 自动挂机时降低奖励 70%（Demo 模式不降低）
-        if (!shouldSpawnTarget && !isDemoMode) {
-          gdReward = Math.floor(gdReward * 0.7)
-        }
+        // 代敲模式不降低奖励（优化玩家体验）
         
         // 设置暴击等级反馈
         setCritLevel(critType)
@@ -709,34 +706,19 @@ export const WoodenFish: React.FC = () => {
         return prev + 1 // Good点击
       })
       
-      // 非暴击时的小额GD奖励（按照 0.85 期望值设计）
+      // 非暴击时的小福报奖励（优化后：20%概率80GD，期望贡献16GD）
+      // 总期望：暴击96GD + 非暴击16GD×84.5% = 96 + 13.5 ≈ 109.5GD（略高于100消耗）
       if (!isCriticalHit) {
         const randomValue = Math.random()
         let smallGdReward = 0
         
-        // 奖池分布（期望值 0.85）
-        // 50% 概率：0 GD（销毁）
-        // 30% 概率：80 GD（微损）
-        // 15% 概率：150 GD（小赚）
-        // 4% 概率：500 GD（大赚）
-        // 1% 概率：2000 GD（天选）
-        
-        if (randomValue < 0.50) {
-          smallGdReward = 0 // 50% 什么都没有
-        } else if (randomValue < 0.80) {
-          smallGdReward = 80 // 30% 回本
-        } else if (randomValue < 0.95) {
-          smallGdReward = 150 // 15% 小赚
-        } else if (randomValue < 0.99) {
-          smallGdReward = 500 // 4% 大赚
-        } else {
-          smallGdReward = 2000 // 1% 天选
+        // 简化奖池：20%概率获得80GD小福报
+        // 期望贡献：20% × 80 = 16 GD
+        if (randomValue < 0.20) {
+          smallGdReward = 80 // 20% 小福报
         }
         
-        // 自动挂机时降低奖励 70%
-        if (!shouldSpawnTarget && smallGdReward > 0) {
-          smallGdReward = Math.floor(smallGdReward * 0.7)
-        }
+        // 代敲模式不降低奖励（优化玩家体验）
         
         if (smallGdReward > 0) {
           addGD(smallGdReward)
