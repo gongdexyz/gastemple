@@ -1,0 +1,12 @@
+# MIME types for static assets
+/assets/*.css
+  Content-Type: text/css
+
+/assets/*.js
+  Content-Type: application/javascript
+
+/manifest.json
+  Content-Type: application/json
+
+/*.svg
+  Content-Type: image/svg+xml

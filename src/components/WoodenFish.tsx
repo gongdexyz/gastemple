@@ -1190,8 +1190,7 @@ export const WoodenFish: React.FC = () => {
                 ease: "easeInOut"
               }}
               className={`critical-flash ${critLevel === 'rare' ? 'rare' : ''} ${critLevel === 'epic' ? 'epic' : ''}`}
-              style={{ touchAction: 'none', pointerEvents: 'auto' }}
-              onTouchMove={(e) => e.preventDefault()}
+              style={{ pointerEvents: 'none' }}
             />
             
             {/* 居中文字 - 延迟放大 */}
@@ -1215,8 +1214,6 @@ export const WoodenFish: React.FC = () => {
                 }
               }}
               className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9999]"
-              style={{ touchAction: 'none' }}
-              onTouchMove={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col items-center gap-4">
                 {/* 暴击等级文字 */}
