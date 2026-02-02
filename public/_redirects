@@ -1,2 +1,12 @@
-# SPA fallback - only for routes without file extensions
+# SPA fallback - exclude static assets
+/assets/*  200
+/*.js  200
+/*.css  200
+/*.svg  200
+/*.png  200
+/*.jpg  200
+/*.gif  200
+/*.json  200
+/*.mp3  200
+/*.html  200
 /*  /index.html  200
