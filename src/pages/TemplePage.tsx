@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Flame, Users, Globe, Trophy } from 'lucide-react'
+import { Flame, Users, Globe, Trophy, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Header } from '../components/Header'
 import { GlitchTransition } from '../components/GlitchTransition'
 import { WoodenFish } from '../components/WoodenFish'
@@ -49,6 +50,7 @@ export const TemplePage: React.FC = () => {
   const { lang } = useLangStore()
   const { targetFlash, criticalFlash } = useEffectsStore()
   const { gdBalance } = useGachaStore()
+  const navigate = useNavigate()
   const isDegen = mode === 'degen'
   const isEN = lang === 'en'
   const TOP_BURNERS = isEN ? TOP_BURNERS_EN : TOP_BURNERS_CN
@@ -707,6 +709,35 @@ export const TemplePage: React.FC = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* 浮动按钮 - 算一卦 */}
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.8, type: 'spring', stiffness: 260, damping: 20 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => navigate('/gacha')}
+        className={`
+          fixed bottom-8 right-8 z-50
+          w-16 h-16 md:w-20 md:h-20
+          rounded-full shadow-2xl
+          flex flex-col items-center justify-center
+          font-bold text-sm md:text-base
+          transition-all duration-300
+          ${isDegen 
+            ? 'bg-gradient-to-br from-degen-purple via-degen-pink to-degen-purple text-white border-2 border-degen-cyan shadow-degen-purple/50' 
+            : 'bg-gradient-to-br from-goldman-gold via-yellow-500 to-goldman-gold text-black border-2 border-yellow-300 shadow-goldman-gold/50'
+          }
+          hover:shadow-xl
+          animate-pulse
+        `}
+      >
+        <Sparkles className="w-6 h-6 md:w-7 md:h-7 mb-0.5" />
+        <span className="text-xs md:text-sm whitespace-nowrap">
+          {isEN ? 'Draw' : '算一卦'}
+        </span>
+      </motion.button>
     </div>
   )
 }
