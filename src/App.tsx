@@ -196,7 +196,7 @@ function App() {
       </AnimatePresence>
       
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<TemplePage />} />
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/gacha" element={<GachaPage />} />
         <Route path="/temple" element={<TemplePage />} />
